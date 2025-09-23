@@ -21,7 +21,6 @@ public class MultipartResource {
                           @RestForm @PartType(MediaType.APPLICATION_JSON) Person person) {
         // do something
         System.out.println(description);
-
         System.out.println(file.length());
         System.out.println(person);
     }
