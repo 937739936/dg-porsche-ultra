@@ -1,4 +1,4 @@
-package com.shdatalink.config.jackson.handler;
+package com.shdatalink.config.handler;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;

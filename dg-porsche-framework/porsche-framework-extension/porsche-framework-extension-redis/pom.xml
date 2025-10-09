@@ -4,44 +4,37 @@
 
     <parent>
         <groupId>com.shdatalink</groupId>
-        <artifactId>dg-porsche-business</artifactId>
+        <artifactId>porsche-framework-extension</artifactId>
         <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>demo</artifactId>
+
+    <artifactId>porsche-framework-extension-redis</artifactId>
 
 
     <dependencies>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-arc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-redis-client</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-common</artifactId>
         </dependency>
         <dependency>
             <groupId>com.shdatalink</groupId>
-            <artifactId>porsche-framework-extension-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-extension-json</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.shdatalink</groupId>
-            <artifactId>porsche-framework-extension-mysql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.shdatalink</groupId>
-            <artifactId>porsche-framework-extension-redis</artifactId>
         </dependency>
     </dependencies>
 
     <build>
-        <finalName>demo</finalName>
         <plugins>
-            <plugin>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>quarkus-maven-plugin</artifactId>
-            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
@@ -51,8 +44,24 @@
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>jandex-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
-
+    <profiles>
+        <profile>
+            <id>porsche-framework-extension-redis</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>${quarkus.platform.group-id}</groupId>
+                        <artifactId>quarkus-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

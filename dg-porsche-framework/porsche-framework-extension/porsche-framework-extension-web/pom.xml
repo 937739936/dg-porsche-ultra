@@ -21,15 +21,15 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
         <dependency>
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.shdatalink</groupId>
+            <artifactId>porsche-framework-extension-json</artifactId>
         </dependency>
     </dependencies>
 

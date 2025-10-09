@@ -1,4 +1,4 @@
-package com.shdatalink.utils;
+package com.shdatalink.framework.common.utils;
 
 import jakarta.enterprise.context.spi.CreationalContext;
 import jakarta.enterprise.inject.spi.Bean;
