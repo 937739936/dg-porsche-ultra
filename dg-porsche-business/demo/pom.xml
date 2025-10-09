@@ -21,6 +21,10 @@
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-extension-web</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.shdatalink</groupId>
+            <artifactId>porsche-framework-extension-mysql</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

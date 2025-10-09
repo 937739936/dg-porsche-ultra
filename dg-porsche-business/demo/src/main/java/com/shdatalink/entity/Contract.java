@@ -1,8 +1,12 @@
 package com.shdatalink.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -10,16 +14,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-//@TableName("t_contract")
-public class Contract {
+@TableName("t_contract")
+public class Contract extends BaseEntity {
 
     /**
      * 主键
      */
-//    @TableId(value = "id", type = IdType.ASSIGN_ID)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -70,7 +75,6 @@ public class Contract {
     /**
      * 签订日期
      */
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate signDate;
 
     /**
@@ -86,16 +90,12 @@ public class Contract {
     /**
      * 执行开始日期
      */
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
     /**
      * 执行截止日期
      */
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
 
 }

@@ -63,22 +63,27 @@
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-jdbc-mysql</artifactId>
+                <version>${quarkus.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-redis-client</artifactId>
+                <version>${quarkus.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-rest-client</artifactId>
+                <version>${quarkus.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-rest-client-jackson</artifactId>
+                <version>${quarkus.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-scheduler</artifactId>
+                <version>${quarkus.platform.version}</version>
             </dependency>
 
             <dependency>
@@ -110,9 +115,16 @@
                 <artifactId>porsche-framework-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>com.shdatalink</groupId>
                 <artifactId>porsche-framework-extension-web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.shdatalink</groupId>
+                <artifactId>porsche-framework-extension-mysql</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

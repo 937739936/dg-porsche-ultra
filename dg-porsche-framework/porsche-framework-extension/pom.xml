@@ -14,5 +14,6 @@
 
     <modules>
         <module>porsche-framework-extension-web</module>
+        <module>porsche-framework-extension-mysql</module>
     </modules>
 </project>
