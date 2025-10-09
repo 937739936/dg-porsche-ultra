@@ -28,6 +28,10 @@
             <artifactId>quarkus-mybatis-plus</artifactId>
         </dependency>
         <dependency>
+            <groupId>p6spy</groupId>
+            <artifactId>p6spy</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-common</artifactId>
         </dependency>

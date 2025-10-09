@@ -2,6 +2,7 @@ package com.shdatalink.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.shdatalink.entity.BaseEntity;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
 
@@ -12,12 +13,13 @@ import java.util.Objects;
  * MP注入处理器
  */
 @Slf4j
+@ApplicationScoped
 public class InjectionMetaObjectHandler implements MetaObjectHandler {
 
     /**
-     * 如果用户不存在默认注入-1代表无用户
+     * 如果用户不存在默认注入0代表无用户
      */
-    private static final Long DEFAULT_USER_ID = -1L;
+    private static final Long DEFAULT_USER_ID = 0L;
 
     /**
      * 插入填充方法，用于在插入数据时自动填充实体对象中的创建时间、更新时间、创建人、更新人等信息

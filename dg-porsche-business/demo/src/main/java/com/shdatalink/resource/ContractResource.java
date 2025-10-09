@@ -45,7 +45,13 @@ public class ContractResource {
     @DELETE
     @Path("/delete")
     public void delete(@QueryParam("id") Long id) {
-        contractService.removeById(id);
+        contractService.remove(null);
+    }
+
+    @DELETE
+    @Path("/delete/all")
+    public void deleteAll() {
+        contractService.remove(null);
     }
 
     @Data
