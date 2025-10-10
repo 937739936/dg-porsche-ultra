@@ -15,7 +15,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.25.2</quarkus.platform.version>
+        <quarkus.platform.version>3.28.1</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.3</surefire-plugin.version>
         <jandex-plugin.version>3.5.0</jandex-plugin.version>
@@ -37,6 +37,7 @@
                 <scope>import</scope>
             </dependency>
 
+            <!--quarkus官方扩展-->
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-arc</artifactId>
@@ -69,11 +70,6 @@
             </dependency>
             <dependency>
                 <groupId>io.quarkus</groupId>
-                <artifactId>quarkus-redis-client</artifactId>
-                <version>${quarkus.platform.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-rest-client</artifactId>
                 <version>${quarkus.platform.version}</version>
             </dependency>
@@ -92,19 +88,18 @@
                 <artifactId>quarkus-scheduler</artifactId>
                 <version>${quarkus.platform.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-mailer</artifactId>
+                <version>${quarkus.platform.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.quarkiverse.mybatis</groupId>
                 <artifactId>quarkus-mybatis-plus</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>p6spy</groupId>
-                <artifactId>p6spy</artifactId>
-                <version>${p6spy.version}</version>
-            </dependency>
-
+            <!--其他第三方依赖-->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
@@ -124,11 +119,18 @@
             </dependency>
 
             <dependency>
+                <groupId>p6spy</groupId>
+                <artifactId>p6spy</artifactId>
+                <version>${p6spy.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>easyexcel</artifactId>
                 <version>${easyexcel.version}</version>
             </dependency>
 
+            <!--porsche-ultra框架依赖-->
             <dependency>
                 <groupId>com.shdatalink</groupId>
                 <artifactId>porsche-framework-common</artifactId>
@@ -162,6 +164,12 @@
             <dependency>
                 <groupId>com.shdatalink</groupId>
                 <artifactId>porsche-framework-extension-excel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.shdatalink</groupId>
+                <artifactId>porsche-framework-extension-mail</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

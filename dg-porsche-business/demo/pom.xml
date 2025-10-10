@@ -37,6 +37,10 @@
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-extension-excel</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.shdatalink</groupId>
+            <artifactId>porsche-framework-extension-mail</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -18,5 +18,6 @@
         <module>porsche-framework-extension-mysql</module>
         <module>porsche-framework-extension-redis</module>
         <module>porsche-framework-extension-excel</module>
+        <module>porsche-framework-extension-mail</module>
     </modules>
 </project>
