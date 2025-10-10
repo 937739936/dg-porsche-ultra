@@ -12,16 +12,17 @@ import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.jboss.resteasy.reactive.RestQuery;
 
+@Path("/demo")
 @RegisterRestClient
 @RegisterClientHeaders(DemoClientHeaderFactory.class)
 @RegisterProvider(ResultWrapperResponseHandler.class)
-@ClientBasicAuth(username = "${service.username}", password = "${service.password}")
 public interface DemoClient {
 
     @GET
     @Path("/hello")
     @Produces(MediaType.APPLICATION_JSON)
     @ClientQueryParam(name = "other-param", value = "other")
-    String hello();
+    String hello(@RestQuery String id);
 }
