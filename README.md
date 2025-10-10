@@ -18,9 +18,7 @@ dg-porsche-ultra/
 │   │   ├── porsche-framework-extension-redis/                       // 缓存服务模块
 │   │   ├── porsche-framework-extension-httpclient/                  // httpClient模块
 │   │   ├── porsche-framework-extension-job/                         // 定时任务模块
-├── README.md
-├── mvnw
-├── mvnw.cmd
-└── pom.xml                                                          // 框架说明文件
+├── README.md                                                        // 框架说明文件
+└── pom.xml                                                         
 
 ```
