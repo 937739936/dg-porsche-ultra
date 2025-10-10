@@ -10,12 +10,14 @@ dg-porsche-ultra/
 │   ├── porsche-framework-common/                                    // 通用模块
 │   ├── porsche-framework-dependencies/                              // 依赖包管理
 │   ├── porsche-framework-extension/                                 // 相关扩展
-│   │   ├── porsche-framework-extension-excel/                       // excel模块
+│   │   ├── porsche-framework-extension-web/                         // web模块
 │   │   ├── porsche-framework-extension-json/                        // 序列化模块
+│   │   ├── porsche-framework-extension-excel/                       // excel模块
 │   │   ├── porsche-framework-extension-mail/                        // 邮件模块
 │   │   ├── porsche-framework-extension-mysql/                       // 数据库模块
 │   │   ├── porsche-framework-extension-redis/                       // 缓存服务模块
-│   │   ├── porsche-framework-extension-web/                         // web模块
+│   │   ├── porsche-framework-extension-httpclient/                  // httpClient模块
+│   │   ├── porsche-framework-extension-job/                         // 定时任务模块
 ├── README.md
 ├── mvnw
 ├── mvnw.cmd
