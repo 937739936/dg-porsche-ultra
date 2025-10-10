@@ -41,6 +41,14 @@
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-extension-mail</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.shdatalink</groupId>
+            <artifactId>porsche-framework-extension-httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.shdatalink</groupId>
+            <artifactId>porsche-framework-extension-job</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -19,5 +19,7 @@
         <module>porsche-framework-extension-redis</module>
         <module>porsche-framework-extension-excel</module>
         <module>porsche-framework-extension-mail</module>
+        <module>porsche-framework-extension-httpclient</module>
+        <module>porsche-framework-extension-job</module>
     </modules>
 </project>

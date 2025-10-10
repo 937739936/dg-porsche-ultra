@@ -172,6 +172,18 @@
                 <artifactId>porsche-framework-extension-mail</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.shdatalink</groupId>
+                <artifactId>porsche-framework-extension-httpclient</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.shdatalink</groupId>
+                <artifactId>porsche-framework-extension-job</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
