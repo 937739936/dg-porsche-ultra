@@ -24,6 +24,7 @@
         <commons.collections4.version>4.5.0</commons.collections4.version>
         <mybatis-plus.version>2.4.1</mybatis-plus.version>
         <p6spy.version>3.9.1</p6spy.version>
+        <easyexcel.version>4.0.3</easyexcel.version>
     </properties>
 
     <dependencyManagement>
@@ -122,7 +123,11 @@
                 <version>${commons.collections4.version}</version>
             </dependency>
 
-
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.shdatalink</groupId>
@@ -151,6 +156,12 @@
             <dependency>
                 <groupId>com.shdatalink</groupId>
                 <artifactId>porsche-framework-extension-redis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.shdatalink</groupId>
+                <artifactId>porsche-framework-extension-excel</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

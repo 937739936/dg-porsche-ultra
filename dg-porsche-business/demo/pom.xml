@@ -33,6 +33,10 @@
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-extension-redis</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.shdatalink</groupId>
+            <artifactId>porsche-framework-extension-excel</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -4,7 +4,7 @@ package com.shdatalink.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.shdatalink.framework.common.utils.BeanUtils;
+import com.shdatalink.framework.common.utils.QuarkusUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import java.util.Objects;
  */
 public class JsonUtils {
 
-    private static final ObjectMapper OBJECT_MAPPER = BeanUtils.getBean(ObjectMapper.class);
+    private static final ObjectMapper OBJECT_MAPPER = QuarkusUtil.getBean(ObjectMapper.class);
 
 
     public static ObjectMapper getObjectMapper() {

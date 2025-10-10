@@ -17,5 +17,6 @@
         <module>porsche-framework-extension-json</module>
         <module>porsche-framework-extension-mysql</module>
         <module>porsche-framework-extension-redis</module>
+        <module>porsche-framework-extension-excel</module>
     </modules>
 </project>
