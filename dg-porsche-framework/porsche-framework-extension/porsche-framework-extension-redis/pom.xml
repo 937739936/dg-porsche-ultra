@@ -24,6 +24,10 @@
             <artifactId>quarkus-redis-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-redis-cache</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-common</artifactId>
         </dependency>
