@@ -13,6 +13,7 @@
 
 
     <dependencies>
+        <!--  框架自身依赖   -->
         <dependency>
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-common</artifactId>
@@ -37,6 +38,9 @@
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-extension-excel</artifactId>
         </dependency>
+
+        <!--  其他依赖   -->
+
     </dependencies>
 
     <build>

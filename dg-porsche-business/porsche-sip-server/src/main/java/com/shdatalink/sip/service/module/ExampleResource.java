@@ -1,5 +1,8 @@
 package com.shdatalink.sip.service.module;
 
+import com.shdatalink.sip.service.module.user.convert.UserConvert;
+import com.shdatalink.sip.service.module.user.entity.User;
+import com.shdatalink.sip.service.module.user.vo.UserInfo;
 import com.shdatalink.utils.IpUtil;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -8,6 +11,8 @@ import jakarta.ws.rs.Path;
 @Path("/test")
 public class ExampleResource {
 
+    @Inject
+    UserConvert userConvert;
 
     /**
      * 获取客户端IP地址
@@ -17,14 +22,14 @@ public class ExampleResource {
     public String getId() {
         return IpUtil.getClientIpAddress();
     }
-//
-//    @Path("/mapstruct")
-//    @GET
-//    public UserInfo mapstruct() {
-//        User user = new User();
-//        user.setUsername("test");
-//        return userConvert.toUserInfo(user);
-//    }
+
+    @Path("/mapstruct")
+    @GET
+    public UserInfo mapstruct() {
+        User user = new User();
+        user.setUsername("test");
+        return userConvert.toUserInfo(user);
+    }
 
 
 }

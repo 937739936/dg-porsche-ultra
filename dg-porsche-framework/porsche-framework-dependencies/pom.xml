@@ -136,6 +136,19 @@
                 <version>${easyexcel.version}</version>
             </dependency>
 
+            <!--  其他依赖   -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${org.mapstruct.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${org.mapstruct.version}</version>
+            </dependency>
+
             <!--porsche-ultra框架依赖-->
             <dependency>
                 <groupId>com.shdatalink</groupId>
