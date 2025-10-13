@@ -14,5 +14,6 @@
 
     <modules>
         <module>demo</module>
+        <module>porsche-sip-server</module>
     </modules>
 </project>
