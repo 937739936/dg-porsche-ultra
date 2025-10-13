@@ -14,7 +14,7 @@ import java.util.Objects;
  */
 @Slf4j
 @ApplicationScoped
-public class InjectionMetaObjectHandler implements MetaObjectHandler {
+public class CustomMetaObjectHandler implements MetaObjectHandler {
 
     /**
      * 如果用户不存在默认注入0代表无用户

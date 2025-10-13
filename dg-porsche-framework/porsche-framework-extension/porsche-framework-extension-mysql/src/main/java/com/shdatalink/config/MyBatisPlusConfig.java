@@ -1,20 +1,12 @@
 package com.shdatalink.config;
 
-import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-import com.shdatalink.handler.InjectionMetaObjectHandler;
 import io.quarkus.arc.DefaultBean;
-import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Inject;
-import org.apache.ibatis.session.SqlSessionFactory;
-
-import javax.sql.DataSource;
 
 
 @ApplicationScoped
