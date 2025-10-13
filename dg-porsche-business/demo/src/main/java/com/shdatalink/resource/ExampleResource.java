@@ -60,8 +60,6 @@ public class ExampleResource {
         contract.setQuantity(new BigDecimal("0"));
         contract.setStartDate(LocalDate.now());
         contract.setEndDate(LocalDate.now());
-        contract.setCreateTime(LocalDateTime.now());
-        contract.setUpdateTime(LocalDateTime.now());
 
         return contract;
     }

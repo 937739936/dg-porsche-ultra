@@ -15,7 +15,7 @@ import java.util.Optional;
  * 提供 Redis 字符串类型的常用操作
  */
 @ApplicationScoped
-public class RedisUtils {
+public class RedisUtil {
 
     private final ValueCommands<String, String> valueCommands;
     private final KeyCommands<String> keyCommands;
@@ -26,7 +26,7 @@ public class RedisUtils {
      * @param ds Redis数据源
      */
     @Inject
-    public RedisUtils(RedisDataSource ds) {
+    public RedisUtil(RedisDataSource ds) {
         this.valueCommands = ds.value(String.class, String.class);
         this.keyCommands = ds.key(String.class);
     }
@@ -48,7 +48,7 @@ public class RedisUtils {
      * @param value 要存储的对象
      */
     public <T> void set(String key, T value) {
-        String jsonValue = JsonUtils.toJsonString(value);
+        String jsonValue = JsonUtil.toJsonString(value);
         valueCommands.set(key, jsonValue);
     }
 
@@ -71,7 +71,7 @@ public class RedisUtils {
      * @param duration 过期时间
      */
     public <T> void setEx(String key, T value, Duration duration) {
-        String jsonValue = JsonUtils.toJsonString(value);
+        String jsonValue = JsonUtil.toJsonString(value);
         valueCommands.setex(key, duration.getSeconds(), jsonValue);
     }
 
@@ -96,7 +96,7 @@ public class RedisUtils {
         if (jsonValue == null) {
             return null;
         }
-        return JsonUtils.parseObject(jsonValue, clazz);
+        return JsonUtil.parseObject(jsonValue, clazz);
     }
 
     /**

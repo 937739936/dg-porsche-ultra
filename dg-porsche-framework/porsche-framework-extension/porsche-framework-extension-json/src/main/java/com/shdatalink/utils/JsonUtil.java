@@ -14,7 +14,7 @@ import java.util.Objects;
 /**
  * JSON 工具类
  */
-public class JsonUtils {
+public class JsonUtil {
 
     private static final ObjectMapper OBJECT_MAPPER = QuarkusUtil.getBean(ObjectMapper.class);
 

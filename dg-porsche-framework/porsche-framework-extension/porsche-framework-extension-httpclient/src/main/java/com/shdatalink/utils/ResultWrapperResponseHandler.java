@@ -30,7 +30,7 @@ public class ResultWrapperResponseHandler implements ClientResponseFilter {
 
         try {
             // 3. 解析为ResultWrapper对象
-            ResultWrapper<?> apiResponse = JsonUtils.parseObject(originalBody, ResultWrapper.class);
+            ResultWrapper<?> apiResponse = JsonUtil.parseObject(originalBody, ResultWrapper.class);
 
             // 4. 验证业务状态码（假设200为成功）
             if (BaseResultCodeEnum.SUCCESS.name().equals(apiResponse.getCode())) {
@@ -47,7 +47,7 @@ public class ResultWrapperResponseHandler implements ClientResponseFilter {
             }
 
             // 6. 将data转换为JSON并设置为新的响应体
-            String dataJson = JsonUtils.toJsonString(data);
+            String dataJson = JsonUtil.toJsonString(data);
             response.setEntityStream(new ByteArrayInputStream(dataJson.getBytes()));
 
         } catch (Exception e) {

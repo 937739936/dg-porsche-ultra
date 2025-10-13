@@ -1,7 +1,7 @@
 package com.shdatalink.resource;
 
 import com.shdatalink.entity.Contract;
-import com.shdatalink.utils.RedisUtils;
+import com.shdatalink.utils.RedisUtil;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class RedisResource {
 
     @Inject
-    RedisUtils redisUtils;
+    RedisUtil redisUtil;
 
     @GET
     @Path("/set")
@@ -40,10 +40,8 @@ public class RedisResource {
         contract.setQuantity(new BigDecimal("0"));
         contract.setStartDate(LocalDate.now());
         contract.setEndDate(LocalDate.now());
-        contract.setCreateTime(LocalDateTime.now());
-        contract.setUpdateTime(LocalDateTime.now());
 
-        redisUtils.set(key, contract);
+        redisUtil.set(key, contract);
         return "设置成功: " + key;
     }
 
@@ -54,13 +52,13 @@ public class RedisResource {
         // 设置带过期时间的键值对
 //        return redisService.get(key);
 //        return redisUtil.get(key);
-        return redisUtils.get(key, Contract.class);
+        return redisUtil.get(key, Contract.class);
     }
 
     @DELETE
     @Path("/delete")
     public Boolean delete(@QueryParam("key") String key) {
-        redisUtils.del(key);
+        redisUtil.del(key);
         return true;
     }
 
