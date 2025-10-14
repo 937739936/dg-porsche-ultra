@@ -42,7 +42,7 @@ public class RoleService extends ServiceImpl<RoleMapper, Role> {
         }
         List<RolePermission> rolePermissions = rolePermissionMapper.selectList(new LambdaQueryWrapper<RolePermission>()
                 .in(RolePermission::getRoleId, roleId));
-        if (CollectionUtils.isEmpty(rolePermissions)){
+        if (CollectionUtils.isEmpty(rolePermissions)) {
             return Collections.emptyList();
         }
         return permissionMapper.selectByIds(rolePermissions.stream().map(RolePermission::getPermissionId).collect(Collectors.toSet()));
@@ -87,6 +87,16 @@ public class RoleService extends ServiceImpl<RoleMapper, Role> {
      */
     public boolean checkRoleNameUnique(RoleSaveParam param) {
         Integer id = Objects.isNull(param.getId()) ? -1 : param.getId();
-        return baseMapper.checkByName(id, param.getName()) > 0 ;
+        return baseMapper.checkByName(id, param.getName()) > 0;
+    }
+
+    /**
+     * 获取所有权限。
+     *
+     * @return 包含所有权限名称的列表
+     */
+    public List<String> getAllPermissions() {
+        return permissionMapper.selectList(null)
+                .stream().map(Permission::getPermission).toList();
     }
 }

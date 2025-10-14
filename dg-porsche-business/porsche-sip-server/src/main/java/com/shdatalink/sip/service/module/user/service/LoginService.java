@@ -47,12 +47,17 @@ public class LoginService {
 
         // 生成token
         String token = JwtUtil.sign(JsonUtil.toJsonString(userInfo), sysPassword);
-
+        // 如果是管理员，则赋予所有权限
         List<Role> role = roleService.getRoleByUserId(user.getId());
-        List<String> list = roleService.getPermissions(role.stream().map(Role::getId).toList())
-                .stream().map(Permission::getPermission)
-                .toList();
-        userInfo.setPermissionTokens(list);
+        List<String> permissionList;
+        if ("admin".equals(user.getUsername())) {
+            permissionList = roleService.getAllPermissions();
+        } else {
+            permissionList = roleService.getPermissions(role.stream().map(Role::getId).toList())
+                    .stream().map(Permission::getPermission)
+                    .toList();
+        }
+        userInfo.setPermissionTokens(permissionList);
         userInfo.setDeviceIds(roleService.getPermissionDevice(role.stream().map(Role::getId).toList()));
         tokenResp.setUserInfo(userInfo);
         userInfo.setRoleIds(role.stream().map(Role::getId).toList());

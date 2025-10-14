@@ -1,7 +1,10 @@
 package com.shdatalink.sip.service.config.web.interceptor;
 
 import com.shdatalink.framework.common.annotation.Anonymous;
+import com.shdatalink.framework.common.annotation.CheckPermission;
+import com.shdatalink.framework.common.enums.CheckPermissionMode;
 import com.shdatalink.framework.common.exception.UnAuthorizedException;
+import com.shdatalink.framework.common.utils.ArgUtil;
 import com.shdatalink.sip.service.module.user.service.LoginService;
 import com.shdatalink.sip.service.module.user.service.UserService;
 import com.shdatalink.sip.service.module.user.vo.UserInfo;
@@ -12,11 +15,15 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MultivaluedMap;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * 授权拦截器，用于检查请求的合法性。
@@ -70,7 +77,35 @@ public class AuthorizationInterceptor implements ContainerRequestFilter {
             throw new UnAuthorizedException();
         }
 
+        // 接口权限校验
+        this.checkPermission(userInfoEntity);
+
         // 添加当前登录信息
         UserInfoThreadHolder.addUserInfo(userInfoEntity);
     }
+
+    /**
+     * 检查接口权限
+     */
+    private void checkPermission(UserInfo userInfoEntity){
+        if (resourceInfo.getResourceMethod().isAnnotationPresent(CheckPermission.class)) {
+            CheckPermission annotation = resourceInfo.getResourceMethod().getAnnotation(CheckPermission.class);
+            String[] value = annotation.value();
+            CheckPermissionMode mode = annotation.mode();
+            if (CheckPermissionMode.AND.equals(mode)) {
+                if (CollectionUtils.isEmpty(userInfoEntity.getPermissionTokens())
+                        || !new HashSet<>(userInfoEntity.getPermissionTokens()).containsAll(List.of(value))) {
+                    throw new UnAuthorizedException();
+                }
+            } else {
+                if (CollectionUtils.isEmpty(userInfoEntity.getPermissionTokens())
+                        || Stream.of(value).noneMatch(permission -> userInfoEntity.getPermissionTokens().contains(permission))) {
+                    throw new UnAuthorizedException();
+                }
+            }
+        }
+    }
+
+
 }
+
