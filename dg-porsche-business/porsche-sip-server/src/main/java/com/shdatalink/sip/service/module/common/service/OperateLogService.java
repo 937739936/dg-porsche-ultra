@@ -30,8 +30,7 @@ public class OperateLogService extends ServiceImpl<OperateLogMapper, OperateLog>
         operateLog.setLogContent(logContent);
         operateLog.setOperateType(operateType);
         try {
-            //获取request
-            operateLog.setMethod(request.absoluteURI());
+            operateLog.setMethod(request.uri());
             operateLog.setRequestParam(JsonUtil.toJsonString(request.params()));
             operateLog.setRequestType(request.method().name());
             //设置IP地址

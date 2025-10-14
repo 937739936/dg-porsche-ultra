@@ -54,7 +54,7 @@ public class AuthorizationInterceptor implements ContainerRequestFilter {
             }
         }
 
-        if (StringUtils.isNotBlank(token)) {
+        if (StringUtils.isBlank(token)) {
             throw new UnAuthorizedException();
         }
 

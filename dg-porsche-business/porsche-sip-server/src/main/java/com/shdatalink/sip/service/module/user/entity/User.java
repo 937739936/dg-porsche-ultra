@@ -41,8 +41,4 @@ public class User extends BaseEntity {
      * 备注
      */
     private String remark;
-    /**
-     * 第三方访问秘钥
-     */
-    private String integrationSecret;
 }
