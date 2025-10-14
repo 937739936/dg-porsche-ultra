@@ -2,6 +2,7 @@ package com.shdatalink.sip.service.utils;
 
 
 import com.shdatalink.framework.common.exception.BizException;
+import com.shdatalink.sip.service.config.web.UserInfoThreadHolder;
 import com.shdatalink.sip.service.module.user.vo.UserInfo;
 
 import java.util.List;

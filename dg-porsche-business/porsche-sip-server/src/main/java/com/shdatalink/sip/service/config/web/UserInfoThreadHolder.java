@@ -1,4 +1,4 @@
-package com.shdatalink.sip.service.utils;
+package com.shdatalink.sip.service.config.web;
 
 
 import com.shdatalink.sip.service.module.user.vo.UserInfo;

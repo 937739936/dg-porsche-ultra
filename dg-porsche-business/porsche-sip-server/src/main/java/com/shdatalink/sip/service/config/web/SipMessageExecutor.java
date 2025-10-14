@@ -1,4 +1,4 @@
-package com.shdatalink.sip.service.config;
+package com.shdatalink.sip.service.config.web;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
