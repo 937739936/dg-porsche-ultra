@@ -17,6 +17,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.service.module.user.service.RoleService",
@@ -63,12 +64,12 @@ public class RoleService extends ServiceImpl<RoleMapper, Role> {
         } else {
             role = getOptById(param.getId()).orElseThrow(() -> new BizException("角色不存在"));
         }
-        if (baseMapper.checkByName(param.getId(), param.getName()) > 0) {
+        if (checkRoleNameUnique(param)) {
             throw new BizException("角色名称已存在");
         }
 
         role.setName(param.getName());
-        updateById(role);
+        saveOrUpdate(role);
         return true;
     }
 
@@ -79,5 +80,13 @@ public class RoleService extends ServiceImpl<RoleMapper, Role> {
         }
 
         return baseMapper.selectByIds(userRoles.stream().map(UserRole::getRoleId).collect(Collectors.toSet()));
+    }
+
+    /**
+     * 校验角色名称是否唯一
+     */
+    public boolean checkRoleNameUnique(RoleSaveParam param) {
+        Integer id = Objects.isNull(param.getId()) ? -1 : param.getId();
+        return baseMapper.checkByName(id, param.getName()) > 0 ;
     }
 }
