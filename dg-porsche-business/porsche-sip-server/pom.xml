@@ -42,10 +42,6 @@
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-extension-jwt</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.smallrye</groupId>
-            <artifactId>jandex</artifactId>
-        </dependency>
 
         <!--  其他依赖   -->
 
