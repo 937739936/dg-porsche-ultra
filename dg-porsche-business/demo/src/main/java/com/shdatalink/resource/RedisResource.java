@@ -1,7 +1,7 @@
 package com.shdatalink.resource;
 
 import com.shdatalink.entity.Contract;
-import com.shdatalink.utils.RedisUtil;
+import com.shdatalink.redis.utils.RedisUtil;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;

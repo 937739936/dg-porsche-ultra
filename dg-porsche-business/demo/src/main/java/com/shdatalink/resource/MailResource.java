@@ -1,11 +1,8 @@
 package com.shdatalink.resource;
 
-import com.shdatalink.utils.MailUtil;
-import io.quarkus.mailer.MailTemplate;
-import io.quarkus.qute.CheckedTemplate;
+import com.shdatalink.mail.utils.MailUtil;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
-import io.smallrye.common.annotation.Blocking;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

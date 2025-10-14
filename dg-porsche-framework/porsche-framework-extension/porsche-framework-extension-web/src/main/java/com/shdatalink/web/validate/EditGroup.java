@@ -1,0 +1,7 @@
+package com.shdatalink.web.validate;
+
+/**
+ * 校验分组 edit
+ */
+public interface EditGroup {
+}

@@ -3,7 +3,7 @@ package com.shdatalink.sip.service.module;
 import com.shdatalink.sip.service.module.user.convert.UserConvert;
 import com.shdatalink.sip.service.module.user.entity.User;
 import com.shdatalink.sip.service.module.user.vo.UserInfo;
-import com.shdatalink.utils.IpUtil;
+import com.shdatalink.web.utils.IpUtil;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -20,7 +20,7 @@ public class ExampleResource {
     @Path("/ip")
     @GET
     public String getId() {
-        return IpUtil.getClientIpAddress();
+        return IpUtil.getIpAddr();
     }
 
     @Path("/mapstruct")

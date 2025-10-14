@@ -2,8 +2,6 @@ package com.shdatalink.httpclient;
 
 
 import com.shdatalink.httpclient.config.DemoClientHeaderFactory;
-import com.shdatalink.utils.ResultWrapperResponseHandler;
-import io.quarkus.rest.client.reactive.ClientBasicAuth;
 import io.quarkus.rest.client.reactive.ClientQueryParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

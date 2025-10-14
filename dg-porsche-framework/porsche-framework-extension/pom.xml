@@ -21,5 +21,6 @@
         <module>porsche-framework-extension-mail</module>
         <module>porsche-framework-extension-httpclient</module>
         <module>porsche-framework-extension-job</module>
+        <module>porsche-framework-extension-jwt</module>
     </modules>
 </project>
