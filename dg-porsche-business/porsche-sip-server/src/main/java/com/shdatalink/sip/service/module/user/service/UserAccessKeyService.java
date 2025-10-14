@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.service.module.user.entity.UserAccessKey;
 import com.shdatalink.sip.service.module.user.mapper.UserAccessKeyMapper;
+import com.shdatalink.sip.service.utils.UserInfoUtil;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -21,8 +22,7 @@ import java.util.List;
 @ApplicationScoped
 public class UserAccessKeyService extends ServiceImpl<UserAccessKeyMapper, UserAccessKey> {
     public UserAccessKey generateAccessKey() {
-//        Integer userId = UserInfoUtil.getUserId();
-        Integer userId = 1;
+        Integer userId = UserInfoUtil.getUserId();
         String key = RandomStringUtils.secure().nextAlphanumeric(10);
         UserAccessKey userAccessKey = new UserAccessKey();
         userAccessKey.setUserId(userId);

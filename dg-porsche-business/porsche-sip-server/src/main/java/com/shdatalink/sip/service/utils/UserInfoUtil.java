@@ -19,6 +19,10 @@ public class UserInfoUtil {
                 .orElseThrow(() -> new BizException("未找到当前登录人信息"));
     }
 
+    public static UserInfo getUserInfoWithNull() {
+        return UserInfoThreadHolder.getCurrentUser();
+    }
+
     public static List<String> getDeviceIdList() {
         return getUserInfoWithThrow().getDeviceIds();
     }

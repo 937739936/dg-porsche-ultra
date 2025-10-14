@@ -1,7 +1,9 @@
-package com.shdatalink.mysql.handler;
+package com.shdatalink.sip.service.config.mybatis;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.shdatalink.mysql.entity.BaseEntity;
+import com.shdatalink.sip.service.module.user.vo.UserInfo;
+import com.shdatalink.sip.service.utils.UserInfoUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
@@ -15,7 +17,6 @@ import java.util.Objects;
 @Slf4j
 @ApplicationScoped
 public class CustomMetaObjectHandler implements MetaObjectHandler {
-
 
     /**
      * 插入填充方法，用于在插入数据时自动填充实体对象中的创建时间、更新时间、创建人、更新人等信息
@@ -31,19 +32,14 @@ public class CustomMetaObjectHandler implements MetaObjectHandler {
                 baseEntity.setCreatedTime(current);
                 baseEntity.setLastModifiedTime(current);
 
-                // 如果创建人为空，则填充当前登录用户的信息 TODO
+                // 如果创建人为空，则填充当前登录用户的信息
                 if (Objects.isNull(baseEntity.getCreatedBy())) {
-//                    UserLoginInfo loginUser = getLoginUser();
-//                    if (Objects.nonNull(loginUser)) {
-//                        Long userId = loginUser.getId();
-//                        // 填充创建人、更新人
-//                        baseEntity.setCreateBy(userId);
-//                        baseEntity.setUpdateBy(userId);
-//                    } else {
-                    // 填充创建人、更新人
-//                    baseEntity.setCreatedBy(DEFAULT_USER_ID);
-//                    baseEntity.setLastModifiedBy(DEFAULT_USER_ID);
-//                    }
+                    UserInfo loginUser = UserInfoUtil.getUserInfoWithNull();
+                    if (Objects.nonNull(loginUser)) {
+                        // 填充创建人、更新人
+                        baseEntity.setCreatedBy(loginUser.getId());
+                        baseEntity.setLastModifiedBy(loginUser.getId());
+                    }
                 }
             } else {
                 LocalDateTime date = LocalDateTime.now();
@@ -68,14 +64,11 @@ public class CustomMetaObjectHandler implements MetaObjectHandler {
             if (Objects.nonNull(metaObject) && metaObject.getOriginalObject() instanceof BaseEntity baseEntity) {
                 baseEntity.setLastModifiedTime(current);
 
-                // 获取当前登录用户的ID，并填充更新人信息 TODO
-//                UserLoginInfo loginUser = getLoginUser();
-//                if (Objects.nonNull(loginUser)) {
-//                    baseEntity.setUpdateBy(loginUser.getId());
-//                } else {
-//                    baseEntity.setUpdateBy(DEFAULT_USER_ID);
-//                }
-//                baseEntity.setUpdateBy(DEFAULT_USER_ID);
+                // 获取当前登录用户的ID，并填充更新人信息
+                UserInfo loginUser = UserInfoUtil.getUserInfoWithNull();
+                if (Objects.nonNull(loginUser)) {
+                    baseEntity.setLastModifiedBy(loginUser.getId());
+                }
             } else {
                 this.strictUpdateFill(metaObject, "lastModifiedTime", LocalDateTime.class, current);
             }
