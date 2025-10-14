@@ -1,5 +1,6 @@
 package com.shdatalink.sip.service.module.user;
 
+import com.shdatalink.framework.common.annotation.Anonymous;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.framework.common.utils.PasswordUtil;
 import com.shdatalink.sip.service.module.common.enums.OperateLogTypeEnum;
@@ -42,7 +43,7 @@ public class LoginController {
      */
     @POST
     @Path("account")
-//    @Anonymous
+    @Anonymous
     public TokenResp accountLogin(@Valid LoginRequest request) {
         User user = userService.getUserByUserName(request.getUsername()).orElseThrow(() -> {
             operateLogService.addLog("用户登录失败，用户不存在！", OperateLogTypeEnum.LOGIN, null, null);
