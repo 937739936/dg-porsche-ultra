@@ -8,6 +8,7 @@ import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.framework.common.model.ResultWrapper;
 import com.shdatalink.framework.common.utils.PasswordUtil;
 import com.shdatalink.sip.service.common.dto.PageParam;
+import com.shdatalink.sip.service.common.dto.PageParamWithGet;
 import com.shdatalink.sip.service.module.user.entity.User;
 import com.shdatalink.sip.service.module.user.entity.UserAccessKey;
 import com.shdatalink.sip.service.module.user.service.UserAccessKeyService;
@@ -137,7 +138,7 @@ public class UserController {
      */
     @GET
     @Path("accessKey/page")
-    public IPage<UserAccessKey> accessKeyPage(PageParam param) {
+    public IPage<UserAccessKey> accessKeyPage(PageParamWithGet param) {
         return userAccessKeyService.page(param.toPage(), new LambdaQueryWrapper<UserAccessKey>().eq(UserAccessKey::getUserId, UserInfoUtil.getUserId()));
     }
 }
