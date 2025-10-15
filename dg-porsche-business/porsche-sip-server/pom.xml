@@ -12,6 +12,10 @@
     <artifactId>porsche-sip-server</artifactId>
 
 
+    <properties>
+        <jain.sip.version>1.3.0-91</jain.sip.version>
+    </properties>
+
     <dependencies>
         <!--  框架自身依赖   -->
         <dependency>
@@ -48,7 +52,16 @@
         </dependency>
 
         <!--  其他依赖   -->
+        <dependency>
+            <groupId>javax.sip</groupId>
+            <artifactId>jain-sip-ri</artifactId>
+            <version>${jain.sip.version}</version>
+        </dependency>
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

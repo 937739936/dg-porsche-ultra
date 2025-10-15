@@ -1,4 +1,4 @@
-package com.shdatalink.sip.server.gb28181.model.base;
+package com.shdatalink.sip.server.gb28181.core.bean.model.base;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

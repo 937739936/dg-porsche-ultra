@@ -19,8 +19,9 @@ public class DeviceSchedule {
 
 //    @Scheduled(cron = "0 */10 * * * *")
     @Scheduled(cron = "*/10 * * * * ?")
-    @RunOnVirtualThread
+//    @RunOnVirtualThread
     void test() {
+        log.info("test");
         sseClient.sendDeviceMessage(LocalDateTime.now());
     }
 }

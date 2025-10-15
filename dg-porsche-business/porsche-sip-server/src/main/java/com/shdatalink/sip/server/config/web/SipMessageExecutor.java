@@ -2,6 +2,7 @@ package com.shdatalink.sip.server.config.web;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Named;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,6 +16,7 @@ public class SipMessageExecutor {
      * 使用虚拟线程
      */
     @Produces
+    @Named("sipMessageExecutor")
     @ApplicationScoped
     public ExecutorService createSipMessageExecutor() {
         // 创建虚拟线程工厂

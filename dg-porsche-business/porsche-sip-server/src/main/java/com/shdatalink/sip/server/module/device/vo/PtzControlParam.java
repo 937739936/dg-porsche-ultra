@@ -1,0 +1,37 @@
+package com.shdatalink.sip.server.module.device.vo;
+
+import com.shdatalink.sip.server.module.device.enums.PtzControlAction;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import org.hibernate.validator.constraints.Range;
+
+@Data
+public class PtzControlParam {
+    /**
+     * 设备id
+     */
+    @NotBlank(message = "设备id不能为空")
+    private String deviceId;
+    /**
+     * 通道id
+     */
+    @NotBlank(message = "通道id不能为空")
+    private String channelId;
+    /**
+     * 动作
+     */
+    @NotNull(message = "动作不能为空")
+    private PtzControlAction action;
+    /**
+     * 速度
+     */
+    @Range(min = 1, max = 10)
+    @NotNull(message = "速度不能为空")
+    private Integer speed;
+
+    /**
+     * 操作序列，按住不放控制模式下必须
+     */
+    private String serialNo;
+}

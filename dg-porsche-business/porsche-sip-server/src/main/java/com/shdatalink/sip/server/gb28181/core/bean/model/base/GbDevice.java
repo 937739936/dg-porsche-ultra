@@ -1,5 +1,6 @@
-package com.shdatalink.sip.server.gb28181.model.base;
+package com.shdatalink.sip.server.gb28181.core.bean.model.base;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.MediaStreamModeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

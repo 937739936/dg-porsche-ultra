@@ -1,4 +1,4 @@
-package com.shdatalink.sip.server.gb28181.constants;
+package com.shdatalink.sip.server.gb28181.core.bean.constants;
 
 import com.shdatalink.framework.common.model.IDict;
 import lombok.Getter;
