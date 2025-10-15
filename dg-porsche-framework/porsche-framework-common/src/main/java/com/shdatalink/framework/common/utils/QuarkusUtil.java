@@ -2,8 +2,10 @@ package com.shdatalink.framework.common.utils;
 
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.ArcContainer;
+import io.quarkus.arc.InjectableInstance;
 import io.quarkus.arc.InstanceHandle;
 import io.quarkus.runtime.LaunchMode;
+import jakarta.enterprise.inject.literal.NamedLiteral;
 
 
 /**
@@ -49,6 +51,18 @@ public class QuarkusUtil {
             return instance.get();
         } catch (Exception e) {
             throw new RuntimeException("No bean found for type: " + type.getName(), e);
+        }
+    }
+
+    /**
+     * 获取指定类型的Bean实例
+     */
+    public static <T> T getBean(String beanName, Class<T> clazz) {
+        try {
+            InjectableInstance<T> select = getArcContainer().select(clazz, NamedLiteral.of(beanName));
+            return select.get();
+        } catch (Exception e) {
+            throw new RuntimeException("No bean found for beanName: " + beanName, e);
         }
     }
 
