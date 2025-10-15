@@ -42,6 +42,10 @@
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-extension-jwt</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.shdatalink</groupId>
+            <artifactId>porsche-framework-extension-job</artifactId>
+        </dependency>
 
         <!--  其他依赖   -->
 
