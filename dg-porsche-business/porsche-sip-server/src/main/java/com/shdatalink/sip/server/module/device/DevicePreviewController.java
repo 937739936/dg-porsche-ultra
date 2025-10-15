@@ -53,7 +53,8 @@ public class DevicePreviewController {
     @GET
     @Path("info")
     public DevicePreviewInfoVO info(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) {
-        return deviceChannelService.info(deviceId, channelId);
+//        return deviceChannelService.info(deviceId, channelId);
+        return null;
     }
 
     /**
@@ -64,7 +65,8 @@ public class DevicePreviewController {
     @GET
     @Path("snapshot")
     public DevicePreviewSnapshot getSnapshot(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) throws IOException {
-        return deviceChannelService.snapShot(deviceId, channelId);
+//        return deviceChannelService.snapShot(deviceId, channelId);
+        return null;
     }
 
     /**
@@ -75,7 +77,8 @@ public class DevicePreviewController {
     @GET
     @Path("realTimeSnap")
     public DevicePreviewSnapshot realTimeSnap(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) throws IOException {
-        return deviceChannelService.realTimeSnap(deviceId, channelId);
+//        return deviceChannelService.realTimeSnap(deviceId, channelId);
+        return null;
     }
 
     /**

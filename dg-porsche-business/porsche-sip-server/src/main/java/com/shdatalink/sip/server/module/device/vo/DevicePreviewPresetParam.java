@@ -1,6 +1,6 @@
 package com.shdatalink.sip.server.module.device.vo;
 
-import com.shdatalink.sip.server.config.validation.annotation.ValueList;
+import com.shdatalink.sip.server.common.validation.annotation.ValueList;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

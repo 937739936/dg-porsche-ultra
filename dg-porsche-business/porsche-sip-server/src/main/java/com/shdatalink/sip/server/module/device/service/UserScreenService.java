@@ -87,14 +87,14 @@ public class UserScreenService extends ServiceImpl<UserScreenMapper, UserScreen>
         List<UserScreenDevice> screens = userScreenDeviceService.getByPresetId(id);
         DevicePreviewPresetVO vo = new DevicePreviewPresetVO();
         vo.setScreenCount(userScreen.getScreenCount());
-        vo.setScreenList(
-                screens.stream()
-                        .map(s -> {
-                            DeviceChannel channel = deviceChannelMapper.selectByDeviceIdAndChannelId(s.getDeviceId(), s.getChannelId());
-                            if (channel == null) return null;
-                            return devicePlayService.playUrl(s.getDeviceId(), s.getChannelId(), channel.getId().toString());
-                        }).toList()
-        );
+//        vo.setScreenList(
+//                screens.stream()
+//                        .map(s -> {
+//                            DeviceChannel channel = deviceChannelMapper.selectByDeviceIdAndChannelId(s.getDeviceId(), s.getChannelId());
+//                            if (channel == null) return null;
+//                            return devicePlayService.playUrl(s.getDeviceId(), s.getChannelId(), channel.getId().toString());
+//                        }).toList()
+//        );
         return vo;
     }
 

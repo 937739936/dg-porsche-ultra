@@ -130,7 +130,8 @@ public class DeviceController {
     @GET
     @Path("channel/page")
     public IPage<DeviceChannelPage> channelPage(@Valid DeviceChannelPageParam param) {
-        return deviceChannelService.getPage(param);
+//        return deviceChannelService.getPage(param);
+        return null;
     }
 
     /**
@@ -139,17 +140,18 @@ public class DeviceController {
     @GET
     @Path("playUrl")
     public DevicePreviewPlayVO playUrl(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) {
-        Device device = deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备'" + deviceId + "'不存在"));
-        DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
-        if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
-            return devicePlayService.playUrl(deviceId, channelId, channel.getId().toString());
-        }else if(device.getProtocolType() == ProtocolTypeEnum.PULL){
-            return devicePlayService.playPullStreamUrl(deviceId, channelId, channel.getId().toString());
-        }else if(device.getProtocolType() == ProtocolTypeEnum.RTMP){
-            return devicePlayService.playRtmpStreamUrl(deviceId, channelId, channel.getId().toString());
-        }else{
-            throw new BizException("该协议类型设备不支持播放");
-        }
+//        Device device = deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备'" + deviceId + "'不存在"));
+//        DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
+//        if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
+//            return devicePlayService.playUrl(deviceId, channelId, channel.getId().toString());
+//        }else if(device.getProtocolType() == ProtocolTypeEnum.PULL){
+//            return devicePlayService.playPullStreamUrl(deviceId, channelId, channel.getId().toString());
+//        }else if(device.getProtocolType() == ProtocolTypeEnum.RTMP){
+//            return devicePlayService.playRtmpStreamUrl(deviceId, channelId, channel.getId().toString());
+//        }else{
+//            throw new BizException("该协议类型设备不支持播放");
+//        }
+        return null;
     }
 
     /**
@@ -164,7 +166,8 @@ public class DeviceController {
         if(device.getProtocolType() == ProtocolTypeEnum.PULL || device.getProtocolType() == ProtocolTypeEnum.RTMP){
             throw new BizException("该协议类型设备不支持刷新通道");
         }
-        return deviceChannelService.renewalChannel(deviceId);
+//        return deviceChannelService.renewalChannel(deviceId);
+        return null;
     }
 
     /**
@@ -237,7 +240,8 @@ public class DeviceController {
     @DELETE
     @Path("channel/delete")
     public boolean deleteChannel(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) {
-        return deviceChannelService.delete(deviceId, channelId);
+//        return deviceChannelService.delete(deviceId, channelId);
+        return true;
     }
 
     /**

@@ -5,157 +5,154 @@ import io.smallrye.config.WithDefault;
 import lombok.Data;
 
 
-@Data
 @ConfigMapping(prefix = "sip")
-public class SipConfigProperties {
+public interface SipConfigProperties {
     /**
      * 是否启用SIP日志，ERROR, INFO, WARNING, OFF, DEBUG, TRACE 默认是：OFF
      */
     @WithDefault("INFO")
-    private String logs = "INFO";
+    String logs();
 
     /**
      * 超时时间 【单位秒】
      */
-    private Integer timeout;
+    Integer timeout();
 
     /**
      * 服务器
      */
-    private SipServerConf server;
+    SipServerConf server();
 
     /**
      * 全局订阅
      */
-    private SipSubscribe subscribe;
+    SipSubscribe subscribe();
 
     /**
      * 配置信息
      */
-    private SipMapConf map;
+    SipMapConf map();
 
 
-    private ZlmMedia media;
+    ZlmMedia media();
 
     /**
      * sip订阅
      *
      */
-    @Data
-    public static class SipSubscribe {
+    interface SipSubscribe {
 
         /**
          * 全局-订阅目录
          */
-        private Boolean catalog = Boolean.FALSE;
+        @WithDefault("false")
+        Boolean catalog();
         /**
          * 全局-订阅报警
          */
-        private Boolean alarm = Boolean.FALSE;
+        @WithDefault("false")
+        Boolean alarm();
         /**
          * 全局-订阅位置
          */
-        private Boolean location = Boolean.FALSE;
+        @WithDefault("false")
+        Boolean location();
 
     }
 
 
-    @Data
-    public static class SipMapConf {
+    interface SipMapConf {
 
         /**
          * 启用
          */
-        private Boolean enable = false;
+        @WithDefault("false")
+        Boolean enable();
 
         /**
          * 地图中心
          */
-        private String center = "117.17159813310452,31.83907609118903";
-
+        @WithDefault("117.17159813310452,31.83907609118903")
+        String center();
 
     }
 
-    @Data
-    public static class SipServerConf {
+    interface SipServerConf {
         /**
          * SIP服务器ID
          */
-        private String id;
+        String id();
 
         /**
          * SIP服务器域 (domain宜采用ID统一编码的前十位编码)
          */
-        private String domain;
+        String domain();
 
         /**
          * SIP服务器地址，一般是本机IP
          * 不填写默认为：`0.0.0.0`
          */
-        private String ip;
+        @WithDefault("0.0.0.0")
+        String ip();
 
 
         /**
          * 公网ip
          */
-        private String wanIp;
+        String wanIp();
 
         /**
          * SIP服务器端口
          */
-        private Integer port = 5060;
+        @WithDefault("5060")
+        Integer port();
 
     }
 
-    @Data
-    public static class ZlmMedia {
+    interface ZlmMedia {
 
         /**
          * IP
          */
-        private String ip;
+        String ip();
 
         /**
          * 端口
          */
-        private int port;
+        int port();
 
         /**
          * 媒体id
          */
-        private String mediaId;
+        String id();
 
         /**
          * 秘密
          */
-        private String secret;
+        String secret();
 
         /**
          * Mp4最大秒
          */
-        private int mp4MaxSecond = 600;
+        @WithDefault("600")
+        int mp4MaxSecond();
 
         /**
          * 录制文件地址,默认 `./www下`
          */
-        private String recordPath;
+        @WithDefault("./www")
+        String recordPath();
+
         /**
          * 快照文件地址
          */
-        private String snapPath;
+        String snapPath();
 
         /**
          * 录制倍率
          */
-        private Double recordSpeed = 1.0;
+        @WithDefault("1.0")
+        Double recordSpeed();
 
-        /**
-         * 获得主机地址
-         *
-         * @return {@link String}
-         */
-        public String getHost() {
-            return String.format("http://%s:%d", this.ip, this.port);
-        }
     }
 }

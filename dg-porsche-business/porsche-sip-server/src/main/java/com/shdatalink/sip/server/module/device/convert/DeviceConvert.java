@@ -17,5 +17,5 @@ public interface DeviceConvert {
 
     DeviceAddParam toDeviceAddParam(DeviceImportVO row);
 
-    DevicePage toDevicePage(Device item, DevicePage page);
+    DevicePage toDevicePage(Device item);
 }
