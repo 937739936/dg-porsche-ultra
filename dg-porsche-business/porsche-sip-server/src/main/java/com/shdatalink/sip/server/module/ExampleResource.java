@@ -2,7 +2,6 @@ package com.shdatalink.sip.server.module;
 
 import com.shdatalink.framework.common.annotation.CheckPermission;
 import com.shdatalink.framework.common.enums.CheckPermissionMode;
-import com.shdatalink.sip.server.common.DictEnumCollector;
 import com.shdatalink.sip.server.module.user.convert.UserConvert;
 import com.shdatalink.sip.server.module.user.entity.User;
 import com.shdatalink.sip.server.module.user.vo.UserInfo;
