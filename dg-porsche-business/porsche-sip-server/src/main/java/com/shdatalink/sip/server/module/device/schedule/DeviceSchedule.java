@@ -18,10 +18,17 @@ public class DeviceSchedule {
     SseClient sseClient;
 
 //    @Scheduled(cron = "0 */10 * * * *")
-    @Scheduled(cron = "*/10 * * * * ?")
+//    @Scheduled(cron = "*/10 * * * * ?")
 //    @RunOnVirtualThread
     void test() {
         log.info("test");
         sseClient.sendDeviceMessage(LocalDateTime.now());
     }
+
+//    @Scheduled(cron = "*/10 * * * * ?")
+//    @RunOnVirtualThread
+//    void test2() {
+//        log.info("test2");
+//        sseClient.sendDeviceMessage(LocalDateTime.now());
+//    }
 }
