@@ -54,10 +54,11 @@ public class QuarkusUtil {
         }
     }
 
+
     /**
      * 获取指定类型的Bean实例
      */
-    public static <T> T getBean(String beanName, Class<T> clazz) {
+    public static <T> T getBeanByName(String beanName, Class<T> clazz) {
         try {
             InjectableInstance<T> select = getArcContainer().select(clazz, NamedLiteral.of(beanName));
             return select.get();

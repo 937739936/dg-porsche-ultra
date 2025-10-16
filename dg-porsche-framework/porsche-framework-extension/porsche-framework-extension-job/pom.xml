@@ -12,7 +12,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>porsche-framework-extension-job</artifactId>
-    <description>定时任务扩展：https://cn.quarkus.io/guides/rest-client</description>
+    <description>定时任务扩展：https://cn.quarkus.io/guides/scheduler</description>
 
 
     <dependencies>

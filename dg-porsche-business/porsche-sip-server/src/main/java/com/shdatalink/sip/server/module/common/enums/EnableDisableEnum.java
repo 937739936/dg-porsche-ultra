@@ -15,5 +15,4 @@ public enum EnableDisableEnum implements IDict<String> {
     ;
     private final String code;
     private final String text;
-
 }

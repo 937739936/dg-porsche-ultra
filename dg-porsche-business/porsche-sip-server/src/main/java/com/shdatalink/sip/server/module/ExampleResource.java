@@ -5,28 +5,22 @@ import com.shdatalink.framework.common.enums.CheckPermissionMode;
 import com.shdatalink.sip.server.module.user.convert.UserConvert;
 import com.shdatalink.sip.server.module.user.entity.User;
 import com.shdatalink.sip.server.module.user.vo.UserInfo;
-import com.shdatalink.web.utils.IpUtil;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 
+import java.util.List;
+
 /**
  * 测试
  */
-@Path("admin/test")
+//@Path("admin/test")
+@Path("test")
 public class ExampleResource {
 
     @Inject
     UserConvert userConvert;
 
-    /**
-     * 获取客户端IP地址
-     */
-    @Path("/ip")
-    @GET
-    public String getId() {
-        return IpUtil.getIpAddr();
-    }
 
     @Path("/mapstruct")
     @GET
