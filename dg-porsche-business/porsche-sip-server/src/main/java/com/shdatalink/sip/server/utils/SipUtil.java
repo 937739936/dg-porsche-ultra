@@ -210,7 +210,8 @@ public class SipUtil {
 
 
     public static SipProvider getSipProvider(String transport) {
-        return StringUtils.equalsIgnoreCase(transport, ListeningPoint.TCP) ? QuarkusUtil.getBean("tcpSipProvider", SipProvider.class) : QuarkusUtil.getBean("udpSipProvider", SipProvider.class);
+        return StringUtils.equalsIgnoreCase(transport, ListeningPoint.TCP) ? QuarkusUtil.getBeanByName("tcpSipProvider", SipProvider.class)
+                : QuarkusUtil.getBeanByName("udpSipProvider", SipProvider.class);
     }
 
 
