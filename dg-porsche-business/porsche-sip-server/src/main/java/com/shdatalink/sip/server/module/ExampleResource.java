@@ -9,8 +9,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 
-import java.util.List;
-
 /**
  * 测试
  */
@@ -21,6 +19,13 @@ public class ExampleResource {
     @Inject
     UserConvert userConvert;
 
+
+
+//    @Path("/getDict")
+//    @GET
+//    public List<Class<? extends IDict<?>>>  getDictEnums() {
+//        return dictEnumRegistry.getDictEnums();
+//    }
 
     @Path("/mapstruct")
     @GET
