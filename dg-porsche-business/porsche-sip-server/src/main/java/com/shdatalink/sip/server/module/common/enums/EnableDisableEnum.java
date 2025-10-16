@@ -1,8 +1,6 @@
 package com.shdatalink.sip.server.module.common.enums;
 
-import com.shdatalink.framework.common.annotation.Anonymous;
 import com.shdatalink.framework.common.model.IDict;
-import com.shdatalink.sip.server.common.DictEnumCollector;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,9 +15,4 @@ public enum EnableDisableEnum implements IDict<String> {
     ;
     private final String code;
     private final String text;
-
-    // 静态块中注册当前枚举类
-    static {
-        DictEnumCollector.register(EnableDisableEnum.class);
-    }
 }
