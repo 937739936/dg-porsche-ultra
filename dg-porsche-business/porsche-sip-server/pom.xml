@@ -50,6 +50,10 @@
             <groupId>com.shdatalink</groupId>
             <artifactId>porsche-framework-extension-job</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.shdatalink</groupId>
+            <artifactId>porsche-framework-extension-httpclient</artifactId>
+        </dependency>
 
         <!--  其他依赖   -->
         <dependency>

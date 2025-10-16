@@ -1,5 +1,6 @@
 package com.shdatalink.sip.server.gb28181.core.process.method.impl;
 
+import com.shdatalink.json.utils.JsonUtil;
 import com.shdatalink.sip.server.gb28181.core.bean.annotations.SipEvent;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.SipEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.DeviceBase;
@@ -13,15 +14,13 @@ import com.shdatalink.sip.server.module.alarmplan.service.AlarmRecordService;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
-import com.shdatalink.sip.server.util.JsonMapper;
-import com.shdatalink.sip.server.util.SipUtil;
-import com.shdatalink.sip.server.util.XmlUtil;
+import com.shdatalink.sip.server.utils.SipUtil;
+import com.shdatalink.sip.server.utils.XmlUtil;
 import gov.nist.javax.sip.message.SIPRequest;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 
 import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
@@ -29,18 +28,17 @@ import javax.sip.address.Address;
 import java.util.Optional;
 
 @SipEvent(SipEnum.Method.MESSAGE)
-@Component
+@ApplicationScoped
 @Slf4j
-@Async("sipMessageExecutor")
 public class MessageRequestProcessor extends AbstractSipRequestProcessor {
-    @Autowired
-    private DeviceService deviceService;
+    @Inject
+    DeviceService deviceService;
 
-    @Autowired
-    private DeviceChannelService deviceChannelService;
+    @Inject
+    DeviceChannelService deviceChannelService;
 
-    @Autowired
-    private AlarmRecordService alarmRecordService;
+    @Inject
+    AlarmRecordService alarmRecordService;
 
     @SneakyThrows
     @Override
@@ -120,7 +118,7 @@ public class MessageRequestProcessor extends AbstractSipRequestProcessor {
             }
         } else if (deviceBase.getCmdType().equals(SipEnum.Cmd.MobilePosition.name())) {
             DeviceMobilePosition deviceMobilePosition = XmlUtil.parse(content, DeviceMobilePosition.class);
-            log.info("deviceMobilePosition, {}", JsonMapper.nonDefaultMapper().toJson(deviceMobilePosition));
+            log.info("deviceMobilePosition, {}", JsonUtil.toJsonString(deviceMobilePosition));
         } else {
             log.info("收到其他类型消息,无法处理.{}", deviceBase.getCmdType());
         }

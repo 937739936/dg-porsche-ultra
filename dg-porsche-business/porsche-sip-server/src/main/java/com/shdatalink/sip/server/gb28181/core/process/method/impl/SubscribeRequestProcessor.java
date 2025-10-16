@@ -1,17 +1,17 @@
 package com.shdatalink.sip.server.gb28181.core.process.method.impl;
 
+import com.shdatalink.json.utils.JsonUtil;
 import com.shdatalink.sip.server.gb28181.core.bean.annotations.SipEvent;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.SipEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.response.ResponseMessage;
 import com.shdatalink.sip.server.gb28181.core.process.method.AbstractSipRequestProcessor;
 import com.shdatalink.sip.server.module.alarmplan.service.SubscribeService;
-import com.shdatalink.sip.server.util.JsonMapper;
-import com.shdatalink.sip.server.util.XmlUtil;
+import com.shdatalink.sip.server.utils.XmlUtil;
 import gov.nist.javax.sip.message.SIPResponse;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
@@ -20,11 +20,11 @@ import javax.sip.message.Response;
 
 @Slf4j
 @SipEvent(SipEnum.Method.SUBSCRIBE)
-@Component
+@ApplicationScoped
 public class SubscribeRequestProcessor extends AbstractSipRequestProcessor {
 
-    @Autowired
-    private SubscribeService subscribeService;
+    @Inject
+    SubscribeService subscribeService;
 
     @Override
     public void request(RequestEvent event) {
@@ -47,7 +47,7 @@ public class SubscribeRequestProcessor extends AbstractSipRequestProcessor {
                 return;
             }
             ResponseMessage responseMessage = XmlUtil.parse(rawContent, ResponseMessage.class);
-            log.info("订阅响应内容:{}", JsonMapper.nonDefaultMapper().toJson(responseMessage));
+            log.info("订阅响应内容:{}", JsonUtil.toJsonString(responseMessage));
             subscribeService.updateSubscribeExpires(responseMessage, expires);
 
             log.info("订阅成功");

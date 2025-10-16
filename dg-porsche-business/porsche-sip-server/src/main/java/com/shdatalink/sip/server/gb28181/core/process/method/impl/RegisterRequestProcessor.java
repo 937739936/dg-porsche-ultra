@@ -1,9 +1,10 @@
 package com.shdatalink.sip.server.gb28181.core.process.method.impl;
 
+import com.shdatalink.framework.common.service.EventPublisher;
 import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.core.bean.annotations.SipEvent;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.SipEnum;
-import com.shdatalink.sip.server.gb28181.core.bean.model.device.dto.RemoteInfo;
+import com.shdatalink.sip.server.gb28181.core.bean.model.device.Dto.RemoteInfo;
 import com.shdatalink.sip.server.gb28181.core.builder.ResponseBuilder;
 import com.shdatalink.sip.server.gb28181.core.process.method.AbstractSipRequestProcessor;
 import com.shdatalink.sip.server.module.device.event.DeviceInfoUpdateEvent;
@@ -11,15 +12,14 @@ import com.shdatalink.sip.server.module.device.event.DeviceOnlineEvent;
 import com.shdatalink.sip.server.module.device.event.DeviceRegisterEvent;
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
-import com.shdatalink.sip.server.util.DigestAuthenticationUtil;
-import com.shdatalink.sip.server.util.SipUtil;
+import com.shdatalink.sip.server.utils.DigestAuthenticationUtil;
+import com.shdatalink.sip.server.utils.SipUtil;
 import gov.nist.javax.sip.header.Authorization;
 import gov.nist.javax.sip.message.SIPRequest;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Component;
 
 import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
@@ -28,22 +28,22 @@ import javax.sip.header.WWWAuthenticateHeader;
 import static com.shdatalink.sip.server.gb28181.core.bean.constants.SipConstant.REGISTER_DIGEST_MD5_ALGORITHM;
 
 @SipEvent(SipEnum.Method.REGISTER)
-@Component
+@ApplicationScoped
 public class RegisterRequestProcessor extends AbstractSipRequestProcessor {
     private static final Logger logger = LoggerFactory.getLogger(RegisterRequestProcessor.class);
 
-    @Autowired
-    private SipConfigProperties sipConfigProperties;
+    @Inject
+    SipConfigProperties sipConfigProperties;
 
-    @Autowired
-    private DeviceService deviceService;
+    @Inject
+    DeviceService deviceService;
 
 
-    @Autowired
-    private DeviceChannelService deviceChannelService;
+    @Inject
+    DeviceChannelService deviceChannelService;
 
-    @Autowired
-    private ApplicationEventPublisher publisher;
+    @Inject
+    EventPublisher publisher;
 
     /*
          注册鉴权流程:
@@ -65,7 +65,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestProcessor {
     public void request(RequestEvent requestEvent) {
         SIPRequest request = (SIPRequest) requestEvent.getRequest();
         String deviceId = SipUtil.getUserIdFromFromHeader(request);
-        String serverDomain = sipConfigProperties.getServer().getDomain();
+        String serverDomain = sipConfigProperties.server().domain();
 
         boolean isRegistration = request.getExpires().getExpires() > 0;
 
@@ -83,7 +83,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestProcessor {
                         } else {
                             boolean f = DigestAuthenticationUtil.doAuthenticatePlainTextPassword(request.getMethod(), clientAuthorization, deviceConfig.getRegisterPassword());
                             if (f) {
-                                publisher.publishEvent(new DeviceRegisterEvent(deviceId, isRegistration, DeviceRegisterEvent.Status.Success));
+                                publisher.fire(new DeviceRegisterEvent(deviceId, isRegistration, DeviceRegisterEvent.Status.Success));
                                 if (isRegistration) {
                                     // 1.  发送注册成功响应消息
                                     ResponseBuilder.of(requestEvent).buildRegisterOfResponse().execute();
@@ -101,17 +101,17 @@ public class RegisterRequestProcessor extends AbstractSipRequestProcessor {
                                         // ignore  exception
                                     }
 
-                                    publisher.publishEvent(new DeviceOnlineEvent(deviceId, true));
-                                    publisher.publishEvent(new DeviceInfoUpdateEvent(deviceConfig));
+                                    publisher.fire(new DeviceOnlineEvent(deviceId, true));
+                                    publisher.fire(new DeviceInfoUpdateEvent(deviceConfig));
                                 } else {
                                     logger.info("{} 设备注销.", deviceId);
-                                    publisher.publishEvent(new DeviceOnlineEvent(deviceId, false));
+                                    publisher.fire(new DeviceOnlineEvent(deviceId, false));
                                     deviceService.updateOnline(deviceId, false);
                                     deviceChannelService.setDeviceOffline(deviceId);
                                     ResponseBuilder.of(requestEvent).buildRegisterOfResponse().execute();
                                 }
                             } else {
-                                publisher.publishEvent(new DeviceRegisterEvent(deviceId, isRegistration, DeviceRegisterEvent.Status.Fail));
+                                publisher.fire(new DeviceRegisterEvent(deviceId, isRegistration, DeviceRegisterEvent.Status.Fail));
                                 logger.info("{} 设备注册失败, 密码不正确.", deviceId);
                                 ResponseBuilder.of(requestEvent).forbidden().execute();
                             }

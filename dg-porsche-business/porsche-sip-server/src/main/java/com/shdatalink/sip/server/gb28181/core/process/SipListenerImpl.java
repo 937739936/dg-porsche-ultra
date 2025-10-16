@@ -1,10 +1,8 @@
 package com.shdatalink.sip.server.gb28181.core.process;
 
 import com.shdatalink.sip.server.gb28181.core.builder.DialogHolder;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.annotation.Order;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 
 import javax.sip.*;
 import javax.sip.header.CSeqHeader;
@@ -25,9 +23,7 @@ import javax.sip.message.Response;
  *
  */
 @Slf4j
-@Component
-@Async("sipMessageExecutor")
-@Order(1)
+@ApplicationScoped
 public class SipListenerImpl implements SipListener {
 
     @Override

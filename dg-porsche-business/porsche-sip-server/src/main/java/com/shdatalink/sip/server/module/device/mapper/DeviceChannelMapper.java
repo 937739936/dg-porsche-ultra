@@ -2,6 +2,7 @@ package com.shdatalink.sip.server.module.device.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
+import com.shdatalink.sip.server.module.pushstream.dto.ChannelBaseInfoDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -41,5 +42,5 @@ public interface DeviceChannelMapper extends BaseMapper<DeviceChannel> {
             "</script>")
     List<DeviceChannel> selectByChannelIds(Collection<String> channelIds);
 
-//    ChannelBaseInfoDTO getBaseChannelInfo(@Param("id") Integer id);
+    ChannelBaseInfoDTO getBaseChannelInfo(@Param("id") Integer id);
 }

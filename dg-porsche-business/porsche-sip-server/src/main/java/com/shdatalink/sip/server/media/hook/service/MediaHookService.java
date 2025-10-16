@@ -2,11 +2,17 @@ package com.shdatalink.sip.server.media.hook.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.shdatalink.framework.common.exception.BizException;
+import com.shdatalink.framework.common.service.EventPublisher;
+import com.shdatalink.json.utils.JsonUtil;
+import com.shdatalink.redis.utils.RedisUtil;
+import com.shdatalink.sip.server.common.constants.RedisKeyConstants;
 import com.shdatalink.sip.server.config.SipConfigProperties;
-import com.shdatalink.sip.server.config.common.RedisKeyConstants;
+import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.InviteTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.media.MediaHttpClient;
+import com.shdatalink.sip.server.media.MediaService;
+import com.shdatalink.sip.server.media.MediaUrlService;
 import com.shdatalink.sip.server.media.bean.entity.req.SnapshotReq;
 import com.shdatalink.sip.server.media.bean.entity.req.StartRecordReq;
 import com.shdatalink.sip.server.media.event.MediaExitedEvent;
@@ -20,19 +26,16 @@ import com.shdatalink.sip.server.module.device.enums.ProtocolTypeEnum;
 import com.shdatalink.sip.server.module.device.event.DeviceOnlineEvent;
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceLogService;
-import com.shdatalink.sip.server.module.device.service.DevicePlayService;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordService;
+import com.shdatalink.sip.server.module.pushstream.convert.PushStreamConvert;
 import com.shdatalink.sip.server.module.pushstream.dto.MediaViewerDTO;
-import com.shdatalink.sip.server.util.JsonMapper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -50,21 +53,44 @@ import java.util.stream.Stream;
 import static com.shdatalink.sip.server.gb28181.core.bean.constants.SipConstant.SNAPSHOT_TOKEN;
 
 @Slf4j
-@Service
-@RequiredArgsConstructor
+@ApplicationScoped
 public class MediaHookService {
 
-    private final VideoRecordService videoRecordService;
-    private final MediaHttpClient mediaHttpClient;
-    private final DevicePlayService devicePlayService;
-    private final DeviceChannelService deviceChannelService;
-    private final VideoRecordRemoteService videoRecordRemoteService;
-    private final ApplicationEventPublisher publisher;
-    private final DeviceService deviceService;
-    private final Executor executor;
-    private final SipConfigProperties sipConfigProperties;
-    private final StringRedisTemplate stringRedisTemplate;
-    private final DeviceLogService deviceLogService;
+    @Inject
+    VideoRecordService videoRecordService;
+
+    @Inject
+    MediaHttpClient mediaHttpClient;
+
+    @Inject
+    DeviceChannelService deviceChannelService;
+
+    @Inject
+    VideoRecordRemoteService videoRecordRemoteService;
+
+    @Inject
+    EventPublisher publisher;
+
+    @Inject
+    DeviceService deviceService;
+
+    @Inject
+    Executor executor;
+
+    @Inject
+    SipConfigProperties sipConfigProperties;
+
+    @Inject
+    RedisUtil redisUtil;
+
+    @Inject
+    DeviceLogService deviceLogService;
+    @Inject
+    MediaService mediaService;
+    @Inject
+    MediaUrlService mediaUrlService;
+    @Inject
+    PushStreamConvert pushStreamConvert;
 
 
     public HookResp flowReport(FlowReportReq flowReportReq) {
@@ -82,7 +108,7 @@ public class MediaHookService {
         String stream = publishReq.getStream();
         String prefix = stream.substring(0, 2);
         if(Objects.equals(prefix,InviteTypeEnum.Rtmp.getPrefix())){
-            DeviceChannel channel = deviceChannelService.getById(devicePlayService.extractStream(stream));
+            DeviceChannel channel = deviceChannelService.getById(StreamFactory.extractChannel(stream));
             if(channel == null) {
                 PublishResp publishResp = new PublishResp();
                 publishResp.setCode(404);
@@ -109,7 +135,7 @@ public class MediaHookService {
             channel.setOnline(online);
             channel.setRegisterTime(LocalDateTime.now());
             deviceChannelService.updateById(channel);
-            publisher.publishEvent(new DeviceOnlineEvent(device.getDeviceId(), online));
+            publisher.fire(new DeviceOnlineEvent(device.getDeviceId(), online));
             executor.execute(()->{
                 try {
                     Thread.sleep(2000);
@@ -117,12 +143,12 @@ public class MediaHookService {
                     throw new RuntimeException(e);
                 }
                 SnapshotReq req = new SnapshotReq();
-                String rtspUrl = devicePlayService.getRtspPlayUrl(channel.getDeviceId(), channel.getChannelId(), channel.getId().toString(), InviteTypeEnum.Rtmp);
+                String rtspUrl = mediaUrlService.getRtspPlayUrl(channel.getDeviceId(), channel.getChannelId(), channel.getId().toString(), InviteTypeEnum.Rtmp);
                 req.setUrl(rtspUrl);
                 req.setTimeoutSec(30);
                 req.setExpireSec(60);
                 byte[] snap = mediaHttpClient.getSnap(req);
-                String snapPath = sipConfigProperties.getMedia().getSnapPath();
+                String snapPath = sipConfigProperties.media().snapPath();
                 if (!Files.exists(Paths.get(snapPath))) {
                     try {
                         Files.createDirectories(Paths.get(snapPath));
@@ -183,7 +209,7 @@ public class MediaHookService {
     }
 
     public HookResp streamChanged(StreamChangedReq streamChangedReq) {
-        log.info("streamChanged: {}", JsonMapper.nonDefaultMapper().toJson(streamChangedReq));
+        log.info("streamChanged: {}", JsonUtil.toJsonString(streamChangedReq));
         InviteTypeEnum action = InviteTypeEnum.getByPrefix(streamChangedReq.getStream().substring(0, 2));
         if (streamChangedReq.getRegist()) {
             if (action == InviteTypeEnum.Download) {
@@ -203,18 +229,18 @@ public class MediaHookService {
 
                 System.out.println(path.toAbsolutePath());
             } else if (action == InviteTypeEnum.Play) {
-                DeviceChannel channel = deviceChannelService.getOptById(devicePlayService.extractStream(streamChangedReq.getStream())).orElseThrow(() -> new BizException("通道不存在"));
+                DeviceChannel channel = deviceChannelService.getOptById(StreamFactory.extractChannel(streamChangedReq.getStream())).orElseThrow(() -> new BizException("通道不存在"));
                 deviceLogService.addLog(channel.getDeviceId(), channel.getChannelId(), channel.getOnline(), MessageTypeEnum.Stream, "开始推流");
             }
         } else {
             log.info("流注销事件");
             if (action == InviteTypeEnum.Play) {
-                DeviceChannel channel = deviceChannelService.getOptById(devicePlayService.extractStream(streamChangedReq.getStream())).orElseThrow(() -> new BizException("通道不存在"));
+                DeviceChannel channel = deviceChannelService.getOptById(StreamFactory.extractChannel(streamChangedReq.getStream())).orElseThrow(() -> new BizException("通道不存在"));
                 deviceLogService.addLog(channel.getDeviceId(), channel.getChannelId(), channel.getOnline(), MessageTypeEnum.Stream, "停止推流");
             }
         }
         if(action == InviteTypeEnum.Rtmp) {
-            Integer channelId = devicePlayService.extractStream(streamChangedReq.getStream());
+            Integer channelId = StreamFactory.extractChannel(streamChangedReq.getStream());
             DeviceChannel deviceChannel = deviceChannelService.getById(channelId);
             if(deviceChannel != null){
                 deviceService.getByDeviceId(deviceChannel.getDeviceId()).ifPresent(device -> {
@@ -223,7 +249,7 @@ public class MediaHookService {
                 });
                 deviceChannel.setOnline(streamChangedReq.getRegist());
                 deviceChannelService.updateById(deviceChannel);
-                publisher.publishEvent(new DeviceOnlineEvent(deviceChannel.getDeviceId(), streamChangedReq.getRegist()));
+                publisher.fire(new DeviceOnlineEvent(deviceChannel.getDeviceId(), streamChangedReq.getRegist()));
             }
         }
         HookResp hookResp = new HookResp();
@@ -232,9 +258,9 @@ public class MediaHookService {
     }
 
     public StreamNoneReaderResp streamNoneReader(StreamNoneReaderReq streamNoneReaderReq) {
-        log.info("流无读取者事件, {}", JsonMapper.nonDefaultMapper().toJson(streamNoneReaderReq));
+        log.info("流无读取者事件, {}", JsonUtil.toJsonString(streamNoneReaderReq));
         String stream = streamNoneReaderReq.getStream();
-        Optional<DeviceChannel> deviceChannelOptional = deviceChannelService.getOptById(devicePlayService.extractStream(stream));
+        Optional<DeviceChannel> deviceChannelOptional = deviceChannelService.getOptById(StreamFactory.extractChannel(stream));
         StreamNoneReaderResp resp = new StreamNoneReaderResp();
         if (deviceChannelOptional.isEmpty()) {
             resp.setClose(true);
@@ -270,7 +296,7 @@ public class MediaHookService {
         log.info("流不存在事件" + streamNotFoundReq);
         HookResp hookResp = new HookResp();
         String stream = streamNotFoundReq.getStream();
-        if (mediaHttpClient.mediaExists(stream)) {
+        if (mediaService.mediaExists(stream)) {
             hookResp.setCode(0);
             return hookResp;
         }
@@ -303,7 +329,7 @@ public class MediaHookService {
                 }
                 deviceChannelService.playBack(stream, startTime, endTime);
             }
-            case PullStream -> devicePlayService.playPullStream(stream);
+            case PullStream -> mediaUrlService.playPullStream(stream);
             default -> {
                 hookResp.setCode(404);
                 return hookResp;
@@ -317,7 +343,7 @@ public class MediaHookService {
 
     public HookResp serverStarted(ServerStartedReqResult serverStartedReq) {
         log.info("服务器启动事件");
-        publisher.publishEvent(new MediaRegisterEvent());
+        publisher.fire(new MediaRegisterEvent());
         HookResp hookResp = new HookResp();
         hookResp.setCode(0);
         hookResp.setMsg("服务器启动成功");
@@ -338,7 +364,7 @@ public class MediaHookService {
     }
 
     public HookResp play(PlayReq playReq) {
-        log.info("media hook on play: {}", JsonMapper.nonDefaultMapper().toJson(playReq));
+        log.info("media hook on play: {}", JsonUtil.toJsonString(playReq));
         String params = playReq.getParams();
         HookResp hookResp = new HookResp();
         Optional<String> first = Stream.of(params.split("&")).filter(item -> item.startsWith("token="))
@@ -349,7 +375,7 @@ public class MediaHookService {
         }
         String token = first.get().replace("token=", "");
         if (!SNAPSHOT_TOKEN.equals(token)) {
-            boolean verify = devicePlayService.verify(playReq.getStream(), token);
+            boolean verify = mediaUrlService.verify(playReq.getStream(), token);
             if (!verify) {
                 hookResp.setCode(401);
                 return hookResp;
@@ -363,24 +389,23 @@ public class MediaHookService {
         }
         if (action == InviteTypeEnum.Playback) {
         }else{
-            String viewerStr = stringRedisTemplate.opsForValue().get(RedisKeyConstants.PUSH_STREAM_VIEWER + playReq.getStream());
-            List<MediaViewerDTO> playReqs = JsonMapper.nonDefaultMapper().fromJson(viewerStr, new TypeReference<>() {
+            String viewerStr = redisUtil.get(RedisKeyConstants.PUSH_STREAM_VIEWER + playReq.getStream());
+            List<MediaViewerDTO> playReqs = JsonUtil.parseObject(viewerStr, new TypeReference<>() {
             });
             if(CollectionUtils.isEmpty(playReqs)){
                 playReqs = new ArrayList<>();
             }
-            MediaViewerDTO mediaViewerDTO = new MediaViewerDTO();
-            BeanUtils.copyProperties(playReq, mediaViewerDTO);
+            MediaViewerDTO mediaViewerDTO = pushStreamConvert.convert(playReq);
             mediaViewerDTO.setPlayTime(LocalDateTime.now());
             playReqs.add(mediaViewerDTO);
-            stringRedisTemplate.opsForValue().set(RedisKeyConstants.PUSH_STREAM_VIEWER + playReq.getStream(), JsonMapper.nonDefaultMapper().toJson(playReqs));
+            redisUtil.set(RedisKeyConstants.PUSH_STREAM_VIEWER + playReq.getStream(), JsonUtil.toJsonString(playReqs));
         }
         hookResp.setCode(0);
         return hookResp;
     }
 
     public HookResp onServerExited(ServerExitedReqResult req) {
-        publisher.publishEvent(new MediaExitedEvent());
+        publisher.fire(new MediaExitedEvent());
         HookResp hookResp = new HookResp();
         hookResp.setCode(0);
         return hookResp;

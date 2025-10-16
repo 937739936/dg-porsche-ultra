@@ -139,4 +139,8 @@ public class RedisUtil {
         return keyCommands.expire(key, duration);
     }
 
+    public int delete(String key) {
+        return keyCommands.del(key);
+    }
+
 }

@@ -1,7 +1,7 @@
 package com.shdatalink.sip.server.gb28181.core.builder;
 
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.GbDevice;
-import com.shdatalink.sip.server.util.SipUtil;
+import com.shdatalink.sip.server.utils.SipUtil;
 import gov.nist.javax.sip.message.SIPRequest;
 import lombok.SneakyThrows;
 

@@ -11,26 +11,26 @@ import com.shdatalink.sip.server.gb28181.core.builder.SipPublisher;
 import com.shdatalink.sip.server.gb28181.core.process.method.AbstractSipRequestProcessor;
 import com.shdatalink.sip.server.module.alarmplan.service.AlarmRecordService;
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
-import com.shdatalink.sip.server.util.SipUtil;
-import com.shdatalink.sip.server.util.XmlUtil;
+import com.shdatalink.sip.server.utils.SipUtil;
+import com.shdatalink.sip.server.utils.XmlUtil;
 import gov.nist.javax.sip.message.SIPRequest;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
 
 @Slf4j
 @SipEvent(SipEnum.Method.NOTIFY)
-@Component
+@ApplicationScoped
 public class NotifyRequestProcessor extends AbstractSipRequestProcessor {
 
-    @Autowired
-    private DeviceChannelService deviceChannelService;
-    @Autowired
-    private AlarmRecordService alarmRecordService;
+    @Inject
+    DeviceChannelService deviceChannelService;
+    @Inject
+    AlarmRecordService alarmRecordService;
 
     @Override
     public void request(RequestEvent event) {

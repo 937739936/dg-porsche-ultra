@@ -3,7 +3,7 @@ package com.shdatalink.sip.server.gb28181.core.builder;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.SipConstant;
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.GbDevice;
-import com.shdatalink.sip.server.util.SipUtil;
+import com.shdatalink.sip.server.utils.SipUtil;
 import gov.nist.javax.sip.message.SIPRequest;
 import lombok.SneakyThrows;
 
@@ -37,7 +37,7 @@ public class InfoRequest extends AbstractRequest implements GBRequest {
         msg.add("CSeq: 1.0");
         msg.add(String.format("Scale: %.2f", speed));
 
-        subject = String.format("%s:0,%s:0", toDevice.getChannelId(), sipConf.getId());
+        subject = String.format("%s:0,%s:0", toDevice.getChannelId(), sipConf.id());
 
         Dialog dialog = DialogHolder.getDialog(streamId);
         if (dialog == null) {

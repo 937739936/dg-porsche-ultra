@@ -8,16 +8,16 @@ import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.re
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.response.DeviceInfo;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.response.DeviceStatus;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
-import com.shdatalink.sip.server.util.SipUtil;
+import com.shdatalink.sip.server.utils.SipUtil;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-@Log4j
+@ApplicationScoped
+@Slf4j
 public class SipMessageTemplate {
 
     @SneakyThrows

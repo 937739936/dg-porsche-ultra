@@ -1,11 +1,11 @@
 package com.shdatalink.sip.server.gb28181.core.builder;
 
-import com.shdatalink.framework.common.utils.SpringContextUtil;
+import com.shdatalink.framework.common.utils.QuarkusUtil;
 import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.MediaStreamModeEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.GbDevice;
 import com.shdatalink.sip.server.gb28181.core.header.impl.XGBVerHeaderImpl;
-import com.shdatalink.sip.server.util.SipUtil;
+import com.shdatalink.sip.server.utils.SipUtil;
 import gov.nist.javax.sip.header.Event;
 import gov.nist.javax.sip.header.Expires;
 import lombok.Getter;
@@ -33,7 +33,6 @@ public abstract class AbstractRequest implements GBRequest {
 
     protected final SipConfigProperties.SipServerConf sipConf;
     protected CallIdHeader callIdHeader;
-//    protected CSeqHeader cSeqHeader;
     protected FromHeader fromHeader;
     protected List<ViaHeader> viaHeaders;
     protected ToHeader toHeader;
@@ -50,8 +49,8 @@ public abstract class AbstractRequest implements GBRequest {
         this.toDevice = toDevice;
         this.streamMode = toDevice.getStreamMode();
         this.method = method;
-        SipConfigProperties sipConfig = SpringContextUtil.getBean(SipConfigProperties.class);
-        this.sipConf = sipConfig.getServer();
+        SipConfigProperties sipConfig = QuarkusUtil.getBean(SipConfigProperties.class);
+        this.sipConf = sipConfig.server();
     }
 
     public AbstractRequest newSession() {
@@ -77,8 +76,8 @@ public abstract class AbstractRequest implements GBRequest {
      */
     public AbstractRequest newSession(String callId, String fromTag, String toTag) {
         this.callIdHeader = SipUtil.createCallIdHeader(callId);
-        this.viaHeaders = SipUtil.createViaHeaders(sipConf.getWanIp(), sipConf.getPort(), toDevice.getTransport(), SipUtil.generateViaTag());
-        this.fromHeader = SipUtil.createFromHeader(SipUtil.createAddress(SipUtil.createSipURI(sipConf.getId(), sipConf.getDomain())), fromTag);
+        this.viaHeaders = SipUtil.createViaHeaders(sipConf.wanIp(), sipConf.port(), toDevice.getTransport(), SipUtil.generateViaTag());
+        this.fromHeader = SipUtil.createFromHeader(SipUtil.createAddress(SipUtil.createSipURI(sipConf.id(), sipConf.domain())), fromTag);
         SipURI toUri = SipUtil.createSipURI(toDevice.getChannelId(), SipUtil.createHostAddress(toDevice.getIp(), toDevice.getPort()));
         this.toHeader = SipUtil.createToHeader(SipUtil.createAddress(toUri), toTag);
         return this;
@@ -115,8 +114,8 @@ public abstract class AbstractRequest implements GBRequest {
         );
         request.addHeader(XGBVerHeaderImpl.GB28181_2016);
 
-        String local = SipUtil.createHostAddress(sipConf.getWanIp(), sipConf.getPort());
-        Address localContact = SipUtil.createAddress(SipUtil.createSipURI(sipConf.getId(), local));
+        String local = SipUtil.createHostAddress(sipConf.wanIp(), sipConf.port());
+        Address localContact = SipUtil.createAddress(SipUtil.createSipURI(sipConf.id(), local));
         request.addHeader(SipUtil.getHeaderFactory().createContactHeader(localContact));
         doRequest(request);
     }
@@ -140,8 +139,8 @@ public abstract class AbstractRequest implements GBRequest {
 
         request.addHeader(XGBVerHeaderImpl.GB28181_2016);
 
-        String local = SipUtil.createHostAddress(sipConf.getWanIp(), sipConf.getPort());
-        Address localContact = SipUtil.createAddress(SipUtil.createSipURI(sipConf.getId(), local));
+        String local = SipUtil.createHostAddress(sipConf.wanIp(), sipConf.port());
+        Address localContact = SipUtil.createAddress(SipUtil.createSipURI(sipConf.id(), local));
         request.addHeader(SipUtil.getHeaderFactory().createContactHeader(localContact));
         if (subject != null) {
             request.addHeader(SipUtil.getHeaderFactory().createSubjectHeader(subject));
@@ -173,8 +172,8 @@ public abstract class AbstractRequest implements GBRequest {
         expires.setExpires(expiresTime);
         request.addHeader(expires);
 
-        String local = SipUtil.createHostAddress(sipConf.getWanIp(), sipConf.getPort());
-        Address localContact = SipUtil.createAddress(SipUtil.createSipURI(sipConf.getId(), local));
+        String local = SipUtil.createHostAddress(sipConf.wanIp(), sipConf.port());
+        Address localContact = SipUtil.createAddress(SipUtil.createSipURI(sipConf.id(), local));
         request.addHeader(SipUtil.getHeaderFactory().createContactHeader(localContact));
         doRequest(request);
     }

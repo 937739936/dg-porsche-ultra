@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.shdatalink.framework.common.exception.BizException;
+import com.shdatalink.sip.server.media.MediaUrlService;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.entity.UserScreen;
 import com.shdatalink.sip.server.module.device.entity.UserScreenDevice;
@@ -33,10 +34,6 @@ public class UserScreenService extends ServiceImpl<UserScreenMapper, UserScreen>
 
     @Inject
     UserScreenDeviceService userScreenDeviceService;
-    @Inject
-    DevicePlayService devicePlayService;
-    @Inject
-    DeviceChannelMapper deviceChannelMapper;
 
     @Transactional
     public boolean save(DevicePreviewPresetParam param) {

@@ -8,8 +8,8 @@ import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.A
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.CatalogSubscribe;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.MobilePositionSubscribe;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.SubscribeMessage;
-import com.shdatalink.sip.server.util.SipUtil;
-import com.shdatalink.sip.server.util.XmlUtil;
+import com.shdatalink.sip.server.utils.SipUtil;
+import com.shdatalink.sip.server.utils.XmlUtil;
 import gov.nist.javax.sip.message.SIPRequest;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

@@ -97,6 +97,11 @@ public class DateUtil {
         return duration.toMinutes();
     }
 
+    public static Long betweenSeconds(LocalDateTime startTime, LocalDateTime endTime) {
+        Duration duration = Duration.between(startTime, endTime);
+        return duration.toSeconds();
+    }
+
     public static Long toMill(LocalDateTime localDateTime) {
         return localDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }

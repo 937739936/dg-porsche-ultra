@@ -1,6 +1,5 @@
 package com.shdatalink.sip.server.module.device.service;
 
-import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -13,9 +12,17 @@ import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.redis.utils.RedisUtil;
 import com.shdatalink.sip.server.common.constants.RedisKeyConstants;
 import com.shdatalink.sip.server.config.SipConfigProperties;
+import com.shdatalink.sip.server.gb28181.SipMessageTemplate;
+import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.*;
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.GbDevice;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.Dto.RemoteInfo;
+import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.control.PtzCmd;
+import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.response.DeviceInfo;
+import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
+import com.shdatalink.sip.server.media.MediaHttpClient;
+import com.shdatalink.sip.server.media.MediaUrlService;
+import com.shdatalink.sip.server.media.bean.entity.req.CloseStreamsReq;
 import com.shdatalink.sip.server.module.device.convert.DeviceConvert;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
@@ -26,10 +33,10 @@ import com.shdatalink.sip.server.module.device.event.DeviceOnlineEvent;
 import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
 import com.shdatalink.sip.server.module.device.mapper.DeviceMapper;
 import com.shdatalink.sip.server.module.device.vo.*;
+import com.shdatalink.sip.server.utils.SipUtil;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.virtual.threads.VirtualThreads;
-import io.vertx.redis.client.Redis;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
@@ -46,9 +53,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.device.service.DeviceService",
         targets = {SerializedLambda.class, SFunction.class},
@@ -57,19 +62,20 @@ import java.util.concurrent.TimeUnit;
 @ApplicationScoped
 public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
 
-//    @Inject
-//    SipMessageTemplate sipMessageTemplate;
+    @Inject
+    SipMessageTemplate sipMessageTemplate;
     @Inject
     DeviceChannelMapper deviceChannelMapper;
     @Inject
     SipConfigProperties sipConfigProperties;
     @Inject
     Validator validator;
-    DevicePlayService devicePlayService;
+    @Inject
+    MediaUrlService mediaUrlService;
     @Inject
     RedisUtil redisUtil;
-//    @Inject
-//    MediaHttpClient mediaHttpClient;
+    @Inject
+    MediaHttpClient mediaHttpClient;
     @Inject
     DeviceSnapService deviceSnapService;
     @Inject
@@ -92,26 +98,26 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
     }
 
 
-//    @Transactional(rollbackOn = Exception.class)
-//    public boolean saveDevice(Device device, RemoteInfo remoteInfo) {
-//        GbDevice gbDevice = Device.toGbDevice(device.getDeviceId(), remoteInfo);
-//
-//        DeviceInfo deviceInfo = sipMessageTemplate.getDeviceInfo(gbDevice);
-//
-//        device.setIp(remoteInfo.getIp());
-//        device.setPort(remoteInfo.getPort());
-//        device.setTransport(remoteInfo.getTransport());
-//        device.setModel(deviceInfo.getModel());
-//        device.setManufacturer(deviceInfo.getManufacturer());
-//        device.setFirmware(deviceInfo.getFirmware());
-//        if (device.getRegisterTime() == null) {
-//            device.setRegisterTime(LocalDateTime.now());
-//        }
-//        device.setKeepaliveTime(LocalDateTime.now());
-//        device.setOnline(true);
-//        // 保存设备信息
-//        return updateById(device);
-//    }
+    @Transactional(rollbackOn = Exception.class)
+    public boolean saveDevice(Device device, RemoteInfo remoteInfo) {
+        GbDevice gbDevice = Device.toGbDevice(device.getDeviceId(), remoteInfo);
+
+        DeviceInfo deviceInfo = sipMessageTemplate.getDeviceInfo(gbDevice);
+
+        device.setIp(remoteInfo.getIp());
+        device.setPort(remoteInfo.getPort());
+        device.setTransport(remoteInfo.getTransport());
+        device.setModel(deviceInfo.getModel());
+        device.setManufacturer(deviceInfo.getManufacturer());
+        device.setFirmware(deviceInfo.getFirmware());
+        if (device.getRegisterTime() == null) {
+            device.setRegisterTime(LocalDateTime.now());
+        }
+        device.setKeepaliveTime(LocalDateTime.now());
+        device.setOnline(true);
+        // 保存设备信息
+        return updateById(device);
+    }
 
     public IPage<DevicePage> getPage(DevicePageParam param) {
         return baseMapper.getPage(new Page<>(param.getPage(), param.getPageSize()), param)
@@ -123,8 +129,8 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
                     }
                     if(item.getProtocolType() == ProtocolTypeEnum.RTMP){
                         deviceChannelMapper.selectByDeviceId(item.getDeviceId()).forEach(channel -> {
-                            String streamId = devicePlayService.streamId(InviteTypeEnum.Rtmp, channel.getId().toString());
-//                            page.setStreamUrl(devicePlayService.buildRtmpStreamUrl(streamId));
+                            String streamId = StreamFactory.streamId(InviteTypeEnum.Rtmp, channel.getId().toString());
+                            page.setStreamUrl(mediaUrlService.buildRtmpStreamUrl(streamId));
                         });
                     }
                     return page;
@@ -157,11 +163,11 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
                     Device device = deviceMapper.selectByChannelId(c.getChannelId());
                     if(device != null){
                         if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
-//                            channel.setPlayUrl(devicePlayService.playUrl(deviceId, c.getChannelId(), c.getId().toString()));
+                            channel.setPlayUrl(mediaUrlService.playUrl(deviceId, c.getChannelId(), c.getId().toString()));
                         }else if(device.getProtocolType() == ProtocolTypeEnum.PULL){
-//                            channel.setPlayUrl(devicePlayService.playPullStreamUrl(deviceId, c.getChannelId(), c.getId().toString()));
+                            channel.setPlayUrl(mediaUrlService.playPullStreamUrl(deviceId, c.getChannelId(), c.getId().toString()));
                         }else if(device.getProtocolType() == ProtocolTypeEnum.RTMP){
-//                            channel.setPlayUrl(devicePlayService.playRtmpStreamUrl(deviceId, c.getChannelId(), c.getId().toString()));
+                            channel.setPlayUrl(mediaUrlService.playRtmpStreamUrl(deviceId, c.getChannelId(), c.getId().toString()));
                         }
                     }
                     return channel;
@@ -191,10 +197,8 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
         Device device = baseMapper.selectByDeviceId(deviceId);
         if(device.getProtocolType() == ProtocolTypeEnum.RTMP){
             deviceChannelMapper.selectByDeviceId(deviceId).forEach(channel -> {
-                String streamId = devicePlayService.streamId(InviteTypeEnum.Rtmp, channel.getId().toString());
-//                CloseStreamsReq closeStreamsReq = MediaReq.getRtmpInstance(streamId, CloseStreamsReq.class);
-//                closeStreamsReq.setForce(1);
-//                mediaHttpClient.closeStreams(closeStreamsReq);
+                String streamId = StreamFactory.streamId(InviteTypeEnum.Rtmp, channel.getId().toString());
+                mediaHttpClient.closeStreams(new CloseStreamsReq(streamId, 1));
             });
         }
         baseMapper.delete(new LambdaQueryWrapper<Device>()
@@ -245,31 +249,31 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
 
         redisUtil.setEx(redisKey, param.getAction().getAction(), Duration.ofMillis(1500));
 
-//        executor.execute(() -> {
-//            Device device = getByDeviceId(param.getDeviceId()).orElseThrow(() -> new BizException("设备不存在或被禁用！"));
-//            PtzCmd cmd = PtzCmd.builder()
-//                    .ptzCmd(PtzCmd.PtzControl.getPTZCmd(param.getAction().getAction(), param.getSpeed(), null))
-//                    .deviceId(param.getChannelId())
-//                    .sn(SipUtil.generateSn())
-//                    .build();
-//            GBRequest.message(device.toGbDevice())
-//                    .newSession()
-//                    .execute(cmd);
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            PtzCmd stop = PtzCmd.builder()
-//                    .ptzCmd(PtzCmd.PtzControl.getPTZCmd(PtzCmd.PtzControl.PTZType.STOP, 5, null))
-//                    .deviceId(param.getChannelId())
-//                    .sn(SipUtil.generateSn())
-//                    .build();
-//            GBRequest.message(device.toGbDevice())
-//                    .newSession()
-//                    .execute(stop);
-//            redisUtil.del(redisKey);
-//        });
+        executor.execute(() -> {
+            Device device = getByDeviceId(param.getDeviceId()).orElseThrow(() -> new BizException("设备不存在或被禁用！"));
+            PtzCmd cmd = PtzCmd.builder()
+                    .ptzCmd(PtzCmd.PtzControl.getPTZCmd(param.getAction().getAction(), param.getSpeed(), null))
+                    .deviceId(param.getChannelId())
+                    .sn(SipUtil.generateSn())
+                    .build();
+            GBRequest.message(device.toGbDevice())
+                    .newSession()
+                    .execute(cmd);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            PtzCmd stop = PtzCmd.builder()
+                    .ptzCmd(PtzCmd.PtzControl.getPTZCmd(PtzCmd.PtzControl.PTZType.STOP, 5, null))
+                    .deviceId(param.getChannelId())
+                    .sn(SipUtil.generateSn())
+                    .build();
+            GBRequest.message(device.toGbDevice())
+                    .newSession()
+                    .execute(stop);
+            redisUtil.del(redisKey);
+        });
         return true;
     }
 
@@ -295,17 +299,17 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
         String redisOptKey = RedisKeyConstants.ptzControl(param.getDeviceId(), param.getChannelId(), param.getSerialNo());
         redisUtil.setEx(redisOptKey, param.getAction().getAction(),Duration.ofMillis(10000));
 
-//        executor.execute(() -> {
-//            Device device = getByDeviceId(param.getDeviceId()).orElseThrow(() -> new BizException("设备不存在或被禁用！"));
-//            PtzCmd cmd = PtzCmd.builder()
-//                    .ptzCmd(PtzCmd.PtzControl.getPTZCmd(param.getAction().getAction(), param.getSpeed(), null))
-//                    .deviceId(param.getChannelId())
-//                    .sn(SipUtil.generateSn())
-//                    .build();
-//            GBRequest.message(device.toGbDevice())
-//                    .newSession()
-//                    .execute(cmd);
-//        });
+        executor.execute(() -> {
+            Device device = getByDeviceId(param.getDeviceId()).orElseThrow(() -> new BizException("设备不存在或被禁用！"));
+            PtzCmd cmd = PtzCmd.builder()
+                    .ptzCmd(PtzCmd.PtzControl.getPTZCmd(param.getAction().getAction(), param.getSpeed(), null))
+                    .deviceId(param.getChannelId())
+                    .sn(SipUtil.generateSn())
+                    .build();
+            GBRequest.message(device.toGbDevice())
+                    .newSession()
+                    .execute(cmd);
+        });
         return true;
     }
 
@@ -317,19 +321,19 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
         if (!redisUtil.exists(redisOptKey)) {
             return false;
         }
-//        executor.execute(() -> {
-//            Device device = getByDeviceId(param.getDeviceId()).orElseThrow(() -> new BizException("设备不存在或被禁用！"));
-//            PtzCmd cmd = PtzCmd.builder()
-//                    .ptzCmd(PtzCmd.PtzControl.getPTZCmd(PtzCmd.PtzControl.PTZType.STOP, 5, null))
-//                    .deviceId(param.getChannelId())
-//                    .sn(SipUtil.generateSn())
-//                    .build();
-//            GBRequest.message(device.toGbDevice())
-//                    .newSession()
-//                    .execute(cmd);
-//            redisUtil.del(RedisKeyConstants.ptzControl(param.getDeviceId(), param.getChannelId()));
-//            redisUtil.del(redisOptKey);
-//        });
+        executor.execute(() -> {
+            Device device = getByDeviceId(param.getDeviceId()).orElseThrow(() -> new BizException("设备不存在或被禁用！"));
+            PtzCmd cmd = PtzCmd.builder()
+                    .ptzCmd(PtzCmd.PtzControl.getPTZCmd(PtzCmd.PtzControl.PTZType.STOP, 5, null))
+                    .deviceId(param.getChannelId())
+                    .sn(SipUtil.generateSn())
+                    .build();
+            GBRequest.message(device.toGbDevice())
+                    .newSession()
+                    .execute(cmd);
+            redisUtil.del(RedisKeyConstants.ptzControl(param.getDeviceId(), param.getChannelId()));
+            redisUtil.del(redisOptKey);
+        });
         return true;
     }
 
@@ -386,9 +390,8 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
 
     public void updateDeviceStatus(Device device, DeviceChannel channel, String rtspUrl, Boolean enableAudio) {
         if(device.getProtocolType() == ProtocolTypeEnum.PULL){
-            String streamId = devicePlayService.streamId(InviteTypeEnum.PullStream, channel.getId().toString());
-//            Boolean online = devicePlayService.addPullStream(rtspUrl, streamId, TransportTypeEnum.parse(device.getTransport()), enableAudio);
-            Boolean online = true;
+            String streamId = StreamFactory.streamId(InviteTypeEnum.PullStream, channel.getId().toString());
+            Boolean online = mediaUrlService.addPullStream(rtspUrl, streamId, TransportTypeEnum.parse(device.getTransport()), enableAudio);
             device.setEnable(true);
             device.setOnline(online);
             if(online){
@@ -408,7 +411,7 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-//                    deviceSnapService.updateDeviceSnap(device, channel);
+                    deviceSnapService.updateDeviceSnap(device, channel);
                 }
             });
         }

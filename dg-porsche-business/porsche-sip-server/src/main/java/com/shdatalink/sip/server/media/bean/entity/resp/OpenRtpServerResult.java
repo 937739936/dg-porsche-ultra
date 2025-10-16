@@ -4,18 +4,10 @@ import lombok.Data;
 
 
 @Data
-public class OpenRtpServerResult {
+public class OpenRtpServerResult extends MediaServerResponse<Void> {
 
     /**
      * 端口
      */
     private int port;
-
-    /**
-     * 状态码
-     */
-    private int code;
-
-    private String msg;
-
 }

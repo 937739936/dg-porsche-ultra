@@ -7,9 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shdatalink.framework.common.utils.QuarkusUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * JSON 工具类
@@ -101,4 +100,43 @@ public class JsonUtil {
         }
     }
 
+    /**
+     * 将字符串转为 List<Enum>
+     *
+     * @param input   JSON数组字符串，如 ["EQUIPMENT_ALARM","DEVICE_ERROR"]
+     * @param enumCls 枚举类型的Class
+     * @param <E>     枚举类型
+     * @return List<E> 枚举列表
+     */
+    public static <E extends Enum<E>> List<E> stringToEnumList(String input, Class<E> enumCls) {
+        if (input == null || input.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        try {
+            // 先解析成字符串列表
+            List<String> strList = getObjectMapper().readValue(input, new TypeReference<>() {
+            });
+
+            return strList.stream()
+                    .map(s -> normalizeAndConvert(s, enumCls)) // 转换为枚举
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            throw new IllegalArgumentException("无法解析字符串为枚举列表: " + input, e);
+        }
+    }
+
+    /**
+     * 容错转换：忽略大小写、空格、下划线
+     */
+    private static  <E extends Enum<E>> E normalizeAndConvert(String value, Class<E> enumCls) {
+        if (value == null) {
+            return null;
+        }
+        String normalized = value.trim()
+                .toUpperCase(Locale.ROOT)
+                .replace(" ", "_");
+        return Enum.valueOf(enumCls, normalized);
+    }
 }
