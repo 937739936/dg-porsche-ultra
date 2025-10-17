@@ -8,6 +8,7 @@ import com.shdatalink.sip.server.gb28181.core.process.method.AbstractSipRequestP
 import com.shdatalink.sip.server.module.alarmplan.service.SubscribeService;
 import com.shdatalink.sip.server.utils.XmlUtil;
 import gov.nist.javax.sip.message.SIPResponse;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
@@ -18,6 +19,7 @@ import javax.sip.ResponseEvent;
 import javax.sip.header.ExpiresHeader;
 import javax.sip.message.Response;
 
+@Startup
 @Slf4j
 @SipEvent(SipEnum.Method.SUBSCRIBE)
 @ApplicationScoped

@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,19 +27,19 @@ public class MediaService {
     SipConfigProperties sipConfigProperties;
 
     public List<MediaListResult> listMedia() {
-        MediaServerResponse<List<MediaListResult>> mediaList = mediaHttpClient.getMediaList(new MediaReq());
-        if (mediaList.getCode() != null) {
+        return listMedia(null);
+    }
+
+    public List<MediaListResult> listMedia(String stream) {
+        MediaServerResponse<List<MediaListResult>> mediaList = mediaHttpClient.getMediaList(new MediaReq(stream));
+        if (mediaList.getCode() != 0) {
             throw new BizException("查询媒体列表失败, code=" + mediaList.getCode());
         }
-        return mediaList.getData();
+        return mediaList.getData() == null ? new ArrayList<>() : mediaList.getData();
     }
 
     public boolean mediaExists(String stream) {
-        MediaServerResponse<List<MediaListResult>> mediaList = mediaHttpClient.getMediaList(new MediaReq(stream));
-        if (mediaList.getCode() != null) {
-            throw new BizException("查询媒体列表失败, code=" + mediaList.getCode());
-        }
-        return mediaList.getData()
+        return listMedia()
                 .stream()
                 .anyMatch(item -> {
                     if (item == null) {
@@ -50,7 +51,7 @@ public class MediaService {
 
     public boolean streamReaderExists(String stream) {
         MediaServerResponse<List<MediaListResult>> mediaList = mediaHttpClient.getMediaList(new MediaReq(stream));
-        if (mediaList.getCode() != null) {
+        if (mediaList.getCode() != 0) {
             throw new BizException("查询媒体列表失败, code=" + mediaList.getCode());
         }
         return mediaList.getData().stream().anyMatch(item -> item.getReaderCount() > 0);
@@ -58,7 +59,7 @@ public class MediaService {
 
     public boolean rtpServerExists(String streamId) {
         MediaServerResponse<List<ListRtpServerResult>> rtpServers = mediaHttpClient.listRtpServer();
-        if (rtpServers.getCode() != null) {
+        if (rtpServers.getCode() != 0) {
             throw new BizException("查询rtp服务列表失败, code=" + rtpServers.getCode());
         }
         return rtpServers.getData() != null && rtpServers.getData().stream().anyMatch(s -> s.getStreamId().equals(streamId));
@@ -104,7 +105,7 @@ public class MediaService {
 
     public List<TcpSessionResult> getAllSessions() {
         MediaServerResponse<List<TcpSessionResult>> allSession = mediaHttpClient.getAllSession(new TcpSessionReq());
-        if (allSession.getCode() != null) {
+        if (allSession.getCode() != 0) {
             throw new BizException("查询媒体列表失败, code=" + allSession.getCode());
         }
         return allSession.getData();

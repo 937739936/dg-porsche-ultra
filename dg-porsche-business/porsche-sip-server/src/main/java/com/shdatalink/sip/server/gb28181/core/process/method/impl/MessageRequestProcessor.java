@@ -17,6 +17,7 @@ import com.shdatalink.sip.server.module.device.service.DeviceService;
 import com.shdatalink.sip.server.utils.SipUtil;
 import com.shdatalink.sip.server.utils.XmlUtil;
 import gov.nist.javax.sip.message.SIPRequest;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
@@ -27,6 +28,7 @@ import javax.sip.ResponseEvent;
 import javax.sip.address.Address;
 import java.util.Optional;
 
+@Startup
 @SipEvent(SipEnum.Method.MESSAGE)
 @ApplicationScoped
 @Slf4j
@@ -77,7 +79,7 @@ public class MessageRequestProcessor extends AbstractSipRequestProcessor {
 
 //            if (!deviceService.updateKeepAliveTime(deviceBase.getDeviceId())) {
 //                log.info("未更新keepAliveTime「{}」", deviceBase.getCmdType());
-//                SipBuilder.buildResponse(Response.BAD_REQUEST, request).execute();
+//                ResponseBuilder.of(event).forbidden().execute();
 //                return;
 //            }
 //            log.info("回复请求「{}」OK", deviceBase.getCmdType());

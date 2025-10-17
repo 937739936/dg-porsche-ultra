@@ -21,7 +21,8 @@ public class MediaHostRewriteFilter implements ClientRequestFilter {
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
         URI oldUri = requestContext.getUri();
-        URI newUri = UriBuilder.fromUri(oldUri)
+        URI newUri = UriBuilder.fromUri(oldUri.getPath())
+                .scheme(oldUri.getScheme())
                 .host(sipConfigProperties.media().ip())
                 .port(sipConfigProperties.media().port())
                 .build();

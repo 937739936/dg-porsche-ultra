@@ -3,12 +3,14 @@ package com.shdatalink.sip.server.gb28181.core.process.method.impl;
 import com.shdatalink.sip.server.gb28181.core.bean.annotations.SipEvent;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.SipEnum;
 import com.shdatalink.sip.server.gb28181.core.process.method.AbstractSipRequestProcessor;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
 
+@Startup
 @Slf4j
 @SipEvent(SipEnum.Method.INFO)
 @ApplicationScoped

@@ -7,6 +7,7 @@ import com.shdatalink.sip.server.gb28181.core.process.method.AbstractSipRequestP
 import com.shdatalink.sip.server.gb28181.core.sdp.GB28181Description;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +17,7 @@ import javax.sip.ResponseEvent;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
+@Startup
 @Slf4j
 @SipEvent(SipEnum.Method.INVITE)
 @ApplicationScoped

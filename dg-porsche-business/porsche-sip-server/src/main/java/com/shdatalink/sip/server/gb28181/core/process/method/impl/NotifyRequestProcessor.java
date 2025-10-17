@@ -14,6 +14,7 @@ import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.utils.SipUtil;
 import com.shdatalink.sip.server.utils.XmlUtil;
 import gov.nist.javax.sip.message.SIPRequest;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
 
+@Startup
 @Slf4j
 @SipEvent(SipEnum.Method.NOTIFY)
 @ApplicationScoped
