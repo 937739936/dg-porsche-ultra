@@ -1,9 +1,8 @@
 package com.shdatalink.sip.server.gb28181.core.builder;
 
-import org.ehcache.impl.internal.concurrent.ConcurrentHashMap;
-
 import javax.sip.Dialog;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DialogHolder {
     private static final Map<String, Dialog> dialogMap = new ConcurrentHashMap<>();
