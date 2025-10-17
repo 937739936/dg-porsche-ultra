@@ -3,6 +3,7 @@ package com.shdatalink.sip.server.module;
 import com.shdatalink.excel.annotation.ExcelProperty;
 import com.shdatalink.excel.utils.ExcelUtil;
 import com.shdatalink.framework.common.annotation.CheckPermission;
+import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.framework.common.enums.CheckPermissionMode;
 import com.shdatalink.sip.server.module.user.convert.UserConvert;
 import com.shdatalink.sip.server.module.user.entity.User;
@@ -33,6 +34,11 @@ public class ExampleResource {
     @Inject
     UserConvert userConvert;
 
+    @Path("/testReturn")
+    @GET
+    public Integer testReturn() {
+        return null;
+    }
 
 
 //    @Path("/getDict")

@@ -1,53 +1,53 @@
 package com.shdatalink.web.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.framework.common.model.ResultWrapper;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.ext.MessageBodyWriter;
+import com.shdatalink.json.utils.JsonUtil;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.Provider;
 
+import java.lang.reflect.Method;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
-/**
- * Controller返回值统一处理
- */
 @Provider
-@Produces(MediaType.APPLICATION_JSON)
-public class ControllerReturnValueHandler implements MessageBodyWriter<Object> {
+public class ControllerReturnValueHandler implements ContainerResponseFilter {
 
-    @Inject
-    ObjectMapper objectMapper;
-
+    // 注入 JAX-RS 标准的 ResourceInfo，获取当前请求的方法和类信息
+    @Context
+    private ResourceInfo resourceInfo;
 
     @Override
-    public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        if (annotations != null) {
-            // 检查是否有忽略包装的注解
-            for (Annotation annotation : annotations) {
-                if (annotation instanceof IgnoredResultWrapper) {
-                    return false;
-                }
-            }
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
+        // 1. 判断当前请求的方法或类是否标注了 @IgnoredResultWrapper,存在注解，直接返回原始响应
+        if (isSkip()) {
+            return;
         }
-        // 已经是ResultWrapper不处理
-        return !(ResultWrapper.class.isAssignableFrom(aClass));
+
+        // 2. 无注解则执行统一包装
+        Object entity = responseContext.getEntity();
+        if (!(entity instanceof ResultWrapper)) {
+            responseContext.setEntity(JsonUtil.toJsonString(ResultWrapper.success(entity)));
+        }
     }
 
-    @Override
-    public void writeTo(Object o, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> multivaluedMap, OutputStream outputStream) throws IOException, WebApplicationException {
-        // 包装返回结果
-        ResultWrapper<Object> wrappedResult = ResultWrapper.success(o);
+    /**
+     * 基于 JAX-RS 标准的 ResourceInfo 判断是否需要跳过包装
+     */
+    private boolean isSkip() {
+        // 获取当前请求的方法
+        Method method = resourceInfo.getResourceMethod();
+        // 检查方法是否标注了 @SkipUnifiedResponse
+        if (method != null && method.isAnnotationPresent(IgnoredResultWrapper.class)) {
+            return true;
+        }
 
-        // 序列化为JSON并写入响应流
-        objectMapper.writeValue(outputStream, wrappedResult);
+        // 获取当前请求的类
+        Class<?> resourceClass = resourceInfo.getResourceClass();
+        // 检查类是否标注了 @SkipUnifiedResponse
+        return resourceClass != null && resourceClass.isAnnotationPresent(IgnoredResultWrapper.class);
     }
 }
