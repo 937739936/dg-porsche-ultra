@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.ws.rs.*;
 import lombok.Data;
+import org.jboss.resteasy.reactive.RestQuery;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -44,7 +45,7 @@ public class ContractResource {
 
     @DELETE
     @Path("/delete")
-    public void delete(@QueryParam("id") Long id) {
+    public void delete(@RestQuery("id") Long id) {
         contractService.remove(null);
     }
 
