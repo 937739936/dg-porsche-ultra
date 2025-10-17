@@ -1,6 +1,7 @@
 package com.shdatalink.sip.server.module.alarmplan.vo;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.QueryParam;
 import lombok.Data;
 
 import java.util.List;
@@ -11,10 +12,12 @@ public class AlarmPlanChannelSaveReq {
      * 报警预案id
      */
     @NotNull(message = "报警预案id不能为空")
+    @QueryParam("planId")
     private Integer planId;
     /**
      * 通道id
      */
+    @QueryParam("channelIds")
     private List<String> channelIds;
 
 }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.server.common.dto.PageParam;
+import com.shdatalink.sip.server.common.dto.PageParamWithGet;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.AlarmSubscribe;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.module.alarmplan.entity.AlarmPlan;
@@ -65,7 +66,7 @@ public class AlarmPlanService extends ServiceImpl<AlarmPlanMapper, AlarmPlan> {
         }
     }
 
-    public IPage<AlarmPlan> getPage(PageParam pageParam) {
+    public IPage<AlarmPlan> getPage(PageParamWithGet pageParam) {
         return page(new Page<>(pageParam.getPage(), pageParam.getPageSize()));
     }
 

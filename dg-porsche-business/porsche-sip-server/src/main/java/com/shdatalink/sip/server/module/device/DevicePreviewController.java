@@ -2,10 +2,12 @@ package com.shdatalink.sip.server.module.device;
 
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
+import com.shdatalink.sip.server.module.device.service.DeviceSnapService;
 import com.shdatalink.sip.server.module.device.service.UserScreenService;
 import com.shdatalink.sip.server.module.device.vo.*;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.ws.rs.*;
 
 
@@ -24,6 +26,8 @@ public class DevicePreviewController {
     UserScreenService userScreenService;
     @Inject
     DeviceChannelService deviceChannelService;
+    @Inject
+    DeviceSnapService deviceSnapService;
 
     /**
      * 设备列表树
@@ -41,7 +45,7 @@ public class DevicePreviewController {
      */
     @GET
     @Path("channelList")
-    public List<PreviewDeviceChannel> channelList(@QueryParam("deviceId") String deviceId) {
+    public List<PreviewDeviceChannel> channelList(@QueryParam("deviceId") @NotBlank String deviceId) {
         return deviceService.previewChannels(deviceId);
     }
 
@@ -52,9 +56,8 @@ public class DevicePreviewController {
      */
     @GET
     @Path("info")
-    public DevicePreviewInfoVO info(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) {
-//        return deviceChannelService.info(deviceId, channelId);
-        return null;
+    public DevicePreviewInfoVO info(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("channelId") @NotBlank String channelId) {
+        return deviceChannelService.info(deviceId, channelId);
     }
 
     /**
@@ -64,9 +67,8 @@ public class DevicePreviewController {
      */
     @GET
     @Path("snapshot")
-    public DevicePreviewSnapshot getSnapshot(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) throws IOException {
-//        return deviceChannelService.snapShot(deviceId, channelId);
-        return null;
+    public DevicePreviewSnapshot getSnapshot(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("channelId") @NotBlank String channelId) throws IOException {
+        return deviceSnapService.querySnapshot(deviceId, channelId);
     }
 
     /**
@@ -76,9 +78,8 @@ public class DevicePreviewController {
      */
     @GET
     @Path("realTimeSnap")
-    public DevicePreviewSnapshot realTimeSnap(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) throws IOException {
-//        return deviceChannelService.realTimeSnap(deviceId, channelId);
-        return null;
+    public DevicePreviewSnapshot realTimeSnap(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("channelId") @NotBlank String channelId) throws IOException {
+        return deviceSnapService.realTimeSnap(deviceId, channelId);
     }
 
     /**
@@ -88,7 +89,7 @@ public class DevicePreviewController {
      */
     @GET
     @Path("getPreset")
-    public DevicePreviewPresetVO getPreset(@QueryParam("id") Integer id) {
+    public DevicePreviewPresetVO getPreset(@QueryParam("id") @NotBlank Integer id) {
         return userScreenService.getDetail(id);
     }
 
@@ -121,7 +122,7 @@ public class DevicePreviewController {
      */
     @DELETE
     @Path("presetDelete")
-    public boolean deletePreset(@QueryParam("id") Integer id) {
+    public boolean deletePreset(@QueryParam("id") @NotBlank Integer id) {
         return userScreenService.delete(id);
     }
 

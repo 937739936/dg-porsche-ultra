@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper">
+
+    <select id="getBaseChannelInfo"
+            resultType="com.shdatalink.sip.server.module.pushstream.dto.ChannelBaseInfoDTO">
+        select tdc.id,
+               tdc.device_id,
+               tdc.channel_id,
+               tdc.online,
+               td.stream_url,
+               td.protocol_type from t_device_channel tdc
+                 left join t_device td on tdc.device_id = td.device_id
+                 where tdc.online = 1
+                   and tdc.id = #{id}
+    </select>
+</mapper>

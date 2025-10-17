@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shdatalink.framework.common.service.EventPublisher;
 import com.shdatalink.sip.server.common.dto.PageParam;
+import com.shdatalink.sip.server.common.dto.PageParamWithGet;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
@@ -53,7 +54,7 @@ public class VideoRecordDeviceService extends ServiceImpl<VideoRecordDeviceMappe
         publisher.fireAfterCommit(new PlanModifyEvent());
     }
 
-    public IPage<VideoRecordDevicePage> getPage(PageParam param) {
+    public IPage<VideoRecordDevicePage> getPage(PageParamWithGet param) {
         Page<VideoRecordDevice> page = baseMapper.selectPage(
                 param.toPage(),
                 new LambdaQueryWrapper<VideoRecordDevice>()

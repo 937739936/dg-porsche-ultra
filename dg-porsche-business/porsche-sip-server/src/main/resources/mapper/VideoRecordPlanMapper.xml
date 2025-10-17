@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shdatalink.sip.server.module.plan.mapper.VideoRecordPlanMapper">
+
+    <select id="selectDeviceByWeekDayAndFlag"
+            resultType="com.shdatalink.sip.server.module.plan.entity.VideoRecordDevice">
+        select *
+        from t_video_record_device
+        where device_id = #{deviceId}
+          and channel_id = #{channelId}
+          and plan_id in (select id from t_video_record_plan where ${weekDay} &amp; #{flag} != 0 and enabled = 1)
+    </select>
+</mapper>

@@ -16,6 +16,8 @@ import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -139,7 +141,7 @@ public class DeviceController {
      */
     @GET
     @Path("playUrl")
-    public DevicePreviewPlayVO playUrl(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) {
+    public DevicePreviewPlayVO playUrl(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("channelId") @NotBlank String channelId) {
         Device device = deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备'" + deviceId + "'不存在"));
         DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
         if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
@@ -159,14 +161,13 @@ public class DeviceController {
      */
     @GET
     @Path("channel/refresh")
-    public Integer channelRefresh(@QueryParam("deviceId") String deviceId) {
+    public Integer channelRefresh(@QueryParam("deviceId") @NotBlank String deviceId) {
         Device device = deviceService.getByDeviceId(deviceId)
                 .orElseThrow(() -> new BizException("设备'" + deviceId + "'不存在"));
         if(device.getProtocolType() == ProtocolTypeEnum.PULL || device.getProtocolType() == ProtocolTypeEnum.RTMP){
             throw new BizException("该协议类型设备不支持刷新通道");
         }
-//        return deviceChannelService.renewalChannel(deviceId);
-        return null;
+        return deviceChannelService.renewalChannel(deviceId);
     }
 
     /**
@@ -215,7 +216,7 @@ public class DeviceController {
      */
     @GET
     @Path("switchEnable")
-    public boolean switchEnable(@QueryParam("deviceId") String deviceId, @QueryParam("enable") Boolean enable) {
+    public boolean switchEnable(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("enable") @NotNull Boolean enable) {
         return deviceService.switchEnable(deviceId, enable);
     }
 
@@ -226,7 +227,7 @@ public class DeviceController {
      */
     @DELETE
     @Path("delete")
-    public boolean delete(@QueryParam("deviceId") String deviceId) {
+    public boolean delete(@QueryParam("deviceId") @NotBlank String deviceId) {
         return deviceService.delete(deviceId);
     }
 
@@ -238,7 +239,7 @@ public class DeviceController {
      */
     @DELETE
     @Path("channel/delete")
-    public boolean deleteChannel(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) {
+    public boolean deleteChannel(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("channelId") @NotBlank String channelId) {
         return deviceChannelService.delete(deviceId, channelId);
     }
 
@@ -250,7 +251,7 @@ public class DeviceController {
      */
     @GET
     @Path("queryName")
-    public DeviceNameVO queryName(@QueryParam("deviceId") String deviceId, @QueryParam("channelId") String channelId) {
+    public DeviceNameVO queryName(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("channelId") @NotBlank String channelId) {
         DeviceNameVO vo = new DeviceNameVO();
         vo.setDeviceName(deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备不存在")).getName());
         if (StringUtils.isNotBlank(channelId)) {

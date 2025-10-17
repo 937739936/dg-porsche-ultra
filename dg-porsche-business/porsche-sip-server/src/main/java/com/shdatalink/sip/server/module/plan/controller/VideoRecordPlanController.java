@@ -8,6 +8,7 @@ import com.shdatalink.sip.server.module.plan.vo.VideoRecordPlanPage;
 import com.shdatalink.sip.server.module.plan.vo.VideoRecordPlanSaveParam;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import lombok.RequiredArgsConstructor;
 
@@ -39,7 +40,7 @@ public class VideoRecordPlanController {
      */
     @Path("enableSwitch")
     @GET
-    public boolean enableSwitch(@QueryParam("id") Integer id, @QueryParam("enabled") Boolean enabled) {
+    public boolean enableSwitch(@QueryParam("id") @NotNull Integer id, @QueryParam("enabled") @NotNull Boolean enabled) {
         return videoRecordPlanService.enableSwitch(id, enabled);
     }
 
@@ -50,7 +51,7 @@ public class VideoRecordPlanController {
      */
     @Path("delete")
     @DELETE
-    public boolean delete(@QueryParam("id") Integer id) {
+    public boolean delete(@QueryParam("id") @NotNull Integer id) {
         return videoRecordPlanService.removeById(id);
     }
 
@@ -68,7 +69,7 @@ public class VideoRecordPlanController {
      */
     @Path("detail")
     @GET
-    public VideoRecordPlanDetailVO detail(@QueryParam("id") Integer id) {
+    public VideoRecordPlanDetailVO detail(@QueryParam("id") @NotNull Integer id) {
         return videoRecordPlanService.detail(id);
     }
 }
