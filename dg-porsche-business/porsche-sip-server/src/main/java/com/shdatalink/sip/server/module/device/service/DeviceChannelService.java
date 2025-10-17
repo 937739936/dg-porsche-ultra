@@ -97,7 +97,7 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
                         if (channel.getRegisterTime() == null) {
                             channel.setRegisterTime(LocalDateTime.now());
                             channel.setName(deviceCatalogItem.getName());
-                            publisher.fire(new ChannelUpdateEvent(channel, ChannelUpdateEvent.Type.New));
+                            publisher.fireAsync(new ChannelUpdateEvent(channel, ChannelUpdateEvent.Type.New));
                         }
                         if (channel.getPtzType() == null && deviceCatalogItem.getInfo() != null) {
                             channel.setPtzType(PtzTypeEnum.getByIdentifier(deviceCatalogItem.getInfo().getPTZType()));
@@ -105,7 +105,7 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
                         boolean online = "ON".equals(deviceCatalogItem.getStatus());
                         channel.setOnline(online);
                         if (online != channel.getOnline()) {
-                            publisher.fire(new DeviceOnlineEvent(deviceId, deviceCatalogItem.getDeviceId(), online));
+                            publisher.fireAsync(new DeviceOnlineEvent(deviceId, deviceCatalogItem.getDeviceId(), online));
                         }
                         updateById(channel);
                         updateOnline(channel.getId(), online);
@@ -121,7 +121,7 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
                     }
                     if (item.getOnline()) {
                         updateOnline(item.getId(), false);
-                        publisher.fire(new DeviceOnlineEvent(deviceId, item.getChannelId(), false));
+                        publisher.fireAsync(new DeviceOnlineEvent(deviceId, item.getChannelId(), false));
                     }
                 });
         return deviceCatalog.getSumNum();
