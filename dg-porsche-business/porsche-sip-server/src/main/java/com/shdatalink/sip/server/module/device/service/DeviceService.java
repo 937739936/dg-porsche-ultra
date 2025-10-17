@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.shdatalink.excel.utils.ExcelUtil;
+//import com.shdatalink.excel.utils.ExcelUtil;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.redis.utils.RedisUtil;
 import com.shdatalink.sip.server.common.constants.RedisKeyConstants;
@@ -54,7 +54,9 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.device.service.DeviceService",
         targets = {SerializedLambda.class, SFunction.class},
@@ -477,7 +479,8 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
 
     public List<String> importDevice(File file) throws IOException {
         FileInputStream fileInputStream = new FileInputStream(file);
-        List<DeviceImportVO> rows = ExcelUtil.importExcel(fileInputStream, DeviceImportVO.class);
+//        List<DeviceImportVO> rows = ExcelUtil.importExcel(fileInputStream, DeviceImportVO.class);
+        List<DeviceImportVO> rows = new ArrayList<>();
         if (rows.isEmpty()) {
             throw new BizException("文件为空，请填写文件内容");
         }

@@ -1,7 +1,6 @@
 package com.shdatalink.sip.server.utils;
 
 import com.shdatalink.framework.common.utils.QuarkusUtil;
-import org.ehcache.impl.internal.concurrent.ConcurrentHashMap;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
