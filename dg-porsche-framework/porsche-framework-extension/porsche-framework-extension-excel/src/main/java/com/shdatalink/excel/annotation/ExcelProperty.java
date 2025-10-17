@@ -1,26 +1,30 @@
 package com.shdatalink.excel.annotation;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.lang.annotation.*;
-
-
-@Target({ElementType.FIELD})
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExcelProperty {
+    /**
+     * 列名
+     */
+    String value();
 
     /**
-     * Excel表头名称
+     * 列顺序
      */
-    String name();
+    int order() default 0;
 
     /**
-     * 列索引（从0开始）
+     * 日期格式，对日期类型字段有效
      */
-    int index();
+    String dateFormat() default "yyyy-MM-dd HH:mm:ss";
 
     /**
-     * 日期格式（如果字段是日期类型，指定格式如：yyyy-MM-dd）
+     * 单元格宽度，-1表示不设置
      */
-    String dateFormat() default "";
-
+    int width() default -1;
 }

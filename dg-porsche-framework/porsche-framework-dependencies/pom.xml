@@ -29,6 +29,7 @@
         <jwt.version>4.5.0</jwt.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <quarkus.poi.version>2.1.4</quarkus.poi.version>
+        <poi.version>4.1.2</poi.version>
     </properties>
 
     <dependencyManagement>
@@ -113,6 +114,7 @@
                 <artifactId>quarkus-poi</artifactId>
                 <version>${quarkus.poi.version}</version>
             </dependency>
+
             <!--其他第三方依赖-->
             <dependency>
                 <groupId>org.projectlombok</groupId>

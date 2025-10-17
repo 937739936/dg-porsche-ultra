@@ -16,10 +16,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-arc</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.quarkiverse.poi</groupId>
             <artifactId>quarkus-poi</artifactId>
         </dependency>

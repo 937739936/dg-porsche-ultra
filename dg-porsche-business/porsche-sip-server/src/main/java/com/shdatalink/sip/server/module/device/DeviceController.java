@@ -112,7 +112,7 @@ public class DeviceController {
     @CheckPermission("device:import")
     @POST
     @Path("importDevice")
-    public List<String> importDevice(@RestForm File file) throws IOException {
+    public List<String> importDevice(@RestForm File file) throws Exception {
         return deviceService.importDevice(file);
     }
 
