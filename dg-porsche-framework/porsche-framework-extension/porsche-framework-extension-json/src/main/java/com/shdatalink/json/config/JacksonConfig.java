@@ -1,4 +1,4 @@
-package com.shdatalink.config;
+package com.shdatalink.json.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
-import com.shdatalink.config.handler.BigNumberSerializer;
+import com.shdatalink.json.config.handler.BigNumberSerializer;
 import io.quarkus.jackson.ObjectMapperCustomizer;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;

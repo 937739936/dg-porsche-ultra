@@ -1,6 +1,7 @@
 package com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.enums;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.stream.Stream;
 
@@ -94,7 +95,7 @@ public enum CmdType {
      * @return {@link CmdType}
      */
     public static CmdType resolve(String cmd) {
-        return Stream.of(CmdType.values()).filter(item -> StringUtils.equalsIgnoreCase(item.name(), cmd)).findFirst().orElse(null);
+        return Stream.of(CmdType.values()).filter(item -> Strings.CI.equals(item.name(), cmd)).findFirst().orElse(null);
     }
 
 }

@@ -5,10 +5,8 @@ import com.shdatalink.sip.server.media.bean.entity.req.*;
 import com.shdatalink.sip.server.media.bean.entity.resp.*;
 import com.shdatalink.sip.server.media.interceptor.MediaHostRewriteFilter;
 import com.shdatalink.sip.server.media.interceptor.MediaHttpRequestHeadersFactory;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import com.shdatalink.sip.server.media.interceptor.MediaHttpRequestLogger;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
@@ -22,6 +20,7 @@ import java.util.List;
 @RegisterClientHeaders(MediaHttpRequestHeadersFactory.class)
 @RegisterProvider(MediaHostRewriteFilter.class)
 @RegisterProvider(MediaHttpRequestHeadersFactory.class)
+@RegisterProvider(MediaHttpRequestLogger.class)
 public interface MediaHttpClient {
 
     /**
@@ -39,6 +38,7 @@ public interface MediaHttpClient {
     @POST
     @Path("/openRtpServer")
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     OpenRtpServerResult openRtpServer(OpenRtpServerReq openRtpServerReq);
 
     /**

@@ -6,10 +6,12 @@ import com.shdatalink.sip.server.module.pushstream.service.PushStreamService;
 import com.shdatalink.sip.server.module.pushstream.vo.PushStreamPageResp;
 import com.shdatalink.sip.server.module.pushstream.vo.PushStreamResp;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.resteasy.reactive.RestQuery;
 
 import java.util.List;
 
@@ -27,7 +29,7 @@ public class PushStreamController {
      */
     @Path("page")
     @GET
-    public IPage<PushStreamPageResp> page(@RestQuery Integer page, @RestQuery Integer pageSize) {
+    public IPage<PushStreamPageResp> page(@QueryParam("page") @DefaultValue("1") Integer page, @QueryParam("pageSize") @DefaultValue("10") Integer pageSize) {
         return pushStreamService.page(page, pageSize);
     }
 
@@ -36,7 +38,7 @@ public class PushStreamController {
      */
     @Path("detail")
     @GET
-    public List<PushStreamResp> detail(@RestQuery String streamId) {
+    public List<PushStreamResp> detail(@QueryParam("streamId") @NotBlank String streamId) {
         if (StringUtils.isBlank(streamId)) {
             return List.of();
         }
@@ -48,7 +50,7 @@ public class PushStreamController {
      */
     @Path("closeStream")
     @GET
-    public Boolean closeStream(@RestQuery String streamId) {
+    public Boolean closeStream(@QueryParam("streamId") @NotBlank String streamId) {
         if (StringUtils.isBlank(streamId)) {
             return false;
         }

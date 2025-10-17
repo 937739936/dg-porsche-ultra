@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import org.jboss.resteasy.reactive.RestQuery;
+import jakarta.ws.rs.QueryParam;
 
 /**
  * 订阅管理
@@ -24,7 +24,7 @@ public class SubscribeController {
      */
     @Path("info")
     @GET
-    public SubscribeResp info(@RestQuery String deviceId){
+    public SubscribeResp info(@QueryParam("deviceId") String deviceId){
         return subscribeService.info(deviceId);
     }
 

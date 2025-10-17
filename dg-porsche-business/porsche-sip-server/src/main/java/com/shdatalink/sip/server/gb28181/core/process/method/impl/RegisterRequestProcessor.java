@@ -16,6 +16,7 @@ import com.shdatalink.sip.server.utils.DigestAuthenticationUtil;
 import com.shdatalink.sip.server.utils.SipUtil;
 import gov.nist.javax.sip.header.Authorization;
 import gov.nist.javax.sip.message.SIPRequest;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import javax.sip.header.WWWAuthenticateHeader;
 
 import static com.shdatalink.sip.server.gb28181.core.bean.constants.SipConstant.REGISTER_DIGEST_MD5_ALGORITHM;
 
+@Startup
 @SipEvent(SipEnum.Method.REGISTER)
 @ApplicationScoped
 public class RegisterRequestProcessor extends AbstractSipRequestProcessor {

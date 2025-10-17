@@ -105,7 +105,7 @@ public class StreamChangedReq {
         @JsonProperty("frames")
         private Integer frames;
         @JsonProperty("loss")
-        private Integer loss;
+        private Float loss;
         @JsonProperty("ready")
         private Boolean ready;
         @JsonProperty("sample_bit")

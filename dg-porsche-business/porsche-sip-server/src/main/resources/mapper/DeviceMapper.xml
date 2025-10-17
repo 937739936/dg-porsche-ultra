@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shdatalink.sip.server.module.device.mapper.DeviceMapper">
+
+    <select id="getPage" resultType="com.shdatalink.sip.server.module.device.entity.Device">
+        select *
+        from t_device td
+        where 1=1
+        <if test="param.protocolType != null">
+            and td.protocol_type = #{param.protocolType}
+        </if>
+        <if test="param.keyword != null and param.keyword != ''">
+            and td.name like concat('%', #{param.keyword}, '%')
+        </if>
+        <if test="param.manufacturer != null">
+            and td.manufacturer = #{param.manufacturer}
+        </if>
+        <if test="param.online != null">
+            and td.online = #{param.online}
+        </if>
+    </select>
+
+    <select id="selectByDeviceIdList" resultType="com.shdatalink.sip.server.module.device.entity.Device">
+        select *
+        from t_device
+        where device_id in
+        <foreach collection="deviceId" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

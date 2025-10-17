@@ -2,6 +2,7 @@ package com.shdatalink.sip.server.module.plan.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.shdatalink.sip.server.common.dto.PageParam;
+import com.shdatalink.sip.server.common.dto.PageParamWithGet;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordDeviceService;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordService;
 import com.shdatalink.sip.server.module.plan.vo.VideoDeviceBindList;
@@ -9,6 +10,8 @@ import com.shdatalink.sip.server.module.plan.vo.VideoRecordDevicePage;
 import com.shdatalink.sip.server.module.plan.vo.VideoRecordDeviceParam;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 
 import java.util.List;
@@ -40,7 +43,7 @@ public class VideoRecordDevicesController {
      */
     @Path("bindList")
     @GET
-    public List<VideoDeviceBindList> bindList(@QueryParam("planId") Integer planId) {
+    public List<VideoDeviceBindList> bindList(@QueryParam("planId") @NotNull Integer planId) {
         return videoRecordDeviceService.getBindList(planId);
     }
 
@@ -49,7 +52,7 @@ public class VideoRecordDevicesController {
      */
     @Path("page")
     @GET
-    public IPage<VideoRecordDevicePage> getPage(PageParam param) {
+    public IPage<VideoRecordDevicePage> getPage(PageParamWithGet param) {
         return videoRecordDeviceService.getPage(param);
     }
 
@@ -59,7 +62,7 @@ public class VideoRecordDevicesController {
      */
     @Path("delete")
     @DELETE
-    public boolean delete(@QueryParam("channelId") String channelId) {
+    public boolean delete(@QueryParam("channelId") @NotBlank String channelId) {
         return videoRecordService.deleteByChannelId(channelId);
     }
 }

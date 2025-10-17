@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.json.utils.JsonUtil;
 import com.shdatalink.sip.server.common.dto.PageParam;
+import com.shdatalink.sip.server.common.dto.PageParamWithGet;
 import com.shdatalink.sip.server.module.alarmplan.convert.AlarmPlanConvert;
 import com.shdatalink.sip.server.module.alarmplan.enums.AlarmMethodEnum;
 import com.shdatalink.sip.server.module.alarmplan.enums.AlarmPriorityEnum;
@@ -18,6 +19,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 
 import java.util.List;
 
@@ -28,13 +30,14 @@ import java.util.List;
 public class AlarmPlanController {
 
     @Inject
-   AlarmRecordService alarmRecordService;
+    AlarmRecordService alarmRecordService;
     @Inject
-   AlarmPlanService alarmPlanService;
+    AlarmPlanService alarmPlanService;
     @Inject
-   AlarmPlanChannelRelService alarmPlanChannelRelService;
+    AlarmPlanChannelRelService alarmPlanChannelRelService;
     @Inject
     AlarmPlanConvert alarmPlanConvert;
+
     /**
      * 报警记录列表
      */
@@ -67,7 +70,7 @@ public class AlarmPlanController {
      */
     @Path("plan/page")
     @GET
-    public IPage<AlarmPlanPageResp> planPage(PageParam pageParam) {
+    public IPage<AlarmPlanPageResp> planPage(PageParamWithGet pageParam) {
         return alarmPlanService.getPage(pageParam).convert(item -> {
             AlarmPlanPageResp resp = new AlarmPlanPageResp();
             resp.setId(item.getId());
@@ -88,7 +91,7 @@ public class AlarmPlanController {
      */
     @Path("plan/delete")
     @GET
-    public Boolean deletePlan(Integer planId) {
+    public Boolean deletePlan(@QueryParam("planId") Integer planId) {
         alarmPlanService.delete(planId);
         return true;
     }
@@ -98,7 +101,7 @@ public class AlarmPlanController {
      */
     @Path("plan/getChannels")
     @GET
-    public List<AlarmPlanChannelResp> getChannels(Integer planId) {
+    public List<AlarmPlanChannelResp> getChannels(@QueryParam("planId") Integer planId) {
         return alarmPlanChannelRelService.getChannels(planId).stream().map(item -> alarmPlanConvert.convert(item)).toList();
     }
 

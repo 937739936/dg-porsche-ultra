@@ -7,18 +7,15 @@ import com.shdatalink.sip.server.module.plan.service.VideoRecordService;
 import com.shdatalink.sip.server.module.plan.vo.VideoRecordTimeLineVO;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import org.jboss.resteasy.reactive.DateFormat;
-import org.jboss.resteasy.reactive.RestHeader;
-import org.jboss.resteasy.reactive.RestPath;
-import org.jboss.resteasy.reactive.RestQuery;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -44,9 +41,10 @@ public class DeviceRecordController {
      */
     @GET
     @Path("timeline")
-    public List<VideoRecordTimeLineVO> timeline(@RestQuery String deviceId, @RestQuery String channelId,
-                                                @RestQuery @DateFormat(pattern = "yyyy-MM-dd") LocalDate date,
-                                                @RestQuery String type) {
+    public List<VideoRecordTimeLineVO> timeline(@QueryParam("deviceId") @NotBlank String deviceId,
+                                                @QueryParam("channelId") @NotBlank String channelId,
+                                                @QueryParam("date") @NotNull LocalDate date,
+                                                @QueryParam("type") @NotBlank String type) {
         if (type.equals("local")) {
             return videoRecordService.timeline(deviceId, channelId, date);
         } else {
@@ -64,7 +62,10 @@ public class DeviceRecordController {
      */
     @Path("speed")
     @GET
-    public boolean setSpeed(@RestQuery String deviceId, @RestQuery String channelId, @RestQuery String ssrc, @RestQuery float speed) {
+    public boolean setSpeed(@QueryParam("deviceId") @NotBlank String deviceId,
+                            @QueryParam("channelId") @NotBlank String channelId,
+                            @QueryParam("ssrc")  @NotBlank String ssrc,
+                            @QueryParam("speed") @NotNull float speed) {
         return videoRecordService.setSpeed(deviceId, channelId, ssrc, speed);
     }
 
@@ -79,10 +80,10 @@ public class DeviceRecordController {
      */
     @Path("playbackUrl")
     @GET
-    public DevicePreviewPlayVO playback(@RestQuery String deviceId,
-                                        @RestQuery String channelId,
-                                        @RestQuery @DateFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                                        @RestQuery String type
+    public DevicePreviewPlayVO playback(@QueryParam("deviceId") @NotBlank String deviceId,
+                                        @QueryParam("channelId") @NotBlank String channelId,
+                                        @QueryParam("start") @NotNull LocalDateTime start,
+                                        @QueryParam("type") @NotBlank String type
     ) throws IOException, InterruptedException {
         if (type.equals("remote")) {
             return videoRecordRemoteService.playback(deviceId, channelId, start);
@@ -103,9 +104,10 @@ public class DeviceRecordController {
     @Path("hls.m3u8")
     @GET
     @Anonymous
-    public Response m3u8(@RestQuery String deviceId, @RestQuery String channelId,
-                         @RestQuery @DateFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                         @RestQuery @DateFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end
+    public Response m3u8(@QueryParam("deviceId") @NotBlank String deviceId,
+                         @QueryParam("channelId") @NotBlank String channelId,
+                         @QueryParam("start") @NotNull LocalDateTime start,
+                         @QueryParam("end") LocalDateTime end
     ) throws IOException, InterruptedException {
         return videoRecordService.m3u8(deviceId, channelId, start, end);
     }
@@ -139,11 +141,11 @@ public class DeviceRecordController {
      */
     @Path("downloadTime")
     @GET
-    public Long downloadTime(@RestQuery String deviceId,
-                             @RestQuery String channelId,
-                             @RestQuery @DateFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                             @RestQuery @DateFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-                             @RestQuery String type) {
+    public Long downloadTime(@QueryParam("deviceId") @NotBlank String deviceId,
+                             @QueryParam("channelId") @NotBlank String channelId,
+                             @QueryParam("start") @NotNull LocalDateTime start,
+                             @QueryParam("end") @NotNull LocalDateTime end,
+                             @QueryParam("type") @NotBlank String type) {
         if (type.equals("remote")) {
             return videoRecordRemoteService.downloadTime(deviceId, channelId, start, end);
         } else {
@@ -163,11 +165,11 @@ public class DeviceRecordController {
      */
     @Path("download")
     @GET
-    public void download(@RestQuery String deviceId,
-                         @RestQuery String channelId,
-                         @RestQuery @DateFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                         @RestQuery @DateFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-                         @RestQuery String type,
+    public void download(@QueryParam("deviceId") @NotBlank String deviceId,
+                         @QueryParam("channelId") @NotBlank String channelId,
+                         @QueryParam("start") @NotNull LocalDateTime start,
+                         @QueryParam("end") @NotNull LocalDateTime end,
+                         @QueryParam("type") @NotBlank String type,
                          RoutingContext context
     ) throws IOException, InterruptedException, TimeoutException, ExecutionException {
         if (type.equals("local")) {
@@ -186,9 +188,9 @@ public class DeviceRecordController {
      */
     @Path("stopDownload")
     @GET
-    public void stopDownload(@RestQuery String deviceId,
-                             @RestQuery String channelId,
-                             @RestQuery String type
+    public void stopDownload(@QueryParam("deviceId") @NotBlank String deviceId,
+                             @QueryParam("channelId") @NotBlank String channelId,
+                             @QueryParam("type") @NotBlank String type
     ) {
         if (type.equals("local")) {
         } else {
