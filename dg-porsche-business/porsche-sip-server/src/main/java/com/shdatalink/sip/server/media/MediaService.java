@@ -11,6 +11,7 @@ import com.shdatalink.sip.server.media.bean.entity.req.TcpSessionReq;
 import com.shdatalink.sip.server.media.bean.entity.resp.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Objects;
 @ApplicationScoped
 public class MediaService {
     @Inject
+    @RestClient
     MediaHttpClient mediaHttpClient;
     @Inject
     SipConfigProperties sipConfigProperties;
@@ -39,7 +41,7 @@ public class MediaService {
         return mediaList.getData()
                 .stream()
                 .anyMatch(item -> {
-                    if(item == null){
+                    if (item == null) {
                         return false;
                     }
                     return Objects.equals(stream, item.getStream());
@@ -69,7 +71,7 @@ public class MediaService {
         req.setStreamId(stream);
         OpenRtpServerResult openRtpServerResult = mediaHttpClient.openRtpServer(req);
         if (openRtpServerResult.getCode() != 0) {
-            throw new BizException("rtp服务开启失败，msg="+openRtpServerResult.getMsg());
+            throw new BizException("rtp服务开启失败，msg=" + openRtpServerResult.getMsg());
         }
         return openRtpServerResult.getPort();
     }

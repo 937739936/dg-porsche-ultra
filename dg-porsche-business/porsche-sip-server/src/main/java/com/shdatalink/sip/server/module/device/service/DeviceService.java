@@ -46,6 +46,7 @@ import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,6 +76,7 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
     @Inject
     RedisUtil redisUtil;
     @Inject
+    @RestClient
     MediaHttpClient mediaHttpClient;
     @Inject
     DeviceSnapService deviceSnapService;

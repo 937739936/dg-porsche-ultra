@@ -36,6 +36,7 @@ import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -60,6 +61,7 @@ public class MediaHookService {
     VideoRecordService videoRecordService;
 
     @Inject
+    @RestClient
     MediaHttpClient mediaHttpClient;
 
     @Inject

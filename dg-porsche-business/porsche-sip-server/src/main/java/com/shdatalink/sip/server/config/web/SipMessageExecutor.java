@@ -9,15 +9,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 
-@ApplicationScoped
+//@ApplicationScoped
 public class SipMessageExecutor {
 
     /**
      * 使用虚拟线程
      */
-    @Produces
-    @Named("sipMessageExecutor")
-    @ApplicationScoped
+//    @Produces
+//    @Named("sipMessageExecutor")
+//    @ApplicationScoped
     public ExecutorService createSipMessageExecutor() {
         // 创建虚拟线程工厂
         ThreadFactory virtualThreadFactory = Thread.ofVirtual()

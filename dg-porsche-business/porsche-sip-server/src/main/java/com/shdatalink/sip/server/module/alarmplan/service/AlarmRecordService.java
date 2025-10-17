@@ -28,6 +28,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +47,7 @@ public class AlarmRecordService extends ServiceImpl<AlarmRecordMapper, AlarmReco
     @Inject
     DeviceChannelMapper deviceChannelMapper;
     @Inject
+    @RestClient
     MediaHttpClient mediaHttpClient;
     @Inject
     MediaUrlService mediaUrlService;

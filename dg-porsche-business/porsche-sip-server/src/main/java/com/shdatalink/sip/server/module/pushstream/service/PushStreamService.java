@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,21 +48,28 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
 @Slf4j
 public class PushStreamService {
-    
-    private final DeviceChannelMapper deviceChannelMapper;
-    private final MediaHttpClient mediaHttpClient;
-    private final MediaUrlService mediaUrlService;
-    private final SipConfigProperties sipConfigProperties;
-    private final RedisUtil redisUtil;
-    private final DeviceMapper deviceMapper;
-    private final MediaService mediaService;
-    
+
+    @Inject
+    DeviceChannelMapper deviceChannelMapper;
+    @Inject
+    @RestClient
+    MediaHttpClient mediaHttpClient;
+    @Inject
+    MediaUrlService mediaUrlService;
+    @Inject
+    SipConfigProperties sipConfigProperties;
+    @Inject
+    RedisUtil redisUtil;
+    @Inject
+    DeviceMapper deviceMapper;
+    @Inject
+    MediaService mediaService;
+
     public IPage<PushStreamPageResp> page(Integer page, Integer pageSize) {
         List<MediaListResult> mediaListResults = mediaService.listMedia();
-        if(CollectionUtils.isEmpty(mediaListResults)){
+        if (CollectionUtils.isEmpty(mediaListResults)) {
             return new Page<>(page, pageSize);
         }
         Map<String, MediaListResult> mediaDataMap = mediaListResults.stream().collect(Collectors.toMap(MediaListResult::getStream, item -> item, (v1, v2) -> v1));
@@ -73,15 +81,15 @@ public class PushStreamService {
             String streamId = mediaListResult.getStream();
             Integer channelId = StreamFactory.extractChannel(streamId);
             ChannelBaseInfoDTO onlinePushStream = deviceChannelMapper.getBaseChannelInfo(channelId);
-            if(onlinePushStream == null){
+            if (onlinePushStream == null) {
                 continue;
             }
             InviteTypeEnum action = InviteTypeEnum.getByPrefix(streamId.substring(0, 2));
-            if(action == InviteTypeEnum.Playback){
+            if (action == InviteTypeEnum.Playback) {
                 resp.setStreamType("回放流");
-            }else if(action == InviteTypeEnum.Download){
+            } else if (action == InviteTypeEnum.Download) {
                 resp.setStreamType("下载流");
-            }else{
+            } else {
                 resp.setStreamType("直播流");
             }
             resp.setDeviceId(onlinePushStream.getDeviceId());
@@ -94,16 +102,16 @@ public class PushStreamService {
                     byte[] bytes = Files.readAllBytes(path);
                     resp.setBase64(Base64.getEncoder().encodeToString(bytes));
                 } catch (IOException e) {
-                   log.error("读取快照文件异常", e);
+                    log.error("读取快照文件异常", e);
                 }
             }
-            if(onlinePushStream.getProtocolType() == ProtocolTypeEnum.RTMP){
+            if (onlinePushStream.getProtocolType() == ProtocolTypeEnum.RTMP) {
                 resp.setStreamUrl(mediaUrlService.buildRtmpStreamUrl(streamId));
-            }else if(onlinePushStream.getProtocolType() == ProtocolTypeEnum.PULL){
+            } else if (onlinePushStream.getProtocolType() == ProtocolTypeEnum.PULL) {
                 resp.setStreamUrl(onlinePushStream.getStreamUrl());
-            }else if(onlinePushStream.getProtocolType() == ProtocolTypeEnum.GB28181){
+            } else if (onlinePushStream.getProtocolType() == ProtocolTypeEnum.GB28181) {
                 MediaPlayerResult originSock = mediaListResult.getOriginSock();
-                if(originSock != null){
+                if (originSock != null) {
                     resp.setStreamUrl(originSock.getPeerIp() + ":" + originSock.getPeerPort());
                 }
             }
@@ -114,18 +122,18 @@ public class PushStreamService {
             resp.setAliveSecond(mediaListResult.getAliveSecond());
             //当无人观看时，保存当前流缓存，有人观看时，删除当前流缓存
             String redisKey = RedisKeyConstants.NO_VIEWER_PUSH_STREAM + streamId;
-            if(mediaListResult.getTotalReaderCount() == 0){
+            if (mediaListResult.getTotalReaderCount() == 0) {
                 String s = redisUtil.get(redisKey);
-                if(StringUtils.isBlank(s)){
+                if (StringUtils.isBlank(s)) {
                     redisUtil.set(redisKey, System.currentTimeMillis() + "");
                 }
-            }else{
+            } else {
                 redisUtil.delete(redisKey);
             }
             Object o = redisUtil.get(redisKey);
-            if(o != null){
+            if (o != null) {
                 long l = (System.currentTimeMillis() - Long.parseLong(o.toString())) / 1000;
-                if(l > resp.getAliveSecond()){
+                if (l > resp.getAliveSecond()) {
                     l = resp.getAliveSecond();
                 }
                 resp.setNoViewerSecond(l);
@@ -135,12 +143,12 @@ public class PushStreamService {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
             resp.setCreateTime(localDateTime);
             for (Track track : mediaListResult.getTracks()) {
-                if(track.getCodecType() == 1){
+                if (track.getCodecType() == 1) {
                     PushStreamPageResp.AudioInfo audioInfo = new PushStreamPageResp.AudioInfo();
                     audioInfo.setSampleRate(track.getSampleRate());
                     audioInfo.setCodecName(CodecTypeEnum.parseText(track.getCodecId()));
                     resp.setAudio(audioInfo);
-                }else if(track.getCodecType() == 0) {
+                } else if (track.getCodecType() == 0) {
                     PushStreamPageResp.VideoInfo videoInfo = new PushStreamPageResp.VideoInfo();
                     videoInfo.setFps(track.getFps());
                     videoInfo.setHeight(track.getHeight());
@@ -158,7 +166,7 @@ public class PushStreamService {
 
     public List<PushStreamResp> detail(String streamId) {
         String viewerStr = redisUtil.get(RedisKeyConstants.PUSH_STREAM_VIEWER + streamId);
-        if(StringUtils.isBlank(viewerStr)){
+        if (StringUtils.isBlank(viewerStr)) {
             return List.of();
         }
         List<MediaViewerDTO> playReqs = JsonUtil.parseObject(viewerStr, new TypeReference<>() {
@@ -179,14 +187,14 @@ public class PushStreamService {
     public boolean closeStream(String streamId) {
         Integer channelId = StreamFactory.extractChannel(streamId);
         DeviceChannel deviceChannel = deviceChannelMapper.selectById(channelId);
-        if(deviceChannel == null){
+        if (deviceChannel == null) {
             throw new BizException("通道不存在");
         }
-        if(deviceChannel.getRecording() != null && deviceChannel.getRecording()){
+        if (deviceChannel.getRecording() != null && deviceChannel.getRecording()) {
             throw new BizException("通道正在录像，不能关闭推流");
         }
         Device device = deviceMapper.selectByChannelId(deviceChannel.getChannelId());
-        if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
+        if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
             GBRequest.bye(device.toGbDevice(deviceChannel.getChannelId())).withStreamId(streamId).execute();
         }
         mediaHttpClient.closeStreams(new CloseStreamsReq(streamId, 1));

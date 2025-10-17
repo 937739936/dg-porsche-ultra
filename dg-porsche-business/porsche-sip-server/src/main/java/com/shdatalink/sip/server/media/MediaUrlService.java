@@ -23,6 +23,7 @@ import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.RandomUtils;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -37,6 +38,7 @@ import static com.shdatalink.sip.server.gb28181.core.bean.constants.SipConstant.
 @ApplicationScoped
 public class MediaUrlService {
     @Inject
+    @RestClient
     MediaHttpClient mediaHttpClient;
     @Inject
     SipConfigProperties sipConfigProperties;
@@ -44,8 +46,6 @@ public class MediaUrlService {
     DeviceChannelService deviceChannelService;
     @Inject
     DeviceService deviceService;
-    @Inject
-    MediaUrlService mediaUrlService;
 
     public ServerNodeConfigResult getNodeConfig() {
         MediaServerResponse<List<ServerNodeConfigResult>> serverConfigs = mediaHttpClient.getServerConfig();
@@ -60,15 +60,15 @@ public class MediaUrlService {
     }
 
     public DevicePreviewPlayVO playPullStreamUrl(String deviceId, String channelId, String stream) {
-        return generatePlayUrl(deviceId, channelId, stream, InviteTypeEnum.PullStream, false,"");
+        return generatePlayUrl(deviceId, channelId, stream, InviteTypeEnum.PullStream, false, "");
     }
 
     public DevicePreviewPlayVO playRtmpStreamUrl(String deviceId, String channelId, String stream) {
-        return generatePlayUrl(deviceId, channelId, stream, InviteTypeEnum.Rtmp, false,"");
+        return generatePlayUrl(deviceId, channelId, stream, InviteTypeEnum.Rtmp, false, "");
     }
 
     public DevicePreviewPlayVO playBackUrl(String deviceId, String channelId, String stream, LocalDateTime start) {
-        LocalDateTime end = start.toLocalDate().atTime(LocalTime.of(23,59,59));
+        LocalDateTime end = start.toLocalDate().atTime(LocalTime.of(23, 59, 59));
         String startStr = start.format(DateTimeFormatter.ofPattern(DateUtil.DATE_TIME_PATTERN));
         String endStr = end.format(DateTimeFormatter.ofPattern(DateUtil.DATE_TIME_PATTERN));
         String ext = "&start=" + URLEncoder.encode(startStr, StandardCharsets.UTF_8) + "&end=" + URLEncoder.encode(endStr, StandardCharsets.UTF_8);
@@ -76,12 +76,11 @@ public class MediaUrlService {
     }
 
     public String snapShotUrl(String stream) {
-        ServerNodeConfigResult serverConfig = mediaUrlService.getNodeConfig();
+        ServerNodeConfigResult serverConfig = getNodeConfig();
         String mediaIp = sipConfigProperties.media().ip();
 
         return String.format("rtsp://%s:%d/rtp/%s?token=%s", mediaIp, serverConfig.getRtspPort(), stream, SNAPSHOT_TOKEN);
     }
-
 
 
     public DevicePreviewPlayVO generatePlayUrl(String deviceId, String channelId, String stream, InviteTypeEnum type, boolean random, String ext) {
@@ -90,7 +89,7 @@ public class MediaUrlService {
         }
 
         if (random) {
-            stream = StreamFactory.streamId(type, RandomUtils.insecure().randomInt(0,99), stream);
+            stream = StreamFactory.streamId(type, RandomUtils.insecure().randomInt(0, 99), stream);
         } else {
             stream = StreamFactory.streamId(type, stream);
         }
@@ -101,7 +100,7 @@ public class MediaUrlService {
 
 
     public String buildRtmpStreamUrl(String stream) {
-        ServerNodeConfigResult serverConfig = mediaUrlService.getNodeConfig();
+        ServerNodeConfigResult serverConfig = getNodeConfig();
 
         String mediaIp = sipConfigProperties.server().wanIp();
         return String.format("rtmp://%s:%d/rtp/%s", mediaIp, serverConfig.getRtmpPort(), stream);
@@ -110,7 +109,7 @@ public class MediaUrlService {
     public DevicePreviewPlayVO buildPlayUrl(String deviceId, String channelId, String stream, String sign, String ext) {
         String mediaIp = sipConfigProperties.server().wanIp();
         int mediaPort = sipConfigProperties.media().port();
-        ServerNodeConfigResult serverConfig = mediaUrlService.getNodeConfig();
+        ServerNodeConfigResult serverConfig = getNodeConfig();
 
         DevicePreviewPlayVO vo = new DevicePreviewPlayVO();
         vo.setDeviceId(deviceId);
@@ -139,7 +138,7 @@ public class MediaUrlService {
         String sign = sign(streamId);
 
         String mediaIp = sipConfigProperties.server().wanIp();
-        ServerNodeConfigResult serverConfig = mediaUrlService.getNodeConfig();
+        ServerNodeConfigResult serverConfig = getNodeConfig();
 
         return String.format("rtsp://%s:%d/rtp/%s?token=%s%s", mediaIp, serverConfig.getRtspPort(), streamId, sign, "");
     }

@@ -20,6 +20,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,6 +39,7 @@ import java.util.Base64;
 public class DeviceSnapService {
 
     @Inject
+    @RestClient
     MediaHttpClient mediaHttpClient;
     @Inject
     SipConfigProperties sipConfigProperties;

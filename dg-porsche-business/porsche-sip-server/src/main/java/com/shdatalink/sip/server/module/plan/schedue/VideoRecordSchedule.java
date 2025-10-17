@@ -29,8 +29,11 @@ import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
+import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -43,6 +46,7 @@ import java.util.concurrent.Executor;
 public class VideoRecordSchedule {
 
     @Inject
+    @RestClient
     MediaHttpClient mediaHttpClient;
 
     @Inject
@@ -83,9 +87,9 @@ public class VideoRecordSchedule {
 
     public void mediaExited(@ObservesAsync MediaExitedEvent event) {
         deviceChannelService.selectRegisterChannel()
-                        .forEach(channel -> {
-                            deviceChannelService.updateRecording(channel.getId(), false);
-                        });
+                .forEach(channel -> {
+                    deviceChannelService.updateRecording(channel.getId(), false);
+                });
     }
 
     public void channelOnlineStatus(@ObservesAsync DeviceOnlineEvent event) {
@@ -112,7 +116,7 @@ public class VideoRecordSchedule {
     /**
      * 开始录像，每小时执行一次
      */
-    @Scheduled(cron = "5 0 */1 * * *")
+    @Scheduled(cron = "5 0 */1 * * ?")
     public void startRecord() {
         startRecordByChannels(deviceChannelService.selectRegisterChannel());
     }
@@ -131,16 +135,16 @@ public class VideoRecordSchedule {
             List<VideoRecordDevice> devices = videoRecordPlanService.getPlanByChannelOfNow(weekDay, channel.getDeviceId(), channel.getChannelId(), LocalDateTime.now().getHour());
             if (!devices.isEmpty()) {
                 Device device = deviceMapper.selectByChannelId(channel.getChannelId());
-                if(device == null) {
+                if (device == null) {
                     continue;
                 }
                 String streamId = StreamFactory.liveStreamId(device.getProtocolType(), channel.getId().toString());
                 IsRecordingResult recording = mediaHttpClient.isRecording(new MediaReq(streamId));
                 // 没有流的时候要打开流
                 if (recording.getCode() == -500) {
-                    if(device.getProtocolType() == ProtocolTypeEnum.GB28181) {
+                    if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
                         deviceChannelService.play(streamId);
-                    }else if(device.getProtocolType() == ProtocolTypeEnum.PULL) {
+                    } else if (device.getProtocolType() == ProtocolTypeEnum.PULL) {
                         Boolean online = mediaUrlService.addPullStream(device.getStreamUrl(), streamId, TransportTypeEnum.parse(device.getTransport()), true);
                         if (online == null || !online) {
                             log.error("拉流失败，设备ID：{}，通道ID：{}", device.getDeviceId(), channel.getChannelId());
@@ -152,7 +156,7 @@ public class VideoRecordSchedule {
                 }
 
                 executor.execute(() -> {
-                    if(device.getProtocolType() == ProtocolTypeEnum.GB28181) {
+                    if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
                         while (!mediaService.rtpServerExists(streamId)) {
                             StartRecordReq startRecordReq = new StartRecordReq();
                             startRecordReq.setType(1);
@@ -169,7 +173,7 @@ public class VideoRecordSchedule {
                                 throw new RuntimeException(e);
                             }
                         }
-                    }else if(device.getProtocolType() == ProtocolTypeEnum.PULL || device.getProtocolType() == ProtocolTypeEnum.RTMP) {
+                    } else if (device.getProtocolType() == ProtocolTypeEnum.PULL || device.getProtocolType() == ProtocolTypeEnum.RTMP) {
                         StartRecordReq startRecordReq = new StartRecordReq();
                         startRecordReq.setType(1);
                         startRecordReq.setMaxSecond(60);
@@ -189,7 +193,7 @@ public class VideoRecordSchedule {
     /**
      * 停止录像，每小时执行一次
      */
-    @Scheduled(cron = "5 0 */1 * * *")
+    @Scheduled(cron = "5 0 */1 * * ?")
     public void stopRecord() {
         stopRecordByChannels(deviceChannelMapper.selectList(null));
     }
