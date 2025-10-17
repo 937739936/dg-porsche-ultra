@@ -35,19 +35,19 @@ public class ControllerReturnValueHandler implements ContainerResponseFilter {
     }
 
     /**
-     * 基于 JAX-RS 标准的 ResourceInfo 判断是否需要跳过包装
+     * 判断是否需要跳过包装
      */
     private boolean isSkip() {
         // 获取当前请求的方法
         Method method = resourceInfo.getResourceMethod();
-        // 检查方法是否标注了 @SkipUnifiedResponse
+        // 检查方法是否标注了 @IgnoredResultWrapper
         if (method != null && method.isAnnotationPresent(IgnoredResultWrapper.class)) {
             return true;
         }
 
         // 获取当前请求的类
         Class<?> resourceClass = resourceInfo.getResourceClass();
-        // 检查类是否标注了 @SkipUnifiedResponse
+        // 检查类是否标注了 @IgnoredResultWrapper
         return resourceClass != null && resourceClass.isAnnotationPresent(IgnoredResultWrapper.class);
     }
 }
