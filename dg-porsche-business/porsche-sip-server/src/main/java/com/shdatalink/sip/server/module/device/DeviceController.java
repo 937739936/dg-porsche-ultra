@@ -2,6 +2,7 @@ package com.shdatalink.sip.server.module.device;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.shdatalink.framework.common.annotation.CheckPermission;
+import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.server.media.MediaUrlService;
 import com.shdatalink.sip.server.module.device.entity.Device;
@@ -206,6 +207,7 @@ public class DeviceController {
     @GET
     @Path("sse")
     @Produces(MediaType.SERVER_SENT_EVENTS)
+    @IgnoredResultWrapper
     public void createSseEmitter(@Context SseEventSink eventSink) {
         sseClient.createSse(eventSink, UUID.randomUUID().toString());
     }
@@ -251,7 +253,7 @@ public class DeviceController {
      */
     @GET
     @Path("queryName")
-    public DeviceNameVO queryName(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("channelId") @NotBlank String channelId) {
+    public DeviceNameVO queryName(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("channelId") String channelId) {
         DeviceNameVO vo = new DeviceNameVO();
         vo.setDeviceName(deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备不存在")).getName());
         if (StringUtils.isNotBlank(channelId)) {

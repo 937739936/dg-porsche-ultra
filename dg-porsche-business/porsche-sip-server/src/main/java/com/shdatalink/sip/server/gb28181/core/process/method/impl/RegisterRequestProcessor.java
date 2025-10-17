@@ -85,7 +85,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestProcessor {
                         } else {
                             boolean f = DigestAuthenticationUtil.doAuthenticatePlainTextPassword(request.getMethod(), clientAuthorization, deviceConfig.getRegisterPassword());
                             if (f) {
-                                publisher.fire(new DeviceRegisterEvent(deviceId, isRegistration, DeviceRegisterEvent.Status.Success));
+                                publisher.fireAsync(new DeviceRegisterEvent(deviceId, isRegistration, DeviceRegisterEvent.Status.Success));
                                 if (isRegistration) {
                                     // 1.  发送注册成功响应消息
                                     ResponseBuilder.of(requestEvent).buildRegisterOfResponse().execute();
@@ -103,17 +103,17 @@ public class RegisterRequestProcessor extends AbstractSipRequestProcessor {
                                         // ignore  exception
                                     }
 
-                                    publisher.fire(new DeviceOnlineEvent(deviceId, true));
-                                    publisher.fire(new DeviceInfoUpdateEvent(deviceConfig));
+                                    publisher.fireAsync(new DeviceOnlineEvent(deviceId, true));
+                                    publisher.fireAsync(new DeviceInfoUpdateEvent(deviceConfig));
                                 } else {
                                     logger.info("{} 设备注销.", deviceId);
-                                    publisher.fire(new DeviceOnlineEvent(deviceId, false));
+                                    publisher.fireAsync(new DeviceOnlineEvent(deviceId, false));
                                     deviceService.updateOnline(deviceId, false);
                                     deviceChannelService.setDeviceOffline(deviceId);
                                     ResponseBuilder.of(requestEvent).buildRegisterOfResponse().execute();
                                 }
                             } else {
-                                publisher.fire(new DeviceRegisterEvent(deviceId, isRegistration, DeviceRegisterEvent.Status.Fail));
+                                publisher.fireAsync(new DeviceRegisterEvent(deviceId, isRegistration, DeviceRegisterEvent.Status.Fail));
                                 logger.info("{} 设备注册失败, 密码不正确.", deviceId);
                                 ResponseBuilder.of(requestEvent).forbidden().execute();
                             }

@@ -137,7 +137,7 @@ public class MediaHookService {
             channel.setOnline(online);
             channel.setRegisterTime(LocalDateTime.now());
             deviceChannelService.updateById(channel);
-            publisher.fire(new DeviceOnlineEvent(device.getDeviceId(), online));
+            publisher.fireAsync(new DeviceOnlineEvent(device.getDeviceId(), online));
             executor.execute(()->{
                 try {
                     Thread.sleep(2000);
@@ -251,7 +251,7 @@ public class MediaHookService {
                 });
                 deviceChannel.setOnline(streamChangedReq.getRegist());
                 deviceChannelService.updateById(deviceChannel);
-                publisher.fire(new DeviceOnlineEvent(deviceChannel.getDeviceId(), streamChangedReq.getRegist()));
+                publisher.fireAsync(new DeviceOnlineEvent(deviceChannel.getDeviceId(), streamChangedReq.getRegist()));
             }
         }
         HookResp hookResp = new HookResp();
@@ -345,7 +345,7 @@ public class MediaHookService {
 
     public HookResp serverStarted(ServerStartedReqResult serverStartedReq) {
         log.info("服务器启动事件");
-        publisher.fire(new MediaRegisterEvent());
+        publisher.fireAsync(new MediaRegisterEvent());
         HookResp hookResp = new HookResp();
         hookResp.setCode(0);
         hookResp.setMsg("服务器启动成功");
@@ -407,7 +407,7 @@ public class MediaHookService {
     }
 
     public HookResp onServerExited(ServerExitedReqResult req) {
-        publisher.fire(new MediaExitedEvent());
+        publisher.fireAsync(new MediaExitedEvent());
         HookResp hookResp = new HookResp();
         hookResp.setCode(0);
         return hookResp;
