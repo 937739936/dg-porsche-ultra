@@ -3,11 +3,11 @@ package com.shdatalink.sip.server.integration.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.shdatalink.framework.common.exception.BizException;
-import com.shdatalink.framework.common.utils.QuarkusUtil;
 import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.integration.convert.IntegrationDeviceConvert;
 import com.shdatalink.sip.server.integration.vo.*;
-import com.shdatalink.sip.server.media.MediaUrlService;
+import com.shdatalink.sip.server.media.MediaService;
+import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
@@ -34,7 +34,7 @@ import java.util.List;
 @ApplicationScoped
 public class IntegrationDeviceChannelService extends ServiceImpl<DeviceChannelMapper, DeviceChannel> {
     @Inject
-    MediaUrlService mediaUrlService;
+    MediaService mediaService;
     @Inject
     SipConfigProperties sipConfigProperties;
     @Inject
@@ -51,6 +51,8 @@ public class IntegrationDeviceChannelService extends ServiceImpl<DeviceChannelMa
                         .in(DeviceChannel::getDeviceId, param.getDeviceId())
                         .isNotNull(DeviceChannel::getRegisterTime)
         ).convert(item -> {
+            Device device = deviceService.getByDeviceId(item.getDeviceId())
+                    .orElseThrow(() -> new BizException("设备不存在"));
             IntegrationDeviceChannelList page = new IntegrationDeviceChannelList();
             page.setChannelId(item.getChannelId());
             page.setName(item.getName());
@@ -58,7 +60,7 @@ public class IntegrationDeviceChannelService extends ServiceImpl<DeviceChannelMa
             page.setOnline(item.getOnline());
             page.setLeaveTime(item.getLeaveTime());
             page.setPtzType(item.getPtzType());
-            page.setPlayUrl(mediaUrlService.playUrl(item.getDeviceId(), item.getChannelId(), item.getId().toString()));
+            page.setPlayUrl(mediaService.getPlayUrl(device, item));
             return page;
         });
     }
@@ -131,14 +133,16 @@ public class IntegrationDeviceChannelService extends ServiceImpl<DeviceChannelMa
         return channelId.stream()
                 .map(c -> {
                     DeviceChannel channel = baseMapper.selectByChannelId(c);
-                    DevicePreviewPlayVO vo = mediaUrlService.playUrl(channel.getDeviceId(), channel.getChannelId(), channel.getId().toString());
+                    Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
+                    DevicePreviewPlayVO vo = mediaService.getPlayUrl(device, channel);
                     return integrationDeviceConvert.toPlayVO(vo);
                 }).toList();
     }
 
     public IntegrationDevicePreviewPlayVO playbackUrl(String channelId, LocalDateTime start) {
         DeviceChannel channel = baseMapper.selectByChannelId(channelId);
-        DevicePreviewPlayVO vo = mediaUrlService.playBackUrl(channel.getDeviceId(), channel.getChannelId(), channel.getId().toString(), start);
+        Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
+        DevicePreviewPlayVO vo = mediaService.getPlayUrl(device, channel);
         return integrationDeviceConvert.toPlayVO(vo);
     }
 

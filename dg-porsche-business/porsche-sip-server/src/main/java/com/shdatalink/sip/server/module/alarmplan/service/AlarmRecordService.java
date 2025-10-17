@@ -11,7 +11,7 @@ import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.InviteTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.response.DeviceAlarm;
 import com.shdatalink.sip.server.media.MediaHttpClient;
-import com.shdatalink.sip.server.media.MediaUrlService;
+import com.shdatalink.sip.server.media.MediaService;
 import com.shdatalink.sip.server.media.bean.entity.req.SnapshotReq;
 import com.shdatalink.sip.server.module.alarmplan.entity.AlarmRecord;
 import com.shdatalink.sip.server.module.alarmplan.enums.AlarmMethodEnum;
@@ -22,6 +22,7 @@ import com.shdatalink.sip.server.module.alarmplan.mapper.AlarmRecordMapper;
 import com.shdatalink.sip.server.module.alarmplan.vo.AlarmRecordPageReq;
 import com.shdatalink.sip.server.module.alarmplan.vo.AlarmRecordPageResp;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
+import com.shdatalink.sip.server.module.device.enums.ProtocolTypeEnum;
 import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -50,11 +51,11 @@ public class AlarmRecordService extends ServiceImpl<AlarmRecordMapper, AlarmReco
     @RestClient
     MediaHttpClient mediaHttpClient;
     @Inject
-    MediaUrlService mediaUrlService;
-    @Inject
     SipConfigProperties sipConfigProperties;
     @Inject
     RedisUtil redisUtil;
+    @Inject
+    MediaService mediaService;
 
     public void handle(DeviceAlarm deviceAlarm) {
         String deviceAlarmCache = redisUtil.get(RedisKeyConstants.ALARM_NOTIFY + deviceAlarm.getSn());
@@ -96,7 +97,7 @@ public class AlarmRecordService extends ServiceImpl<AlarmRecordMapper, AlarmReco
             return null;
         }
         try {
-            String rtspUrl = mediaUrlService.snapShotUrl(StreamFactory.streamId(InviteTypeEnum.Play, deviceChannel.getId().toString()));
+            String rtspUrl = mediaService.getSnapshotUrl(ProtocolTypeEnum.GB28181, deviceChannel.getId());
             SnapshotReq req = new SnapshotReq();
             req.setUrl(rtspUrl);
             req.setTimeoutSec(5);

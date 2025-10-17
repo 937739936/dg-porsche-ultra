@@ -5,7 +5,6 @@ import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.framework.common.utils.DateUtil;
 import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.builder.InfoRequest;
-import com.shdatalink.sip.server.media.MediaUrlService;
 import com.shdatalink.sip.server.media.hook.req.RecordMp4Req;
 import com.shdatalink.sip.server.module.config.enums.ConfigTypesEnum;
 import com.shdatalink.sip.server.module.config.service.ConfigService;
@@ -56,8 +55,6 @@ import java.util.concurrent.atomic.AtomicLong;
 public class VideoRecordService extends ServiceImpl<VideoRecordMapper, VideoRecord> {
     @Inject
     DeviceChannelMapper deviceChannelMapper;
-    @Inject
-    MediaUrlService mediaUrlService;
     @Inject
     ConfigService configService;
     @Inject

@@ -13,7 +13,6 @@ import com.shdatalink.sip.server.gb28181.core.bean.constants.InviteTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.media.MediaHttpClient;
 import com.shdatalink.sip.server.media.MediaService;
-import com.shdatalink.sip.server.media.MediaUrlService;
 import com.shdatalink.sip.server.media.bean.entity.Track;
 import com.shdatalink.sip.server.media.bean.entity.req.CloseStreamsReq;
 import com.shdatalink.sip.server.media.bean.entity.resp.MediaListResult;
@@ -31,7 +30,6 @@ import com.shdatalink.sip.server.module.pushstream.vo.PushStreamPageResp;
 import com.shdatalink.sip.server.module.pushstream.vo.PushStreamResp;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -57,15 +55,13 @@ public class PushStreamService {
     @RestClient
     MediaHttpClient mediaHttpClient;
     @Inject
-    MediaUrlService mediaUrlService;
+    MediaService mediaService;
     @Inject
     SipConfigProperties sipConfigProperties;
     @Inject
     RedisUtil redisUtil;
     @Inject
     DeviceMapper deviceMapper;
-    @Inject
-    MediaService mediaService;
 
     public IPage<PushStreamPageResp> page(Integer page, Integer pageSize) {
         List<MediaListResult> mediaListResults = mediaService.listMedia();
@@ -106,7 +102,7 @@ public class PushStreamService {
                 }
             }
             if (onlinePushStream.getProtocolType() == ProtocolTypeEnum.RTMP) {
-                resp.setStreamUrl(mediaUrlService.buildRtmpStreamUrl(streamId));
+                resp.setStreamUrl(mediaService.rtmpUrl(streamId));
             } else if (onlinePushStream.getProtocolType() == ProtocolTypeEnum.PULL) {
                 resp.setStreamUrl(onlinePushStream.getStreamUrl());
             } else if (onlinePushStream.getProtocolType() == ProtocolTypeEnum.GB28181) {

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.shdatalink.framework.common.annotation.CheckPermission;
 import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.framework.common.exception.BizException;
-import com.shdatalink.sip.server.media.MediaUrlService;
+import com.shdatalink.sip.server.media.MediaService;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.enums.ProtocolTypeEnum;
@@ -48,7 +48,7 @@ public class DeviceController {
     @Inject
     DeviceLogService deviceLogService;
     @Inject
-    MediaUrlService mediaUrlService;
+    MediaService mediaService;
     @Inject
     Validator validator;
 
@@ -145,15 +145,7 @@ public class DeviceController {
     public DevicePreviewPlayVO playUrl(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("channelId") @NotBlank String channelId) {
         Device device = deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备'" + deviceId + "'不存在"));
         DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
-        if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
-            return mediaUrlService.playUrl(deviceId, channelId, channel.getId().toString());
-        }else if(device.getProtocolType() == ProtocolTypeEnum.PULL){
-            return mediaUrlService.playPullStreamUrl(deviceId, channelId, channel.getId().toString());
-        }else if(device.getProtocolType() == ProtocolTypeEnum.RTMP){
-            return mediaUrlService.playRtmpStreamUrl(deviceId, channelId, channel.getId().toString());
-        }else{
-            throw new BizException("该协议类型设备不支持播放");
-        }
+        return mediaService.getPlayUrl(device, channel);
     }
 
     /**

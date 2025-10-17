@@ -9,10 +9,11 @@ import com.shdatalink.sip.server.common.constants.RedisKeyConstants;
 import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.InviteTypeEnum;
+import com.shdatalink.sip.server.gb28181.core.bean.constants.TransportTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.media.MediaHttpClient;
 import com.shdatalink.sip.server.media.MediaService;
-import com.shdatalink.sip.server.media.MediaUrlService;
+import com.shdatalink.sip.server.media.MediaSignService;
 import com.shdatalink.sip.server.media.bean.entity.req.SnapshotReq;
 import com.shdatalink.sip.server.media.bean.entity.req.StartRecordReq;
 import com.shdatalink.sip.server.media.event.MediaExitedEvent;
@@ -27,6 +28,7 @@ import com.shdatalink.sip.server.module.device.event.DeviceOnlineEvent;
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceLogService;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
+import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordService;
 import com.shdatalink.sip.server.module.pushstream.convert.PushStreamConvert;
@@ -90,7 +92,7 @@ public class MediaHookService {
     @Inject
     MediaService mediaService;
     @Inject
-    MediaUrlService mediaUrlService;
+    MediaSignService mediaSignService;
     @Inject
     PushStreamConvert pushStreamConvert;
 
@@ -145,8 +147,8 @@ public class MediaHookService {
                     throw new RuntimeException(e);
                 }
                 SnapshotReq req = new SnapshotReq();
-                String rtspUrl = mediaUrlService.getRtspPlayUrl(channel.getDeviceId(), channel.getChannelId(), channel.getId().toString(), InviteTypeEnum.Rtmp);
-                req.setUrl(rtspUrl);
+                DevicePreviewPlayVO playUrl = mediaService.getPlayUrl(ProtocolTypeEnum.RTMP, channel.getDeviceId(), channel.getChannelId(), channel.getId());
+                req.setUrl(playUrl.getRtspUrl());
                 req.setTimeoutSec(30);
                 req.setExpireSec(60);
                 byte[] snap = mediaHttpClient.getSnap(req);
@@ -331,7 +333,11 @@ public class MediaHookService {
                 }
                 deviceChannelService.playBack(stream, startTime, endTime);
             }
-            case PullStream -> mediaUrlService.playPullStream(stream);
+            case PullStream -> {
+                DeviceChannel channel = deviceChannelService.getById(StreamFactory.extractChannel(stream));
+                Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
+                mediaService.addPullStream(device.getStreamUrl(), stream, TransportTypeEnum.TCP, device.getEnableAudio());
+            }
             default -> {
                 hookResp.setCode(404);
                 return hookResp;
@@ -377,7 +383,7 @@ public class MediaHookService {
         }
         String token = first.get().replace("token=", "");
         if (!SNAPSHOT_TOKEN.equals(token)) {
-            boolean verify = mediaUrlService.verify(playReq.getStream(), token);
+            boolean verify = mediaSignService.verify(playReq.getStream(), token);
             if (!verify) {
                 hookResp.setCode(401);
                 return hookResp;

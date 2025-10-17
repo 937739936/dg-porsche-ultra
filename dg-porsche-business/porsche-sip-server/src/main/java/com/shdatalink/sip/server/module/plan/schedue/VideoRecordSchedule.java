@@ -5,7 +5,6 @@ import com.shdatalink.sip.server.gb28181.core.bean.constants.TransportTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.media.MediaHttpClient;
 import com.shdatalink.sip.server.media.MediaService;
-import com.shdatalink.sip.server.media.MediaUrlService;
 import com.shdatalink.sip.server.media.bean.entity.req.MediaReq;
 import com.shdatalink.sip.server.media.bean.entity.req.StartRecordReq;
 import com.shdatalink.sip.server.media.bean.entity.resp.IsRecordingResult;
@@ -25,13 +24,13 @@ import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.plan.entity.VideoRecordDevice;
 import com.shdatalink.sip.server.module.plan.event.PlanModifyEvent;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordPlanService;
+import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.Scheduled;
-import jakarta.enterprise.context.ApplicationScoped;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.enterprise.event.ObservesAsync;
-import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -42,7 +41,8 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 @Slf4j
-@ApplicationScoped
+@Singleton
+@Startup
 public class VideoRecordSchedule {
 
     @Inject
@@ -60,29 +60,24 @@ public class VideoRecordSchedule {
     @Inject
     Executor executor;
     @Inject
-    MediaUrlService mediaUrlService;
-    @Inject
     MediaService mediaService;
     @Inject
     ConfigService configService;
 
     public void init(@ObservesAsync StartupEvent event) {
         try {
-            startRecord();
-            stopRecord();
+            recordSchedule();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void onPlanModify(@ObservesAsync PlanModifyEvent event) {
-        startRecord();
-        stopRecord();
+        recordSchedule();
     }
 
     public void mediaRegister(@ObservesAsync MediaRegisterEvent event) {
-        startRecord();
-        stopRecord();
+        recordSchedule();
     }
 
     public void mediaExited(@ObservesAsync MediaExitedEvent event) {
@@ -114,11 +109,13 @@ public class VideoRecordSchedule {
     }
 
     /**
-     * 开始录像，每小时执行一次
+     * 开始/停止录像，每小时执行一次
      */
     @Scheduled(cron = "5 0 */1 * * ?")
-    public void startRecord() {
+    @RunOnVirtualThread
+    public void recordSchedule() {
         startRecordByChannels(deviceChannelService.selectRegisterChannel());
+        stopRecordByChannels(deviceChannelMapper.selectList(null));
     }
 
     public void startRecordByDevice(Device device) {
@@ -145,7 +142,7 @@ public class VideoRecordSchedule {
                     if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
                         deviceChannelService.play(streamId);
                     } else if (device.getProtocolType() == ProtocolTypeEnum.PULL) {
-                        Boolean online = mediaUrlService.addPullStream(device.getStreamUrl(), streamId, TransportTypeEnum.parse(device.getTransport()), true);
+                        Boolean online = mediaService.addPullStream(device.getStreamUrl(), streamId, TransportTypeEnum.parse(device.getTransport()), true);
                         if (online == null || !online) {
                             log.error("拉流失败，设备ID：{}，通道ID：{}", device.getDeviceId(), channel.getChannelId());
                         }
@@ -188,14 +185,6 @@ public class VideoRecordSchedule {
                 });
             }
         }
-    }
-
-    /**
-     * 停止录像，每小时执行一次
-     */
-    @Scheduled(cron = "5 0 */1 * * ?")
-    public void stopRecord() {
-        stopRecordByChannels(deviceChannelMapper.selectList(null));
     }
 
     public void stopRecordByDevice(Device device) {

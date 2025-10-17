@@ -15,12 +15,7 @@ import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.r
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.response.DeviceCatalog;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.media.MediaService;
-import com.shdatalink.sip.server.media.MediaUrlService;
-import com.shdatalink.sip.server.media.bean.entity.req.CloseStreamsReq;
-import com.shdatalink.sip.server.media.bean.entity.req.OpenRtpServerReq;
-import com.shdatalink.sip.server.media.bean.entity.resp.OpenRtpServerResult;
 import com.shdatalink.sip.server.module.alarmplan.enums.DeviceEventEnum;
-import com.shdatalink.sip.server.module.common.enums.OperateLogTypeEnum;
 import com.shdatalink.sip.server.module.device.convert.DeviceChannelConvert;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
@@ -34,7 +29,6 @@ import com.shdatalink.sip.server.module.device.mapper.DeviceMapper;
 import com.shdatalink.sip.server.module.device.vo.DeviceChannelPage;
 import com.shdatalink.sip.server.module.device.vo.DeviceChannelPageParam;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewInfoVO;
-import com.shdatalink.sip.server.module.device.vo.DevicePreviewSnapshot;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -44,14 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,14 +54,8 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
     SipMessageTemplate sipMessageTemplate;
     @Inject
     DeviceService deviceService;
-//    @Inject
-//    MediaHttpClient mediaHttpClient;
     @Inject
     EventPublisher publisher;
-    @Inject
-    SipConfigProperties sipConfigProperties;
-    @Inject
-    MediaUrlService mediaUrlService;
     @Inject
     DeviceMapper deviceMapper;
     @Inject

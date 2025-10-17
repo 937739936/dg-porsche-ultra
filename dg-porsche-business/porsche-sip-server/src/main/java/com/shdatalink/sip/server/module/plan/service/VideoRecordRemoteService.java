@@ -9,7 +9,6 @@ import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.Re
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.response.RecordInfo;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.media.MediaService;
-import com.shdatalink.sip.server.media.MediaUrlService;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
@@ -42,8 +41,6 @@ public class VideoRecordRemoteService {
     DeviceService deviceService;
     @Inject
     DeviceChannelService deviceChannelService;
-    @Inject
-    MediaUrlService mediaUrlService;
     @Inject
     SipConfigProperties sipConfigProperties;
     @Inject
@@ -82,7 +79,8 @@ public class VideoRecordRemoteService {
 
     public DevicePreviewPlayVO playback(String deviceId, String channelId, LocalDateTime start) {
         DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
-        return mediaUrlService.playBackUrl(deviceId, channelId, channel.getId().toString(), start);
+        Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
+        return mediaService.getPlaybackUrl(device, channel, start);
     }
 
     public void download(String deviceId, String channelId, LocalDateTime startTime, LocalDateTime endTime, RoutingContext context) throws ExecutionException, InterruptedException, TimeoutException, IOException {

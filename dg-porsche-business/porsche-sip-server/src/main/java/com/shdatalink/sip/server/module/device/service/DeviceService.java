@@ -23,7 +23,7 @@ import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.control.
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.response.DeviceInfo;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.media.MediaHttpClient;
-import com.shdatalink.sip.server.media.MediaUrlService;
+import com.shdatalink.sip.server.media.MediaService;
 import com.shdatalink.sip.server.media.bean.entity.req.CloseStreamsReq;
 import com.shdatalink.sip.server.module.device.convert.DeviceConvert;
 import com.shdatalink.sip.server.module.device.entity.Device;
@@ -52,13 +52,10 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.device.service.DeviceService",
         targets = {SerializedLambda.class, SFunction.class},
@@ -76,7 +73,7 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
     @Inject
     Validator validator;
     @Inject
-    MediaUrlService mediaUrlService;
+    MediaService mediaService;
     @Inject
     RedisUtil redisUtil;
     @Inject
@@ -136,7 +133,7 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
                     if(item.getProtocolType() == ProtocolTypeEnum.RTMP){
                         deviceChannelMapper.selectByDeviceId(item.getDeviceId()).forEach(channel -> {
                             String streamId = StreamFactory.streamId(InviteTypeEnum.Rtmp, channel.getId().toString());
-                            page.setStreamUrl(mediaUrlService.buildRtmpStreamUrl(streamId));
+                            page.setStreamUrl(mediaService.rtmpUrl(streamId));
                         });
                     }
                     return page;
@@ -168,13 +165,7 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
                     channel.setPtz(PtzTypeEnum.PTZCamera.equals(c.getPtzType()));
                     Device device = deviceMapper.selectByChannelId(c.getChannelId());
                     if(device != null){
-                        if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
-                            channel.setPlayUrl(mediaUrlService.playUrl(deviceId, c.getChannelId(), c.getId().toString()));
-                        }else if(device.getProtocolType() == ProtocolTypeEnum.PULL){
-                            channel.setPlayUrl(mediaUrlService.playPullStreamUrl(deviceId, c.getChannelId(), c.getId().toString()));
-                        }else if(device.getProtocolType() == ProtocolTypeEnum.RTMP){
-                            channel.setPlayUrl(mediaUrlService.playRtmpStreamUrl(deviceId, c.getChannelId(), c.getId().toString()));
-                        }
+                        channel.setPlayUrl(mediaService.getPlayUrl(device, c));
                     }
                     return channel;
                 }).toList();
@@ -397,7 +388,7 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
     public void updateDeviceStatus(Device device, DeviceChannel channel, String rtspUrl, Boolean enableAudio) {
         if(device.getProtocolType() == ProtocolTypeEnum.PULL){
             String streamId = StreamFactory.streamId(InviteTypeEnum.PullStream, channel.getId().toString());
-            Boolean online = mediaUrlService.addPullStream(rtspUrl, streamId, TransportTypeEnum.parse(device.getTransport()), enableAudio);
+            Boolean online = mediaService.addPullStream(rtspUrl, streamId, TransportTypeEnum.parse(device.getTransport()), enableAudio);
             device.setEnable(true);
             device.setOnline(online);
             if(online){

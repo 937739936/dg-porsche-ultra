@@ -9,7 +9,6 @@ import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.InviteTypeEnum;
 import com.shdatalink.sip.server.media.MediaHttpClient;
 import com.shdatalink.sip.server.media.MediaService;
-import com.shdatalink.sip.server.media.MediaUrlService;
 import com.shdatalink.sip.server.media.bean.entity.req.SnapshotReq;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
@@ -18,7 +17,6 @@ import com.shdatalink.sip.server.module.device.vo.DevicePreviewSnapshot;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -49,8 +47,6 @@ public class DeviceSnapService {
     DeviceChannelService deviceChannelService;
     @Inject
     MediaService mediaService;
-    @Inject
-    MediaUrlService mediaUrlService;
 
     public void updateDeviceSnap(Device device, DeviceChannel channel) {
         if (device.getProtocolType() == ProtocolTypeEnum.PULL) {
@@ -79,20 +75,12 @@ public class DeviceSnapService {
     public DevicePreviewSnapshot realTimeSnap(String deviceId, String channelId) throws IOException {
         Device device = deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备不存在"));
         DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
-        String rtspUrl;
+        String rtspUrl = mediaService.getSnapshotUrl(device, channel.getId());
         if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
             String stream = StreamFactory.streamId(InviteTypeEnum.Play, channel.getId().toString());
             if (!mediaService.mediaExists(stream)) {
                 return querySnapshot(deviceId, channelId);
             }
-            rtspUrl = mediaUrlService.snapShotUrl(stream);
-        }else if(device.getProtocolType() == ProtocolTypeEnum.PULL){
-            rtspUrl = device.getStreamUrl();
-        }else if(device.getProtocolType() == ProtocolTypeEnum.RTMP){
-            rtspUrl = mediaUrlService.getRtspPlayUrl(channel.getDeviceId(), channel.getChannelId(), channel.getId().toString(), InviteTypeEnum.Rtmp);
-        }else{
-            log.info("设备不支持拉流，无法截图，deviceId: {}, protocolType: {}", device.getDeviceId(), device.getProtocolType().getText());
-            throw new BizException("设备不支持拉流，无法截图");
         }
         try {
             SnapshotReq req = new SnapshotReq();

@@ -16,6 +16,7 @@ public class MediaHttpRequestLogger implements ClientRequestFilter {
         if (requestContext.getEntity() != null) {
             String entityJson = JsonUtil.toJsonString(requestContext.getEntity());
             log.info("=== 请求数据 ===");
+            log.info("url: {}", requestContext.getUri());
             log.info("原始对象: {}", requestContext.getEntity());
             log.info("BODY: {}", entityJson);
             requestContext.setEntity(entityJson);
