@@ -207,20 +207,27 @@ public class VideoRecordSchedule {
                 deviceChannelService.updateRecording(channel.getId(), false);
                 continue;
             }
-            if (recording.getCode() == 0 && recording.getStatus()) {
-                // 如果正在录像，就查找录像计划中是否有当前小时开启的录像计划
-                List<VideoRecordDevice> devices = videoRecordPlanService.getPlanByChannelOfNow(weekDay, channel.getDeviceId(), channel.getChannelId(), LocalDateTime.now().getHour());
-                if (devices.isEmpty() || !channel.getOnline()) {
-                    // 如果没有，就停止
-                    mediaHttpClient.stopRecord(new MediaReq(streamId));
-                    deviceChannelService.updateRecording(channel.getId(), false);
-                    if (!mediaService.streamReaderExists(streamId)) {
-                        if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
-                            GBRequest.bye(device.toGbDevice(channel.getChannelId())).withStreamId(streamId).execute();
+            if (recording.getCode() == 0) {
+                if (recording.getStatus()) {
+                    // 如果正在录像，就查找录像计划中是否有当前小时开启的录像计划
+                    List<VideoRecordDevice> devices = videoRecordPlanService.getPlanByChannelOfNow(weekDay, channel.getDeviceId(), channel.getChannelId(), LocalDateTime.now().getHour());
+                    if (devices.isEmpty() || !channel.getOnline()) {
+                        // 如果没有，就停止
+                        mediaHttpClient.stopRecord(new MediaReq(streamId));
+                        deviceChannelService.updateRecording(channel.getId(), false);
+                        if (!mediaService.streamReaderExists(streamId)) {
+                            if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
+                                GBRequest.bye(device.toGbDevice(channel.getChannelId())).withStreamId(streamId).execute();
+                            }
+                            mediaService.closeStreams(streamId);
                         }
-                        mediaService.closeStreams(streamId);
                     }
+                } else {
+                    deviceChannelService.updateRecording(channel.getId(), false);
                 }
+            } else {
+                log.error("录像停止异常: {}", recording);
+                deviceChannelService.updateRecording(channel.getId(), false);
             }
         }
     }
