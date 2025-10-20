@@ -1,7 +1,7 @@
 package com.shdatalink.resource;
 
 import com.shdatalink.entity.Contract;
-import com.shdatalink.redis.utils.RedisUtil;
+import com.shdatalink.framework.redis.utils.RedisUtil;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
@@ -11,7 +11,6 @@ import jakarta.ws.rs.QueryParam;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Path("/redis")
 public class RedisResource {

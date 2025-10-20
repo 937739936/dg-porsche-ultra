@@ -1,6 +1,6 @@
 package com.shdatalink.sip.server.gb28181.core.process.method.impl;
 
-import com.shdatalink.json.utils.JsonUtil;
+import com.shdatalink.framework.json.utils.JsonUtil;
 import com.shdatalink.sip.server.gb28181.core.bean.annotations.SipEvent;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.SipEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.DeviceBase;

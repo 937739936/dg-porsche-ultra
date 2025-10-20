@@ -1,6 +1,6 @@
 package com.shdatalink.resource;
 
-import com.shdatalink.mail.utils.MailUtil;
+import com.shdatalink.framework.mail.utils.MailUtil;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import jakarta.inject.Inject;

@@ -2,8 +2,7 @@ package com.shdatalink.sip.server.module.alarmplan;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.shdatalink.framework.common.exception.BizException;
-import com.shdatalink.json.utils.JsonUtil;
-import com.shdatalink.sip.server.common.dto.PageParam;
+import com.shdatalink.framework.json.utils.JsonUtil;
 import com.shdatalink.sip.server.common.dto.PageParamWithGet;
 import com.shdatalink.sip.server.module.alarmplan.convert.AlarmPlanConvert;
 import com.shdatalink.sip.server.module.alarmplan.enums.AlarmMethodEnum;

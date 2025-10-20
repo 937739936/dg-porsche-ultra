@@ -2,8 +2,8 @@ package com.shdatalink.sip.server.module.user.service;
 
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
-import com.shdatalink.json.utils.JsonUtil;
-import com.shdatalink.jwt.utils.JwtUtil;
+import com.shdatalink.framework.json.utils.JsonUtil;
+import com.shdatalink.framework.jwt.utils.JwtUtil;
 import com.shdatalink.sip.server.common.constants.RedisKeyConstants;
 import com.shdatalink.sip.server.module.user.convert.UserConvert;
 import com.shdatalink.sip.server.module.user.entity.Role;
@@ -12,7 +12,7 @@ import com.shdatalink.sip.server.module.user.entity.Permission;
 import com.shdatalink.sip.server.module.user.mapper.UserMapper;
 import com.shdatalink.sip.server.module.user.vo.TokenResp;
 import com.shdatalink.sip.server.module.user.vo.UserInfo;
-import com.shdatalink.redis.utils.RedisUtil;
+import com.shdatalink.framework.redis.utils.RedisUtil;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.user.service.LoginService",
         targets = {SerializedLambda.class, SFunction.class},

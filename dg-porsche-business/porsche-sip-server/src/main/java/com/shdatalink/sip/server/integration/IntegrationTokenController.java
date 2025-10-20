@@ -1,7 +1,7 @@
 package com.shdatalink.sip.server.integration;
 
 import com.shdatalink.framework.common.annotation.Anonymous;
-import com.shdatalink.jwt.utils.JwtUtil;
+import com.shdatalink.framework.jwt.utils.JwtUtil;
 import com.shdatalink.sip.server.integration.vo.IntegrationAccessTokenVO;
 import com.shdatalink.sip.server.module.user.entity.UserAccessKey;
 import com.shdatalink.sip.server.module.user.service.UserAccessKeyService;

@@ -2,7 +2,7 @@ package com.shdatalink.sip.server.module.config.service;
 
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.shdatalink.json.utils.JsonUtil;
+import com.shdatalink.framework.json.utils.JsonUtil;
 import com.shdatalink.sip.server.module.config.entity.Config;
 import com.shdatalink.sip.server.module.config.enums.ConfigTypesEnum;
 import com.shdatalink.sip.server.module.config.mapper.ConfigMapper;

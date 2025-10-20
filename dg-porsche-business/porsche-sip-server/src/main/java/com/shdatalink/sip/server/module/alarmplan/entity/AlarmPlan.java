@@ -2,9 +2,9 @@ package com.shdatalink.sip.server.module.alarmplan.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.shdatalink.json.utils.JsonUtil;
-import com.shdatalink.mysql.entity.BaseEntity;
-import com.shdatalink.mysql.handler.IDictTypeHandler;
+import com.shdatalink.framework.json.utils.JsonUtil;
+import com.shdatalink.framework.mysql.entity.BaseEntity;
+import com.shdatalink.framework.mysql.handler.IDictTypeHandler;
 import com.shdatalink.sip.server.module.alarmplan.enums.AlarmMethodEnum;
 import com.shdatalink.sip.server.module.alarmplan.enums.AlarmPriorityEnum;
 import com.shdatalink.sip.server.module.alarmplan.enums.AlarmTypeEnum;
