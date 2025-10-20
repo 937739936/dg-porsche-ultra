@@ -65,7 +65,7 @@ public class SipServerConfiguration {
 //        }
         return properties;
     }
-    @Produces
+    @Singleton
     @Named("sipFactory")
     public SipFactory sipFactory() {
         SipFactory instance = SipFactory.getInstance();
@@ -73,7 +73,7 @@ public class SipServerConfiguration {
         return instance;
     }
 
-    @Produces
+    @Singleton
     @Named("sipStack")
     public SipStackImpl createSipStackImpl(SipConfigProperties sipConfig, @Named("sipFactory") SipFactory sipFactory) throws PeerUnavailableException {
         SipConfigProperties.SipServerConf server = sipConfig.server();
