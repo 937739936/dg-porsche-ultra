@@ -65,17 +65,13 @@ public class SipServerConfiguration {
 //        }
         return properties;
     }
-    @Singleton
-    @Named("sipFactory")
-    public SipFactory sipFactory() {
-        SipFactory instance = SipFactory.getInstance();
-        instance.setPathName("gov.nist");
-        return instance;
-    }
 
     @Singleton
     @Named("sipStack")
-    public SipStackImpl createSipStackImpl(SipConfigProperties sipConfig, @Named("sipFactory") SipFactory sipFactory) throws PeerUnavailableException {
+    public SipStackImpl createSipStackImpl(SipConfigProperties sipConfig) throws PeerUnavailableException {
+        SipFactory sipFactory = SipFactory.getInstance();
+        sipFactory.setPathName("gov.nist");
+
         SipConfigProperties.SipServerConf server = sipConfig.server();
         if (Objects.isNull(server) || StringUtils.isEmpty(server.domain()) || StringUtils.isEmpty(server.id())) {
             throw new RuntimeException("sip.server.id 或 sip.server.domain 不能为空");
@@ -93,7 +89,8 @@ public class SipServerConfiguration {
     @Startup
     @Singleton
     @Named("tcpSipProvider")
-    public SipProviderImpl startTcpListener(SipConfigProperties sipConfig, SipStackImpl sipStack, SipListener sipProcessor) {
+    public SipProviderImpl startTcpListener(SipConfigProperties sipConfig, SipListener sipProcessor) throws PeerUnavailableException {
+        SipStackImpl sipStack = createSipStackImpl(sipConfig);
         SipConfigProperties.SipServerConf server = sipConfig.server();
         String ip = StringUtils.isEmpty(server.ip()) ? "0.0.0.0" : server.ip();
         Integer port = server.port();
@@ -123,7 +120,8 @@ public class SipServerConfiguration {
     @Startup
     @Singleton
     @Named("udpSipProvider")
-    public SipProviderImpl startUdpListener(SipConfigProperties sipConfig, SipStackImpl sipStack, SipListener sipProcessor) {
+    public SipProviderImpl startUdpListener(SipConfigProperties sipConfig, SipListener sipProcessor) throws PeerUnavailableException {
+        SipStackImpl sipStack = createSipStackImpl(sipConfig);
         SipConfigProperties.SipServerConf server = sipConfig.server();
         String ip = StringUtils.isEmpty(server.ip()) ? "0.0.0.0" : server.ip();
         Integer port = server.port();

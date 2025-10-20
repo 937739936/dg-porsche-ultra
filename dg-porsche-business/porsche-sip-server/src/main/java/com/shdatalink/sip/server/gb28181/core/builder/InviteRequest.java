@@ -107,6 +107,7 @@ public class InviteRequest extends AbstractRequest implements GBRequest {
             } else {
                 throw new BizException("点播类型["+action+"]暂不支持");
             }
+            subject = String.format("%s:%s,%s:0", toDevice.getChannelId(), streamId, sipConf.id());
             request(SIPRequest.INVITE, SipConstant.SDP, gbDescription);
         }
         return this;
