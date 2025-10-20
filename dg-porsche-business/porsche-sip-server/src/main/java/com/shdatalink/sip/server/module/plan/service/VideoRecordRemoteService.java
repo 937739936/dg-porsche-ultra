@@ -1,5 +1,7 @@
 package com.shdatalink.sip.server.module.plan.service;
 
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.framework.common.utils.DateUtil;
 import com.shdatalink.sip.server.config.SipConfigProperties;
@@ -16,6 +18,7 @@ import com.shdatalink.sip.server.module.device.service.DeviceService;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
 import com.shdatalink.sip.server.module.plan.vo.VideoRecordTimeLineVO;
 import com.shdatalink.sip.server.utils.SipUtil;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,6 +38,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
+@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService",
+        targets = {SerializedLambda.class, SFunction.class},
+        serialization = true)
 @ApplicationScoped
 public class VideoRecordRemoteService {
     @Inject

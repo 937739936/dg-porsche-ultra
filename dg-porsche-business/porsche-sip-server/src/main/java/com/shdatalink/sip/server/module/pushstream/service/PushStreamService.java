@@ -1,6 +1,8 @@
 package com.shdatalink.sip.server.module.pushstream.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.shdatalink.framework.common.exception.BizException;
@@ -28,6 +30,7 @@ import com.shdatalink.sip.server.module.pushstream.dto.MediaViewerDTO;
 import com.shdatalink.sip.server.module.pushstream.enums.CodecTypeEnum;
 import com.shdatalink.sip.server.module.pushstream.vo.PushStreamPageResp;
 import com.shdatalink.sip.server.module.pushstream.vo.PushStreamResp;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +48,9 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.pushstream.service.PushStreamService",
+        targets = {SerializedLambda.class, SFunction.class},
+        serialization = true)
 @ApplicationScoped
 @Slf4j
 public class PushStreamService {

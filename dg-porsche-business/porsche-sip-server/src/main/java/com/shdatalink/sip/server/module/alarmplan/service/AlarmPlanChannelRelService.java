@@ -1,6 +1,8 @@
 package com.shdatalink.sip.server.module.alarmplan.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.server.module.alarmplan.entity.AlarmPlanChannelRel;
 import com.shdatalink.sip.server.module.alarmplan.mapper.AlarmPlanChannelRelMapper;
@@ -8,6 +10,7 @@ import com.shdatalink.sip.server.module.alarmplan.vo.AlarmPlanChannelSaveReq;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -15,6 +18,9 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 
+@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.alarmplan.service.AlarmPlanChannelRelService",
+        targets = {SerializedLambda.class, SFunction.class},
+        serialization = true)
 @ApplicationScoped
 public class AlarmPlanChannelRelService extends ServiceImpl<AlarmPlanChannelRelMapper, AlarmPlanChannelRel> {
 

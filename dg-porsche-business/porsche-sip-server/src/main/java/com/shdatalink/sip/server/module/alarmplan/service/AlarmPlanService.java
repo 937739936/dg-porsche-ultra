@@ -2,6 +2,8 @@ package com.shdatalink.sip.server.module.alarmplan.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.server.common.dto.PageParam;
@@ -16,6 +18,7 @@ import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.mapper.DeviceMapper;
 import com.shdatalink.sip.server.utils.SipUtil;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -23,6 +26,9 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 
+@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.alarmplan.service.AlarmPlanService",
+        targets = {SerializedLambda.class, SFunction.class},
+        serialization = true)
 @ApplicationScoped
 public class AlarmPlanService extends ServiceImpl<AlarmPlanMapper, AlarmPlan> {
 

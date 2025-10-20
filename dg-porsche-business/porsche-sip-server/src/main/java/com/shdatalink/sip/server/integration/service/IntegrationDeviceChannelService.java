@@ -2,6 +2,8 @@ package com.shdatalink.sip.server.integration.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.integration.convert.IntegrationDeviceConvert;
@@ -17,6 +19,7 @@ import com.shdatalink.sip.server.module.device.vo.PtzControlStopParam;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService;
 import com.shdatalink.sip.server.module.plan.vo.VideoRecordTimeLineVO;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -31,6 +34,9 @@ import java.time.ZoneId;
 import java.util.Base64;
 import java.util.List;
 
+@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.integration.service.IntegrationDeviceChannelService",
+        targets = {SerializedLambda.class, SFunction.class},
+        serialization = true)
 @ApplicationScoped
 public class IntegrationDeviceChannelService extends ServiceImpl<DeviceChannelMapper, DeviceChannel> {
     @Inject

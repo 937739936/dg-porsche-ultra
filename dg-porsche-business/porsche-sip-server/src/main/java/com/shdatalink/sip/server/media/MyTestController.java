@@ -86,7 +86,7 @@ public class MyTestController {
      */
     @Path("/getMediaList")
     @GET
-    public MediaServerResponse<List<MediaListResult>> getMediaList(String stream) {
+    public MediaServerResponse<List<MediaListResult>> getMediaList(@QueryParam("stream") String stream) {
         return zlmRestTemplate.getMediaList(new MediaReq(stream));
     }
 

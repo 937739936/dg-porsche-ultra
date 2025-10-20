@@ -2,6 +2,8 @@ package com.shdatalink.sip.server.module.alarmplan.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shdatalink.framework.json.utils.JsonUtil;
 import com.shdatalink.framework.redis.utils.RedisUtil;
@@ -23,6 +25,7 @@ import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.enums.ProtocolTypeEnum;
 import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +42,9 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 
+@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.alarmplan.service.AlarmRecordService",
+        targets = {SerializedLambda.class, SFunction.class},
+        serialization = true)
 @ApplicationScoped
 @Slf4j
 public class AlarmRecordService extends ServiceImpl<AlarmRecordMapper, AlarmRecord> {

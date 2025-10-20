@@ -2,6 +2,8 @@ package com.shdatalink.sip.server.module.plan.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.framework.common.service.EventPublisher;
@@ -15,6 +17,7 @@ import com.shdatalink.sip.server.module.plan.vo.VideoRecordPlanDetailVO;
 import com.shdatalink.sip.server.module.plan.vo.VideoRecordPlanPage;
 import com.shdatalink.sip.server.module.plan.vo.VideoRecordPlanSaveParam;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -22,6 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
+@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.plan.service.VideoRecordPlanService",
+        targets = {SerializedLambda.class, SFunction.class},
+        serialization = true)
 @ApplicationScoped
 public class VideoRecordPlanService extends ServiceImpl<VideoRecordPlanMapper, VideoRecordPlan> {
     @Inject

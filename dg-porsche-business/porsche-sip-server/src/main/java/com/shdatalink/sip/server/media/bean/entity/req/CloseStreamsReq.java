@@ -1,5 +1,6 @@
 package com.shdatalink.sip.server.media.bean.entity.req;
 
+import jakarta.ws.rs.QueryParam;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CloseStreamsReq extends MediaReq {
 
+    @QueryParam(("force"))
     private int force;
 
     public CloseStreamsReq(String stream) {
