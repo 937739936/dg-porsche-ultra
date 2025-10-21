@@ -60,7 +60,7 @@ public interface MediaHttpClient {
     /**
      * 获取流列表，可选筛选参数
      */
-    @GET
+    @POST
     @Path("/getMediaList")
     @Produces(MediaType.APPLICATION_JSON)
     MediaServerResponse<List<MediaListResult>> getMediaList(MediaReq req);
@@ -112,7 +112,7 @@ public interface MediaHttpClient {
     /**
      * 获取所有TcpSession列表
      */
-    @GET
+    @POST
     @Path("/getAllSession")
     @Produces(MediaType.APPLICATION_JSON)
     MediaServerResponse<List<TcpSessionResult>> getAllSession(TcpSessionReq req);
@@ -189,7 +189,7 @@ public interface MediaHttpClient {
     /**
      * 获取媒体流播放器列表
      */
-    @GET
+    @POST
     @Path("/getMediaPlayerList")
     @Produces(MediaType.APPLICATION_JSON)
     MediaServerResponse<List<MediaPlayerResult>> getMediaPlayerList(MediaReq req);
@@ -197,7 +197,7 @@ public interface MediaHttpClient {
     /**
      * 获取rtp推流信息
      */
-    @GET
+    @POST
     @Path("/getRtpInfo")
     @Produces(MediaType.APPLICATION_JSON)
     RtpInfoResult getRtpInfo(GetRtpInfoReq req);
@@ -205,7 +205,7 @@ public interface MediaHttpClient {
     /**
      * 搜索文件系统，获取流对应的录像文件列表或日期文件夹列表
      */
-    @GET
+    @POST
     @Path("/getMp4RecordFile")
     @Produces(MediaType.APPLICATION_JSON)
     MediaServerResponse<GetMp4RecordFileResult> getMp4RecordFile(GetMp4FileReq req);
@@ -229,7 +229,7 @@ public interface MediaHttpClient {
     /**
      * 是否正在录制
      */
-    @GET
+    @POST
     @Path("/isRecording")
     @Produces(MediaType.APPLICATION_JSON)
     IsRecordingResult isRecording(MediaReq recordReq);
@@ -237,7 +237,7 @@ public interface MediaHttpClient {
     /**
      * 获取截图
      */
-    @GET
+    @POST
     @Path("/getSnap")
     @Produces(MediaType.APPLICATION_JSON)
     byte[] getSnap(SnapshotReq snapshotReq);
@@ -321,7 +321,7 @@ public interface MediaHttpClient {
     /**
      * 获取Rtp发送列表
      */
-    @GET
+    @POST
     @Path("/listRtpSender")
     @Produces(MediaType.APPLICATION_JSON)
     RtpSenderListResult listRtpSender(MediaReq req);

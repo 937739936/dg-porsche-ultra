@@ -111,6 +111,7 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
     public IPage<DeviceChannelPage> getPage(DeviceChannelPageParam param) {
         return baseMapper.selectPage(param.toPage(), new LambdaQueryWrapper<DeviceChannel>()
                 .eq(DeviceChannel::getDeviceId, param.getDeviceId())
+                .eq(param.getOnline() != null, DeviceChannel::getOnline, param.getOnline())
                 .eq(StringUtils.isNotBlank(param.getName()), DeviceChannel::getName, param.getName()))
                 .convert(item -> {
                     DeviceChannelPage deviceChannelPage = deviceChannelConvert.toDeviceChannelPage(item);

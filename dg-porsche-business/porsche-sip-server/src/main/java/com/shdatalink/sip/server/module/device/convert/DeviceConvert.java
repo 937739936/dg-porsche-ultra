@@ -10,11 +10,17 @@ import com.shdatalink.sip.server.module.user.vo.UserDetailVO;
 import com.shdatalink.sip.server.module.user.vo.UserInfo;
 import com.shdatalink.sip.server.module.user.vo.UserPage;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
 
 @Mapper(config = QuarkusMappingConfig.class)
 public interface DeviceConvert {
 
+    @Mappings({
+            @Mapping(target = "manufacturer", ignore = true),
+            @Mapping(target = "deviceType", ignore = true),
+    })
     DeviceAddParam toDeviceAddParam(DeviceImportVO row);
 
     DevicePage toDevicePage(Device item);

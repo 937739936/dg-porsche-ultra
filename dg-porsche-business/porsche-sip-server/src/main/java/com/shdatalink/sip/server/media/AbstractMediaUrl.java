@@ -39,9 +39,19 @@ public abstract class AbstractMediaUrl implements MediaUrl {
         throw new RuntimeException("not supported");
     }
 
+    protected DevicePreviewPlayVO buildInner(String stream, String sign, String ext) {
+        String mediaIp = sipConfigProperties.media().ip();
+        int mediaPort = sipConfigProperties.media().port();
+        return build(stream, mediaIp, mediaPort, sign, ext);
+    }
+
     protected DevicePreviewPlayVO build(String stream, String sign, String ext) {
         String mediaIp = sipConfigProperties.server().wanIp();
         int mediaPort = sipConfigProperties.media().port();
+        return build(stream, mediaIp, mediaPort, sign, ext);
+    }
+    protected DevicePreviewPlayVO build(String stream, String mediaIp, Integer mediaPort, String sign, String ext) {
+
         ServerNodeConfigResult serverConfig = mediaService.getFirstServerNodeConfig();
 
         DevicePreviewPlayVO vo = new DevicePreviewPlayVO();

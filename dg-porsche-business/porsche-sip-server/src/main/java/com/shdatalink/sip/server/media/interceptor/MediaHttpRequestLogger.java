@@ -6,6 +6,7 @@ import jakarta.ws.rs.client.ClientRequestFilter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.net.URI;
 
 @Slf4j
 public class MediaHttpRequestLogger implements ClientRequestFilter {
@@ -13,12 +14,12 @@ public class MediaHttpRequestLogger implements ClientRequestFilter {
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
         if (requestContext.getEntity() != null) {
-            String entityJson = JsonUtil.toJsonString(requestContext.getEntity());
             log.info("=== 请求数据 ===");
             log.info("url: {}", requestContext.getUri());
             log.info("原始对象: {}", requestContext.getEntity());
-            log.info("BODY: {}", entityJson);
+            String entityJson = JsonUtil.toJsonString(requestContext.getEntity());
             requestContext.setEntity(entityJson);
+            log.info("BODY: {}", entityJson);
         }
     }
 }

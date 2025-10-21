@@ -44,6 +44,6 @@ public class GBMediaUrl extends AbstractMediaUrl {
     @Override
     public String snapshot(Integer channelPrimaryId) {
         String stream = StreamFactory.streamId(InviteTypeEnum.Play, channelPrimaryId.toString());
-        return build(stream, SNAPSHOT_TOKEN, "").getRtspUrl();
+        return buildInner(stream, SNAPSHOT_TOKEN, "").getRtspUrl();
     }
 }
