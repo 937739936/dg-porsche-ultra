@@ -78,7 +78,6 @@ public class SipServerConfiguration {
     @ApplicationScoped
     @Named("sipStack")
     public SipStackImpl createSipStackImpl(SipConfigProperties sipConfig, SipFactory sipFactory) throws PeerUnavailableException {
-        SipStackImpl sipStack = null;
         try {
             SipConfigProperties.SipServerConf server = sipConfig.server();
             if (Objects.isNull(server) || StringUtils.isEmpty(server.domain()) || StringUtils.isEmpty(server.id())) {
@@ -87,15 +86,15 @@ public class SipServerConfiguration {
             String ip = StringUtils.isEmpty(server.ip()) ? "0.0.0.0" : server.ip();
             String level = Optional.ofNullable(sipConfig.logs()).orElse("OFF");
             Properties sipProperties = getProperties(ip, level);
-            sipStack = (SipStackImpl) sipFactory.createSipStack(sipProperties);
+            SipStackImpl sipStack = (SipStackImpl) sipFactory.createSipStack(sipProperties);
             sipStack.setMessageParserFactory(new GbStringMsgParserFactory());
             sipStack.setStackName("gb_starter");
             log.info("sipStack bean created.");
+            return sipStack;
         } catch (Exception e) {
             log.error("创建 SipStackImpl 失败", e);
             throw new RuntimeException(e);
         }
-        return sipStack;
     }
 
     @Startup
@@ -114,13 +113,10 @@ public class SipServerConfiguration {
             tcpSipProvider.addSipListener(sipProcessor);
             log.info("\033[36;2m「SIP」 tcp://{}:{} 启动成功\033[36;0m", ip, port);
             return tcpSipProvider;
-        } catch (TransportNotSupportedException
-                 | ObjectInUseException
-                 | TooManyListenersException
-                 | InvalidArgumentException e) {
+        } catch (Exception e) {
             log.error("\033[31;2m[SIP] tcp://{}:{} SIP服务启动失败,请检查端口是否被占用或者ip是否正确\033[31;0m", ip, port);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
 
@@ -139,13 +135,10 @@ public class SipServerConfiguration {
             udpSipProvider.addSipListener(sipProcessor);
             log.info("\033[36;2m「SIP」 upd://{}:{} 启动成功\033[36;0m", ip, port);
             return udpSipProvider;
-        } catch (TransportNotSupportedException
-                 | ObjectInUseException
-                 | TooManyListenersException
-                 | InvalidArgumentException e) {
+        } catch (Exception e) {
             log.error("\033[31;2m[SIP] upd://{}:{} SIP服务启动失败,请检查端口是否被占用或者ip是否正确\033[31;0m", ip, port);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
 

@@ -37,6 +37,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.io.IOException;
@@ -397,9 +398,14 @@ public class MediaHookService {
         if (action == InviteTypeEnum.Playback) {
         }else{
             String viewerStr = redisUtil.get(RedisKeyConstants.PUSH_STREAM_VIEWER + playReq.getStream());
-            List<MediaViewerDTO> playReqs = JsonUtil.parseObject(viewerStr, new TypeReference<>() {
-            });
-            if(CollectionUtils.isEmpty(playReqs)){
+            List<MediaViewerDTO> playReqs;
+            if (StringUtils.isNotBlank(viewerStr)) {
+                playReqs = JsonUtil.parseObject(viewerStr, new TypeReference<>() {
+                });
+                if (playReqs == null) {
+                    playReqs = new ArrayList<>();
+                }
+            } else {
                 playReqs = new ArrayList<>();
             }
             MediaViewerDTO mediaViewerDTO = pushStreamConvert.convert(playReq);

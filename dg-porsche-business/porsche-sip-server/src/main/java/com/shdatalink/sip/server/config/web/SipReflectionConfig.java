@@ -10,6 +10,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
                 gov.nist.javax.sip.SipStackImpl.class,
                 gov.nist.javax.sip.UtilsExt.class,
                 gov.nist.core.LogWriter.class,
+                gov.nist.javax.sip.header.ExtensionHeaderList.class,
                 gov.nist.javax.sip.stack.ServerLog.class,
                 gov.nist.javax.sip.stack.DefaultTlsSecurityPolicy.class,
                 gov.nist.javax.sip.stack.SIPTransactionStack.class,
