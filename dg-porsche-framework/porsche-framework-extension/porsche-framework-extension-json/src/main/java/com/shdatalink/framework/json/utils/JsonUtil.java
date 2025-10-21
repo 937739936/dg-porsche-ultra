@@ -60,30 +60,12 @@ public class JsonUtil {
             return null;
         }
         try {
-            // 针对原生镜像环境，提前校验类是否可实例化（辅助排查问题）
-            checkClassForDeserialization(clazz);
             return OBJECT_MAPPER.readValue(text, clazz);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    /**
-     * 辅助检查类是否适合反序列化（非必须，但可提前暴露问题）
-     */
-    private static <T> void checkClassForDeserialization(Class<T> clazz) {
-        // 检查是否为接口或抽象类（无法直接实例化）
-        if (clazz.isInterface() || java.lang.reflect.Modifier.isAbstract(clazz.getModifiers())) {
-            throw new IllegalArgumentException("目标类 " + clazz.getName() + " 是接口或抽象类，无法直接反序列化");
-        }
-        // 检查是否有可访问的构造方法（简单校验，实际反序列化可能依赖更多条件）
-        try {
-            clazz.getDeclaredConstructor(); // 检查无参构造是否存在
-        } catch (NoSuchMethodException e) {
-            // 仅作为警告提示，因为可能通过 @JsonCreator 注解使用有参构造
-            log.warn("警告：类 " + clazz.getName() + " 未找到无参构造方法，若未使用 @JsonCreator 可能导致反序列化失败");
-        }
-    }
 
     /**
      * 将JSON格式的字符串转换为指定类型的对象，支持复杂类型
