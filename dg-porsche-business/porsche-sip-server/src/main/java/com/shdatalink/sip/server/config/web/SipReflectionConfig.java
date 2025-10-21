@@ -501,7 +501,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
                 gov.nist.javax.sip.stack.DefaultRouter.class,
                 gov.nist.javax.sip.stack.NioTcpMessageProcessor.PendingData.class,
                 gov.nist.javax.sip.stack.MessageProcessor.class,
-                gov.nist.javax.sip.stack.sctp.SCTPMessageProcessor.class,
+//                gov.nist.javax.sip.stack.sctp.SCTPMessageProcessor.class,
 //        gov.nist.javax.sip.stack.sctp.SCTPMessageChannel.class,
                 gov.nist.javax.sip.stack.SIPMessageValve.class,
                 gov.nist.javax.sip.stack.MessageChannel.class,
