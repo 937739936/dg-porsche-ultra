@@ -8,6 +8,7 @@ import com.shdatalink.sip.server.module.device.vo.*;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 
 
@@ -89,7 +90,7 @@ public class DevicePreviewController {
      */
     @GET
     @Path("getPreset")
-    public DevicePreviewPresetVO getPreset(@QueryParam("id") @NotBlank Integer id) {
+    public DevicePreviewPresetVO getPreset(@QueryParam("id") @NotNull Integer id) {
         return userScreenService.getDetail(id);
     }
 

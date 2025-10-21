@@ -153,44 +153,6 @@ public class DeviceSchedule {
                     }
                 });
     }
-//
-//    @Scheduled(cron = "0 */2 * * * ?")
-//    public void snapshotExistsStream() {
-//        for (MediaData mediaData : mediaHttpClient.getMediaList()) {
-//            String stream = mediaData.getStream();
-//            DeviceChannel channel = deviceChannelMapper.selectById(devicePlayService.extractStream(stream));
-//            if (channel == null) {
-//                continue;
-//            }
-//            String rtspUrl;
-//            Device device = deviceMapper.selectByDeviceId(channel.getDeviceId());
-//            if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
-//                rtspUrl = devicePlayService.snapShotUrl(devicePlayService.streamId(InviteTypeEnum.Play, channel.getId().toString()));
-//            }else if(device.getProtocolType() == ProtocolTypeEnum.PULL){
-//                rtspUrl = device.getStreamUrl();
-//            }else if(device.getProtocolType() == ProtocolTypeEnum.RTMP){
-//                rtspUrl = devicePlayService.getRtspPlayUrl(channel.getDeviceId(), channel.getChannelId(), channel.getId().toString(), InviteTypeEnum.Rtmp);
-//            }else{
-//                log.warn("设备不支持拉流，无法截图，deviceId: {}, protocolType: {}", device.getDeviceId(), device.getProtocolType());
-//                return;
-//            }
-//            SnapshotReq req = new SnapshotReq();
-//            req.setUrl(rtspUrl);
-//            req.setTimeoutSec(30);
-//            req.setExpireSec(60);
-//            byte[] snap = mediaHttpClient.getSnap(req);
-//            String snapPath = sipConfigProperties.getMedia().getSnapPath();
-//            try {
-//                if (!Files.exists(Paths.get(snapPath))) {
-//                    Files.createDirectories(Paths.get(snapPath));
-//                }
-//                Files.write(Paths.get(snapPath, channel.getDeviceId() + "_" + channel.getChannelId() + ".jpg"), snap);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//    }
 
     /**
      * 刷新订阅
