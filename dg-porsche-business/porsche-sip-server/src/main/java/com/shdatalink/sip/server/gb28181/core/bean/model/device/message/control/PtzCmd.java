@@ -2,6 +2,7 @@ package com.shdatalink.sip.server.gb28181.core.bean.model.device.message.control
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.control.enums.ControlCmdType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @SuperBuilder
 @Data
+@RegisterForReflection
 public class PtzCmd extends ControlMessage{
     @Builder.Default
     private ControlCmdType cmdType = ControlCmdType.DeviceControl;

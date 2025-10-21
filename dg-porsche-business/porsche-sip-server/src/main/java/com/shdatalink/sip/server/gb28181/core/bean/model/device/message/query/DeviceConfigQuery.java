@@ -1,11 +1,13 @@
 package com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Data
+@RegisterForReflection
 public class DeviceConfigQuery extends QueryMessage {
     /**
      * 图像抓拍配置

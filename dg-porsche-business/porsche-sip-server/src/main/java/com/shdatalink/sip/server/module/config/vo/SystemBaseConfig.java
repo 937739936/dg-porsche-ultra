@@ -1,5 +1,6 @@
 package com.shdatalink.sip.server.module.config.vo;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
 
@@ -7,6 +8,7 @@ import lombok.Data;
  * 系统基础配置
  */
 @Data
+@RegisterForReflection
 public class SystemBaseConfig {
     /**
      * 平台名称

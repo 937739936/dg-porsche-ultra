@@ -3,12 +3,14 @@ package com.shdatalink.sip.server.gb28181.core.bean.model.device.message.control
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.control.enums.ControlCmdType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Data
+@RegisterForReflection
 public class VideoParamAttribute extends ControlMessage {
     @Builder.Default
     private ControlCmdType cmdType = ControlCmdType.DeviceConfig;

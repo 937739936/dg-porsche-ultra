@@ -1,5 +1,6 @@
 package com.shdatalink.sip.server.module.config.vo;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
  * 录像配置
  */
 @Data
+@RegisterForReflection
 public class VideoRecordConfig {
     /**
      * 录像保存路径

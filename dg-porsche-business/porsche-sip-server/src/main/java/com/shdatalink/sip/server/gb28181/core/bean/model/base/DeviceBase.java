@@ -1,6 +1,7 @@
 package com.shdatalink.sip.server.gb28181.core.bean.model.base;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@RegisterForReflection
 public class DeviceBase {
     @JacksonXmlProperty(localName = "CmdType")
     private String cmdType;

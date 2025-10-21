@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.DeviceBase;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.MessageStating;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @JacksonXmlRootElement(localName = "Response")
+@RegisterForReflection
 public class RecordInfo extends DeviceBase implements MessageStating<RecordInfo> {
     /**
      * 设备/区域名称（必选）

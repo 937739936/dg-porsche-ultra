@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.shdatalink.framework.common.utils.QuarkusUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.ParameterizedType;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 /**
  * JSON 工具类
  */
+@Slf4j
 public class JsonUtil {
 
     private static final ObjectMapper OBJECT_MAPPER = QuarkusUtil.getBean(ObjectMapper.class);
@@ -53,7 +55,7 @@ public class JsonUtil {
      * @return 转换后的对象，如果字符串为空则返回null
      * @throws RuntimeException 如果转换过程中发生IO异常，则抛出运行时异常
      */
-        public static <T> T parseObject(String text, Class<T> clazz) {
+    public static <T> T parseObject(String text, Class<T> clazz) {
         if (StringUtils.isBlank(text)) {
             return null;
         }
@@ -63,6 +65,7 @@ public class JsonUtil {
             throw new RuntimeException(e);
         }
     }
+
 
     /**
      * 将JSON格式的字符串转换为指定类型的对象，支持复杂类型
@@ -156,7 +159,7 @@ public class JsonUtil {
     /**
      * 容错转换：忽略大小写、空格、下划线
      */
-    private static  <E extends Enum<E>> E normalizeAndConvert(String value, Class<E> enumCls) {
+    private static <E extends Enum<E>> E normalizeAndConvert(String value, Class<E> enumCls) {
         if (value == null) {
             return null;
         }
