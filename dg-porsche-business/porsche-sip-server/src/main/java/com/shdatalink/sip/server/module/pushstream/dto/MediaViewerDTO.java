@@ -1,10 +1,16 @@
 package com.shdatalink.sip.server.module.pushstream.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@RegisterForReflection
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class MediaViewerDTO {
 
     /**
