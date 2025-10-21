@@ -296,7 +296,7 @@ public class VideoRecordService extends ServiceImpl<VideoRecordMapper, VideoReco
             VideoRecord record = diffOfDuration.record;
             if (i == 0) {
                 long duration = diffOfDuration.duration - diffOfDuration.diff;
-                if (diffOfDuration.diff < 5000) {
+                if (diffOfDuration.diff < 5000 && i + 1 < subList.size()) {
                     // 合并前两段视频
                     mergeTs = subList.get(i + 1).ts;
                     duration += subList.get(i + 1).duration;

@@ -1,6 +1,7 @@
 package com.shdatalink.sip.server.app.device;
 
 import com.shdatalink.framework.common.annotation.Anonymous;
+import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService;
@@ -91,6 +92,7 @@ public class AppRecordController {
     @Path("hls.m3u8")
     @GET
     @Anonymous
+    @IgnoredResultWrapper
     public void m3u8(@QueryParam("deviceId") @NotBlank String deviceId,
                      @QueryParam("channelId") @NotBlank String channelId,
                      @QueryParam("start") @NotNull LocalDateTime start,

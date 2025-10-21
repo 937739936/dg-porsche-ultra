@@ -1,6 +1,7 @@
 package com.shdatalink.sip.server.module.device;
 
 import com.shdatalink.framework.common.annotation.Anonymous;
+import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordService;
@@ -104,6 +105,7 @@ public class DeviceRecordController {
     @Path("hls.m3u8")
     @GET
     @Anonymous
+    @IgnoredResultWrapper
     public Response m3u8(@QueryParam("deviceId") @NotBlank String deviceId,
                          @QueryParam("channelId") @NotBlank String channelId,
                          @QueryParam("start") @NotNull LocalDateTime start,
