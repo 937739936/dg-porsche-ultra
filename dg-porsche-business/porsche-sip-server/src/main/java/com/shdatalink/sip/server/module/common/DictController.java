@@ -1,45 +1,58 @@
-package com.shdatalink.sip.server.module.common;
+package com.shdatalink.sip.server.app.common;
 
+import com.shdatalink.framework.common.exception.BaseResultCodeEnum;
+import com.shdatalink.framework.common.model.DictBean;
 import com.shdatalink.framework.common.model.IDict;
-import io.quarkus.runtime.StartupEvent;
-import jakarta.enterprise.event.Observes;
+import com.shdatalink.sip.server.gb28181.core.bean.constants.DeviceManufacturerEnum;
+import com.shdatalink.sip.server.gb28181.core.bean.constants.DeviceTypeEnum;
+import com.shdatalink.sip.server.gb28181.core.bean.constants.MediaStreamModeEnum;
+import com.shdatalink.sip.server.gb28181.core.bean.constants.TransportTypeEnum;
+import com.shdatalink.sip.server.module.alarmplan.enums.AlarmMethodEnum;
+import com.shdatalink.sip.server.module.alarmplan.enums.AlarmPriorityEnum;
+import com.shdatalink.sip.server.module.alarmplan.enums.AlarmTypeEnum;
+import com.shdatalink.sip.server.module.alarmplan.enums.EventTypeEnum;
+import com.shdatalink.sip.server.module.common.enums.EnableDisableEnum;
+import com.shdatalink.sip.server.module.common.enums.OperateLogTypeEnum;
+import com.shdatalink.sip.server.module.device.enums.MessageTypeEnum;
+import com.shdatalink.sip.server.module.device.enums.ProtocolTypeEnum;
+import com.shdatalink.sip.server.module.device.enums.PtzTypeEnum;
+import com.shdatalink.sip.server.module.device.enums.SIPProtocolEnum;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
+
 
 import java.util.*;
 
 /**
- * 通用接口/字典
+ * APP/通用接口/字典
  */
 @Path("admin/dict")
 public class DictController {
 
     private final static Map<String, Map<String, String>> dict = new HashMap<>();
 
-    void onStart(@Observes StartupEvent ev) {
-        Reflections reflections = new Reflections("com.shdatalink.sip", new SubTypesScanner(false));
-        Set<Class<? extends IDict>> iDictImplementers = reflections.getSubTypesOf(IDict.class);
-        for (Class<? extends IDict> implementer : iDictImplementers) {
-            // 过滤：只保留是枚举的类（使用 isEnum() 检查）
-            if (implementer.isEnum()) {
-                // 类型转换（安全，因为已确认是 Enum）
-                IDict[] constants = implementer.getEnumConstants();
-                if (constants == null) {
-                    continue;
-                }
-                Map<String, String> map = new LinkedHashMap<>();
-                for (IDict constant : constants) {
-                    map.put(constant.getCode().toString(), constant.getText());
-                }
-                dict.put(implementer.getSimpleName(), map);
-            }
+    static {
+        Set<Class<? extends IDict<?>>> classes = null;
+        try {
+            classes = scanEnums();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+        for (Class<? extends IDict> enumClass : classes) {
+            IDict[] constants = enumClass.getEnumConstants();
+            if (constants == null) continue;
+            Map<String, String> map = new LinkedHashMap<>();
+            for (IDict constant : constants) {
+                map.put(constant.getCode().toString(), constant.getText());
+            }
+            dict.put(enumClass.getSimpleName(), map);
+        }
+
     }
 
     /**
      * 查询所有字典
+     * @return
      */
     @GET
     @Path("all")
@@ -47,5 +60,24 @@ public class DictController {
         return dict;
     }
 
+    public static Set<Class<? extends IDict<?>>> scanEnums() {
+        Set<Class<? extends IDict<?>>> result = new HashSet<>();
+        result.add(EnableDisableEnum.class);
+        result.add(OperateLogTypeEnum.class);
+        result.add(AlarmMethodEnum.class);
+        result.add(AlarmPriorityEnum.class);
+        result.add(AlarmTypeEnum.class);
+        result.add(BaseResultCodeEnum.class);
+        result.add(DeviceManufacturerEnum.class);
+        result.add(DeviceTypeEnum.class);
+        result.add(EventTypeEnum.class);
+        result.add(MediaStreamModeEnum.class);
+        result.add(MessageTypeEnum.class);
+        result.add(ProtocolTypeEnum.class);
+        result.add(PtzTypeEnum.class);
+        result.add(SIPProtocolEnum.class);
+        result.add(TransportTypeEnum.class);
+        return result;
+    }
 
 }
