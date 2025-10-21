@@ -32,7 +32,6 @@ public class DevicePreviewController {
 
     /**
      * 设备列表树
-     * @return
      */
     @GET
     @Path("deviceList")
@@ -42,7 +41,6 @@ public class DevicePreviewController {
 
     /**
      * 设备通道
-     * @return
      */
     @GET
     @Path("channelList")
@@ -64,7 +62,6 @@ public class DevicePreviewController {
     /**
      * 查询快照
      * @param deviceId 设备id（国标）
-     * @return
      */
     @GET
     @Path("snapshot")
@@ -75,7 +72,6 @@ public class DevicePreviewController {
     /**
      * 查询实时快照
      * @param deviceId 设备id（国标）
-     * @return
      */
     @GET
     @Path("realTimeSnap")
@@ -85,8 +81,6 @@ public class DevicePreviewController {
 
     /**
      * 查询预设详情
-     * @param id
-     * @return
      */
     @GET
     @Path("getPreset")
@@ -96,8 +90,6 @@ public class DevicePreviewController {
 
     /**
      * 保存预设组
-     * @param param
-     * @return
      */
     @POST
     @Path("setPreset")
@@ -108,7 +100,6 @@ public class DevicePreviewController {
     /**
      * 预设列表
      * 只返回最近的10条
-     * @return
      */
     @GET
     @Path("presetList")
@@ -118,19 +109,15 @@ public class DevicePreviewController {
 
     /**
      * 删除预设
-     * @param id
-     * @return
      */
     @DELETE
     @Path("presetDelete")
-    public boolean deletePreset(@QueryParam("id") @NotBlank Integer id) {
+    public boolean deletePreset(@QueryParam("id") @NotNull Integer id) {
         return userScreenService.delete(id);
     }
 
     /**
      * 云台控制
-     * @param param
-     * @return
      */
     @POST
     @Path("ptzControl")
@@ -140,8 +127,6 @@ public class DevicePreviewController {
 
     /**
      * 云台控制开始
-     * @param param
-     * @return
      */
     @POST
     @Path("ptzControlStart")
@@ -151,8 +136,6 @@ public class DevicePreviewController {
 
     /**
      * 云台控制停止
-     * @param param
-     * @return
      */
     @POST
     @Path("ptzControlStop")
