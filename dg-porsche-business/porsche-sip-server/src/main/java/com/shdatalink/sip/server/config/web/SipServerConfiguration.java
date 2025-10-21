@@ -1,12 +1,13 @@
 package com.shdatalink.sip.server.config.web;
 
-import com.shdatalink.framework.common.exception.BizException;
+import com.shdatalink.framework.common.utils.QuarkusUtil;
 import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.SipConstant;
 import com.shdatalink.sip.server.gb28181.core.parser.GbStringMsgParserFactory;
 import gov.nist.javax.sip.SipProviderImpl;
 import gov.nist.javax.sip.SipStackImpl;
 import io.quarkus.runtime.Startup;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 import jakarta.ws.rs.Produces;
@@ -19,7 +20,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.TooManyListenersException;
 
-@Startup
 @ApplicationScoped
 @Slf4j
 public class SipServerConfiguration {
@@ -65,7 +65,6 @@ public class SipServerConfiguration {
         return properties;
     }
 
-    @Startup
     @Produces
     @ApplicationScoped
     @Named("sipFactory")
@@ -75,7 +74,6 @@ public class SipServerConfiguration {
         return instance;
     }
 
-    @Startup
     @Produces
     @ApplicationScoped
     @Named("sipStack")
@@ -109,6 +107,7 @@ public class SipServerConfiguration {
         String ip = StringUtils.isEmpty(server.ip()) ? "0.0.0.0" : server.ip();
         Integer port = server.port();
         try {
+
             ListeningPoint tcpListeningPoint = sipStack.createListeningPoint(ip, port, SipConstant.TransPort.TCP);
             SipProviderImpl tcpSipProvider = (SipProviderImpl) sipStack.createSipProvider(tcpListeningPoint);
             tcpSipProvider.setDialogErrorsAutomaticallyHandled();
@@ -124,11 +123,6 @@ public class SipServerConfiguration {
         return null;
     }
 
-//    @PreDestroy
-//    public void cleanup() {
-//        SipStack stack = QuarkusUtil.getBean(SipStack.class);
-//        stack.stop();
-//    }
 
     @Startup
     @Produces
@@ -152,6 +146,13 @@ public class SipServerConfiguration {
             log.error("\033[31;2m[SIP] upd://{}:{} SIP服务启动失败,请检查端口是否被占用或者ip是否正确\033[31;0m", ip, port);
         }
         return null;
+    }
+
+
+    @PreDestroy
+    public void cleanup() {
+        SipStack stack = QuarkusUtil.getBean(SipStack.class);
+        stack.stop();
     }
 
 }
