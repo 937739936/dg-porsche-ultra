@@ -4,12 +4,14 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.DeviceBase;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
 @JacksonXmlRootElement(localName = "Response")
+@RegisterForReflection
 public class ConfigDownload extends DeviceBase {
     /**
      * 基本参数
