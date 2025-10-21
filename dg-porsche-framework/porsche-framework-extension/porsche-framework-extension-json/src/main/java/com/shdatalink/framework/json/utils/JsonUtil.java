@@ -3,10 +3,14 @@ package com.shdatalink.framework.json.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.shdatalink.framework.common.utils.QuarkusUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,9 +78,31 @@ public class JsonUtil {
             return null;
         }
         try {
-            return OBJECT_MAPPER.readValue(text, typeReference);
+            Type type = extractTypeFromTypeReference(typeReference);
+            JavaType javaType = TypeFactory.defaultInstance().constructType(type);
+            return OBJECT_MAPPER.readValue(text, javaType);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 从 TypeReference 中提取 Type 信息
+     */
+    private static Type extractTypeFromTypeReference(TypeReference<?> typeReference) {
+        try {
+            // TypeReference 通常通过匿名内部类实现，我们可以获取其泛型信息
+            Type genericSuperclass = typeReference.getClass().getGenericSuperclass();
+            if (genericSuperclass instanceof ParameterizedType) {
+                ParameterizedType paramType = (ParameterizedType) genericSuperclass;
+                Type[] actualTypeArguments = paramType.getActualTypeArguments();
+                if (actualTypeArguments.length > 0) {
+                    return actualTypeArguments[0];
+                }
+            }
+            throw new IllegalArgumentException("Invalid TypeReference: " + typeReference);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot extract type from TypeReference", e);
         }
     }
 

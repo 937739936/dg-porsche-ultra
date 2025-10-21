@@ -14,6 +14,8 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
                 gov.nist.javax.sip.stack.ServerLog.class,
                 gov.nist.javax.sip.stack.DefaultTlsSecurityPolicy.class,
                 gov.nist.javax.sip.stack.SIPTransactionStack.class,
+                gov.nist.javax.sip.address.AddressFactoryEx.class,
+                gov.nist.javax.sip.address.AddressFactoryImpl.class,
                 gov.nist.javax.sip.message.MessageExt.class,
                 gov.nist.javax.sip.stack.MessageProcessorFactory.class,
                 gov.nist.javax.sip.stack.NioMessageProcessorFactory.class,

@@ -1,7 +1,11 @@
 package com.shdatalink.sip.server.module;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.shdatalink.framework.common.annotation.CheckPermission;
 import com.shdatalink.framework.common.enums.CheckPermissionMode;
+import com.shdatalink.framework.common.model.IDict;
+import com.shdatalink.framework.json.utils.JsonUtil;
+import com.shdatalink.sip.server.module.pushstream.dto.MediaViewerDTO;
 import com.shdatalink.sip.server.module.user.convert.UserConvert;
 import com.shdatalink.sip.server.module.user.entity.User;
 import com.shdatalink.sip.server.module.user.vo.UserInfo;
@@ -38,11 +42,14 @@ public class ExampleResource {
     }
 
 
-//    @Path("/getDict")
-//    @GET
-//    public List<Class<? extends IDict<?>>>  getDictEnums() {
-//        return dictEnumRegistry.getDictEnums();
-//    }
+    @Path("/getDict")
+    @GET
+    public List<MediaViewerDTO> getDictEnums() {
+        String json = "[{\"id\":\"298-65\",\"app\":\"rtp\",\"ip\":\"127.0.0.1\",\"port\":58812,\"schema\":\"rtsp\",\"protocol\":\"rtsp\",\"stream\":\"0100000128\",\"playTime\":\"2025-10-21 14:16:14\"}]";
+        List<MediaViewerDTO> playReqs = JsonUtil.parseObject(json, new TypeReference<>() {
+        });
+        return playReqs;
+    }
 
     @Path("/mapstruct")
     @GET

@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@RegisterForReflection
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
