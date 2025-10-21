@@ -2,6 +2,8 @@ package com.shdatalink.sip.server.app.device.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.server.app.device.vo.AppDeviceChannelDetailVO;
@@ -16,11 +18,15 @@ import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceSnapService;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewSnapshot;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.io.IOException;
 
+@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.app.device.service.AppDeviceChannelService",
+        targets = {SerializedLambda.class, SFunction.class},
+        serialization = true)
 @ApplicationScoped
 public class AppDeviceChannelService extends ServiceImpl<DeviceChannelMapper, DeviceChannel> {
     @Inject

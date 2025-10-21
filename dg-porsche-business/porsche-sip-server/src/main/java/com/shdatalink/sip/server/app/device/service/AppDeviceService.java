@@ -2,6 +2,8 @@ package com.shdatalink.sip.server.app.device.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shdatalink.sip.server.app.device.vo.AppDevicePage;
 import com.shdatalink.sip.server.app.device.vo.AppDevicePageParam;
@@ -11,9 +13,13 @@ import com.shdatalink.sip.server.module.device.service.DeviceService;
 import com.shdatalink.sip.server.module.device.vo.PtzControlParam;
 import com.shdatalink.sip.server.module.device.vo.PtzControlStopParam;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.commons.lang3.StringUtils;
 
+@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.app.device.service.AppDeviceService",
+        targets = {SerializedLambda.class, SFunction.class},
+        serialization = true)
 @ApplicationScoped
 public class AppDeviceService extends ServiceImpl<DeviceMapper, Device> {
     private final DeviceService deviceService;
