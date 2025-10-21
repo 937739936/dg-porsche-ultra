@@ -4,8 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.shdatalink.framework.common.exception.BizException;
+import com.shdatalink.sip.server.media.MediaService;
+import com.shdatalink.sip.server.module.device.entity.Device;
+import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.entity.UserScreen;
 import com.shdatalink.sip.server.module.device.entity.UserScreenDevice;
+import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
 import com.shdatalink.sip.server.module.device.mapper.UserScreenMapper;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewPresetParam;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewPresetVO;
@@ -31,6 +35,14 @@ public class UserScreenService extends ServiceImpl<UserScreenMapper, UserScreen>
 
     @Inject
     UserScreenDeviceService userScreenDeviceService;
+
+    @Inject
+    DeviceChannelMapper deviceChannelMapper;
+    @Inject
+    MediaService mediaService;
+    @Inject
+    DeviceService deviceService;
+
 
     @Transactional
     public boolean save(DevicePreviewPresetParam param) {
@@ -81,14 +93,15 @@ public class UserScreenService extends ServiceImpl<UserScreenMapper, UserScreen>
         List<UserScreenDevice> screens = userScreenDeviceService.getByPresetId(id);
         DevicePreviewPresetVO vo = new DevicePreviewPresetVO();
         vo.setScreenCount(userScreen.getScreenCount());
-//        vo.setScreenList(
-//                screens.stream()
-//                        .map(s -> {
-//                            DeviceChannel channel = deviceChannelMapper.selectByDeviceIdAndChannelId(s.getDeviceId(), s.getChannelId());
-//                            if (channel == null) return null;
-//                            return devicePlayService.playUrl(s.getDeviceId(), s.getChannelId(), channel.getId().toString());
-//                        }).toList()
-//        );
+        vo.setScreenList(
+                screens.stream()
+                        .map(s -> {
+                            DeviceChannel channel = deviceChannelMapper.selectByDeviceIdAndChannelId(s.getDeviceId(), s.getChannelId());
+                            if (channel == null) return null;
+                            Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在，设备ID：" + channel.getDeviceId()));
+                            return mediaService.getPlayUrl(device.getProtocolType(), s.getDeviceId(), s.getChannelId(), channel.getId());
+                        }).toList()
+        );
         return vo;
     }
 
