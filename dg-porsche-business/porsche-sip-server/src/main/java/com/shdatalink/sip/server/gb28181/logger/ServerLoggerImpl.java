@@ -5,10 +5,12 @@ import gov.nist.core.ServerLogger;
 import gov.nist.core.StackLogger;
 import gov.nist.javax.sip.message.SIPMessage;
 import gov.nist.javax.sip.stack.SIPTransactionStack;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import javax.sip.SipStack;
 import java.util.Properties;
 
+@RegisterForReflection
 public class ServerLoggerImpl implements ServerLogger {
 
     private boolean showLog = true;

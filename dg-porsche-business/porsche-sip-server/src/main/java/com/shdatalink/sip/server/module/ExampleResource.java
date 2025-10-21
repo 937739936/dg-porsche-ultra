@@ -2,8 +2,6 @@ package com.shdatalink.sip.server.module;
 
 import com.shdatalink.framework.common.annotation.CheckPermission;
 import com.shdatalink.framework.common.enums.CheckPermissionMode;
-import com.shdatalink.framework.excel.annotation.ExcelProperty;
-import com.shdatalink.framework.excel.utils.ExcelUtil;
 import com.shdatalink.sip.server.module.user.convert.UserConvert;
 import com.shdatalink.sip.server.module.user.entity.User;
 import com.shdatalink.sip.server.module.user.vo.UserInfo;
@@ -65,31 +63,31 @@ public class ExampleResource {
         return true;
     }
 
-    @Path("excel/import")
-    @POST
-    public List<ContractImportVo> importExcel(@RestForm File file) throws Exception {
-        FileInputStream fileInputStream = new FileInputStream(file);
-        return ExcelUtil.importExcel(fileInputStream, ContractImportVo.class);
-    }
+//    @Path("excel/import")
+//    @POST
+//    public List<ContractImportVo> importExcel(@RestForm File file) throws Exception {
+//        FileInputStream fileInputStream = new FileInputStream(file);
+//        return ExcelUtil.importExcel(fileInputStream, ContractImportVo.class);
+//    }
+//
+//    @Path("excel/export")
+//    @GET
+//    public Response exportExcel() throws IOException, IllegalAccessException {
+//        List<ContractImportVo> dataList = new ArrayList<>();
+//        dataList.add(new ContractImportVo("001"));
+//        dataList.add(new ContractImportVo("002"));
+//        dataList.add(new ContractImportVo("003"));
+//        return ExcelUtil.exportExcel(dataList, "测试", ContractImportVo.class);
+//    }
 
-    @Path("excel/export")
-    @GET
-    public Response exportExcel() throws IOException, IllegalAccessException {
-        List<ContractImportVo> dataList = new ArrayList<>();
-        dataList.add(new ContractImportVo("001"));
-        dataList.add(new ContractImportVo("002"));
-        dataList.add(new ContractImportVo("003"));
-        return ExcelUtil.exportExcel(dataList, "测试", ContractImportVo.class);
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class ContractImportVo {
-
-        @ExcelProperty("合同编号")
-        private String contractNo;
-    }
+//    @Data
+//    @AllArgsConstructor
+//    @NoArgsConstructor
+//    public static class ContractImportVo {
+//
+//        @ExcelProperty("合同编号")
+//        private String contractNo;
+//    }
 
 
 }

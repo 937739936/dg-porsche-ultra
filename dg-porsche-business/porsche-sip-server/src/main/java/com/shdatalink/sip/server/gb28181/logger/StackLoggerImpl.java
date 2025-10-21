@@ -1,11 +1,14 @@
 package com.shdatalink.sip.server.gb28181.logger;
 
 import gov.nist.core.StackLogger;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LocationAwareLogger;
 
 import java.util.Properties;
 
+
+@RegisterForReflection
 public class StackLoggerImpl implements StackLogger {
 
 	/**

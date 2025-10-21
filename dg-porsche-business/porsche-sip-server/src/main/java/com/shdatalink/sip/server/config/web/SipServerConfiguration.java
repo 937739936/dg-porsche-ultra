@@ -1,16 +1,14 @@
 package com.shdatalink.sip.server.config.web;
 
-import com.shdatalink.framework.common.utils.QuarkusUtil;
+import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.SipConstant;
 import com.shdatalink.sip.server.gb28181.core.parser.GbStringMsgParserFactory;
 import gov.nist.javax.sip.SipProviderImpl;
 import gov.nist.javax.sip.SipStackImpl;
 import io.quarkus.runtime.Startup;
-import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
-import jakarta.inject.Singleton;
 import jakarta.ws.rs.Produces;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +19,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.TooManyListenersException;
 
+@Startup
 @ApplicationScoped
 @Slf4j
 public class SipServerConfiguration {
@@ -66,31 +65,46 @@ public class SipServerConfiguration {
         return properties;
     }
 
-    @Singleton
-    @Named("sipStack")
-    public SipStackImpl createSipStackImpl(SipConfigProperties sipConfig) throws PeerUnavailableException {
-        SipFactory sipFactory = SipFactory.getInstance();
-        sipFactory.setPathName("gov.nist");
+    @Startup
+    @Produces
+    @ApplicationScoped
+    @Named("sipFactory")
+    public SipFactory sipFactory() {
+        SipFactory instance = SipFactory.getInstance();
+        instance.setPathName("gov.nist");
+        return instance;
+    }
 
-        SipConfigProperties.SipServerConf server = sipConfig.server();
-        if (Objects.isNull(server) || StringUtils.isEmpty(server.domain()) || StringUtils.isEmpty(server.id())) {
-            throw new RuntimeException("sip.server.id 或 sip.server.domain 不能为空");
+    @Startup
+    @Produces
+    @ApplicationScoped
+    @Named("sipStack")
+    public SipStackImpl createSipStackImpl(SipConfigProperties sipConfig, SipFactory sipFactory) throws PeerUnavailableException {
+        SipStackImpl sipStack = null;
+        try {
+            SipConfigProperties.SipServerConf server = sipConfig.server();
+            if (Objects.isNull(server) || StringUtils.isEmpty(server.domain()) || StringUtils.isEmpty(server.id())) {
+                throw new RuntimeException("sip.server.id 或 sip.server.domain 不能为空");
+            }
+            String ip = StringUtils.isEmpty(server.ip()) ? "0.0.0.0" : server.ip();
+            String level = Optional.ofNullable(sipConfig.logs()).orElse("OFF");
+            Properties sipProperties = getProperties(ip, level);
+            sipStack = (SipStackImpl) sipFactory.createSipStack(sipProperties);
+            sipStack.setMessageParserFactory(new GbStringMsgParserFactory());
+            sipStack.setStackName("gb_starter");
+            log.info("sipStack bean created.");
+        } catch (Exception e) {
+            log.error("创建 SipStackImpl 失败", e);
+            throw new RuntimeException(e);
         }
-        String ip = StringUtils.isEmpty(server.ip()) ? "0.0.0.0" : server.ip();
-        String level = Optional.ofNullable(sipConfig.logs()).orElse("OFF");
-        Properties sipProperties = getProperties(ip, level);
-        SipStackImpl sipStack = (SipStackImpl) sipFactory.createSipStack(sipProperties);
-        sipStack.setMessageParserFactory(new GbStringMsgParserFactory());
-        sipStack.setStackName("gb_starter");
         return sipStack;
     }
 
-
     @Startup
-    @Singleton
+    @Produces
+    @ApplicationScoped
     @Named("tcpSipProvider")
-    public SipProviderImpl startTcpListener(SipConfigProperties sipConfig, SipListener sipProcessor) throws PeerUnavailableException {
-        SipStackImpl sipStack = createSipStackImpl(sipConfig);
+    public SipProviderImpl startTcpListener(SipConfigProperties sipConfig, SipStackImpl sipStack, SipListener sipProcessor) throws PeerUnavailableException {
         SipConfigProperties.SipServerConf server = sipConfig.server();
         String ip = StringUtils.isEmpty(server.ip()) ? "0.0.0.0" : server.ip();
         Integer port = server.port();
@@ -110,18 +124,17 @@ public class SipServerConfiguration {
         return null;
     }
 
-    @PreDestroy
-    public void cleanup() {
-        SipStack stack = QuarkusUtil.getBean(SipStack.class);
-        stack.stop();
-    }
-
+//    @PreDestroy
+//    public void cleanup() {
+//        SipStack stack = QuarkusUtil.getBean(SipStack.class);
+//        stack.stop();
+//    }
 
     @Startup
-    @Singleton
+    @Produces
+    @ApplicationScoped
     @Named("udpSipProvider")
-    public SipProviderImpl startUdpListener(SipConfigProperties sipConfig, SipListener sipProcessor) throws PeerUnavailableException {
-        SipStackImpl sipStack = createSipStackImpl(sipConfig);
+    public SipProviderImpl startUdpListener(SipConfigProperties sipConfig, SipStackImpl sipStack, SipListener sipProcessor) throws PeerUnavailableException {
         SipConfigProperties.SipServerConf server = sipConfig.server();
         String ip = StringUtils.isEmpty(server.ip()) ? "0.0.0.0" : server.ip();
         Integer port = server.port();
@@ -141,16 +154,4 @@ public class SipServerConfiguration {
         return null;
     }
 
-//    @Produces
-//    @Named("executor")
-//    public Executor executor() {
-//        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-//        executor.setCorePoolSize(5);       // 核心线程数
-//        executor.setMaxPoolSize(200);       // 最大线程数
-//        executor.setQueueCapacity(1000);     // 队列容量
-//        executor.setKeepAliveSeconds(60);  // 线程空闲时间
-//        executor.setThreadNamePrefix("taskExecutor-"); // 线程名前缀
-//        executor.initialize();
-//        return executor;
-//    }
 }
