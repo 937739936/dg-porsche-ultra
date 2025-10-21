@@ -1,0 +1,140 @@
+package com.shdatalink.sip.server.app.device;
+
+import com.shdatalink.framework.common.annotation.Anonymous;
+import com.shdatalink.framework.common.exception.BizException;
+import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
+import com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService;
+import com.shdatalink.sip.server.module.plan.service.VideoRecordService;
+import com.shdatalink.sip.server.module.plan.vo.VideoRecordTimeLineVO;
+import io.vertx.ext.web.RoutingContext;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+/**
+ * APP/回放
+ */
+@Path("app/device/record")
+public class AppRecordController {
+    @Inject
+    VideoRecordService videoRecordService;
+    @Inject
+    VideoRecordRemoteService videoRecordRemoteService;
+
+    /**
+     * 录像回放-时间线
+     *
+     * @param deviceId  设备id
+     * @param channelId 通道id
+     * @param date 日期
+     * @param type local:本地 remote:远端
+     * @return
+     */
+    @Path("timeline")
+    @GET
+    public List<VideoRecordTimeLineVO> timeline(@QueryParam("deviceId") @NotBlank String deviceId,
+                                                @QueryParam("channelId") @NotBlank String channelId,
+                                                @QueryParam("date") @NotNull LocalDate date,
+                                                @QueryParam("type") @NotBlank String type
+    ) {
+        if (type.equals("local")) {
+            return videoRecordService.timeline(deviceId, channelId, date);
+        } else {
+            try {
+                return videoRecordRemoteService.timeline(deviceId, channelId, date);
+            } catch (BizException e) {
+                return new ArrayList<>();
+            }
+        }
+    }
+
+    /**
+     * 录像回放url
+     *
+     * @param deviceId  设备id
+     * @param channelId 通道id
+     * @param start 开始播放时间
+     * @param type local:本地 remote:远端
+     * @return
+     */
+    @Path("playbackUrl")
+    @GET
+    public DevicePreviewPlayVO play(@QueryParam("deviceId") @NotBlank String deviceId,
+                                    @QueryParam("channelId") @NotBlank String channelId,
+                                    @QueryParam("start") @NotNull LocalDateTime start,
+                                    @QueryParam("type") @NotBlank String type
+    ) throws IOException, InterruptedException {
+        if (type.equals("remote")) {
+            return videoRecordRemoteService.playback(deviceId, channelId, start);
+        } else {
+            return videoRecordService.playback(deviceId, channelId, start);
+        }
+    }
+
+    /**
+     * m3u8链接
+     * @param deviceId
+     * @param channelId
+     * @param start
+     * @param end
+     * @return
+     */
+    @Path("hls.m3u8")
+    @GET
+    @Anonymous
+    public void m3u8(@QueryParam("deviceId") @NotBlank String deviceId,
+                     @QueryParam("channelId") @NotBlank String channelId,
+                     @QueryParam("start") @NotNull LocalDateTime start,
+                     @QueryParam("end") LocalDateTime end
+    ) throws IOException, InterruptedException {
+        videoRecordService.m3u8(deviceId, channelId, start, end);
+    }
+
+    @Path("ts/{recordId}/{offset}/{diff}/{merge}/{fileName}")
+    @GET
+    @Anonymous
+    public void ts(@PathParam("recordId") Integer recordId,
+                   @PathParam("offset") Long offset,
+                   @PathParam("diff") Float diff,
+                   @PathParam("merge") String merge,
+                   @PathParam("fileName") String fileName,
+                   @HeaderParam(value = "range") String range,
+                   RoutingContext context
+    ) throws IOException, InterruptedException {
+        videoRecordService.ts(recordId, offset, diff, merge, fileName, range, context);
+    }
+
+    /**
+     * 下载mp4文件
+     * @param deviceId
+     * @param channelId
+     * @param start
+     * @param end
+     * @param type local:本地 remote:远端
+     * @throws IOException
+     */
+    @Path("download")
+    @GET
+    public void download(@QueryParam("deviceId") @NotBlank String deviceId,
+                         @QueryParam("channelId") @NotBlank String channelId,
+                         @QueryParam("start") @NotNull LocalDateTime start,
+                         @QueryParam("end") @NotNull LocalDateTime end,
+                         @QueryParam("type") @NotBlank String type,
+                         RoutingContext context
+    ) throws IOException, InterruptedException, TimeoutException, ExecutionException {
+        if (type.equals("local")) {
+            videoRecordService.download(deviceId, channelId, start, end, context);
+        } else {
+            videoRecordRemoteService.download(deviceId, channelId, start, end, context);
+        }
+    }
+}
