@@ -84,10 +84,10 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
                             channel.setPtzType(PtzTypeEnum.getByIdentifier(deviceCatalogItem.getInfo().getPTZType()));
                         }
                         boolean online = "ON".equals(deviceCatalogItem.getStatus());
-                        channel.setOnline(online);
                         if (online != channel.getOnline()) {
                             publisher.fireAsync(new DeviceOnlineEvent(deviceId, deviceCatalogItem.getDeviceId(), online));
                         }
+                        channel.setOnline(online);
                         updateById(channel);
                         updateOnline(channel.getId(), online);
                     });
@@ -199,6 +199,13 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
 
     public void setDeviceOffline(String deviceId) {
         baseMapper.setDeviceOffline(deviceId);
+        baseMapper.selectByDeviceId(deviceId)
+                .forEach(channel -> {
+                    updateOnline(channel.getId(), false);
+                    if (channel.getRegisterTime() != null) {
+                        publisher.fireAsync(new DeviceOnlineEvent(channel.getDeviceId(), channel.getChannelId(), false));
+                    }
+                });
     }
 
     public void updateOnline(Integer id, boolean isOnline) {
