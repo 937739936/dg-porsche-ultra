@@ -1,6 +1,7 @@
 package com.shdatalink.sip.server.module.device;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.shdatalink.framework.common.annotation.Anonymous;
 import com.shdatalink.framework.common.annotation.CheckPermission;
 import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.framework.common.exception.BizException;
@@ -122,6 +123,7 @@ public class DeviceController {
     /**
      * 设备日志
      */
+    @Anonymous
     @GET
     @Path("logs")
     public IPage<DeviceLogsPage> logs(DeviceLogsPageParam param) {

@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shdatalink.framework.common.exception.BizException;
+import com.shdatalink.framework.excel.utils.ExcelUtil;
 import com.shdatalink.framework.redis.utils.RedisUtil;
 import com.shdatalink.sip.server.common.constants.RedisKeyConstants;
 import com.shdatalink.sip.server.config.SipConfigProperties;
@@ -469,8 +470,8 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
 
     public List<String> importDevice(File file) throws Exception {
         FileInputStream fileInputStream = new FileInputStream(file);
-//        List<DeviceImportVO> rows = ExcelUtil.importExcel(fileInputStream, DeviceImportVO.class);
-        List<DeviceImportVO> rows = new ArrayList<>();
+        List<DeviceImportVO> rows = ExcelUtil.importExcel(fileInputStream, DeviceImportVO.class);
+//        List<DeviceImportVO> rows = new ArrayList<>();
         if (rows.isEmpty()) {
             throw new BizException("文件为空，请填写文件内容");
         }

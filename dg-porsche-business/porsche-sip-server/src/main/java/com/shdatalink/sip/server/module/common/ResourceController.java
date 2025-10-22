@@ -3,12 +3,15 @@ package com.shdatalink.sip.server.module.common;
 import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.framework.common.exception.BizException;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.resteasy.reactive.RestQuery;
 
 
 import java.io.File;
@@ -30,7 +33,7 @@ public class ResourceController {
     @GET
     @Path("/files/{path:.*}")
     @IgnoredResultWrapper
-    public Response getFile(@PathParam("path") String requestPath, String fileName) {
+    public Response getFile(@NotBlank @PathParam("path") String requestPath, @QueryParam("fileName") String fileName) {
         String requestUri = "files" + File.separator + requestPath;
 
         log.info("文件请求拦截路径:{}", requestPath);

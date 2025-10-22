@@ -2,7 +2,9 @@ package com.shdatalink.sip.server.media.hook.resp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class PublishResp extends HookResp {
 

@@ -3,8 +3,10 @@ package com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
 
+@EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @Data
 @RegisterForReflection

@@ -1,7 +1,9 @@
 package com.shdatalink.sip.server.media.hook.resp;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class StreamNoneReaderResp extends HookResp {
 

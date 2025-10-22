@@ -3,7 +3,9 @@ package com.shdatalink.sip.server.module.plan.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.shdatalink.framework.mysql.entity.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("t_video_record_plan")
 public class VideoRecordPlan extends BaseEntity {

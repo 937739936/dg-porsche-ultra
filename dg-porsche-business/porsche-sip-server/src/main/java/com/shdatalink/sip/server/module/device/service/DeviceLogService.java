@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 
-@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.device.service.UserScreenDeviceService",
+@RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.device.service.DeviceLogService",
         targets = {SerializedLambda.class, SFunction.class},
         serialization = true)
 @Slf4j

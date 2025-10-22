@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.shdatalink.framework.mysql.entity.BaseEntity;
 import com.shdatalink.sip.server.module.common.enums.OperateLogTypeEnum;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 操作日志表
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("t_operate_log")
 public class OperateLog extends BaseEntity {

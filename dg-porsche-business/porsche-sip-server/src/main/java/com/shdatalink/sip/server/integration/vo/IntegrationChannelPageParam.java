@@ -4,9 +4,11 @@ import com.shdatalink.sip.server.common.dto.PageParamWithGet;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.QueryParam;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class IntegrationChannelPageParam extends PageParamWithGet {
     /**
