@@ -123,7 +123,6 @@ public class DeviceController {
     /**
      * 设备日志
      */
-    @Anonymous
     @GET
     @Path("logs")
     public IPage<DeviceLogsPage> logs(DeviceLogsPageParam param) {

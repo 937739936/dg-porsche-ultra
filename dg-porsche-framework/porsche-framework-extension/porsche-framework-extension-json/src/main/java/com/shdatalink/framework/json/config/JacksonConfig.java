@@ -1,6 +1,8 @@
 package com.shdatalink.framework.json.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -33,7 +35,14 @@ public class JacksonConfig implements ObjectMapperCustomizer {
     @Override
     public void customize(ObjectMapper objectMapper) {
         // 注册Java 8时间模块（处理LocalDate、LocalDateTime等）
-        objectMapper.registerModule(new JavaTimeModule());
+        SimpleModule timeModule = new JavaTimeModule()
+                .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATETIME_FORMAT)))
+                .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATETIME_FORMAT)))
+                .addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(DATE_FORMAT)))
+                .addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(DATE_FORMAT)))
+                .addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(TIME_FORMAT)))
+                .addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern(TIME_FORMAT)));
+        objectMapper.registerModule(timeModule);
 
         // 创建自定义模块
         SimpleModule customModule = new SimpleModule();
@@ -42,12 +51,12 @@ public class JacksonConfig implements ObjectMapperCustomizer {
         customModule.addSerializer(BigInteger.class, BigNumberSerializer.INSTANCE);
         customModule.addSerializer(BigDecimal.class, ToStringSerializer.instance);
 
-        customModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATETIME_FORMAT)));
-        customModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATETIME_FORMAT)));
-        customModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(DATE_FORMAT)));
-        customModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(DATE_FORMAT)));
-        customModule.addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(TIME_FORMAT)));
-        customModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern(TIME_FORMAT)));
+        // 设置输入时忽略在JSON字符串中存在但Java对象实际没有的属性
+        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        // 设置序列化和反序列化enum类型时toString可用
+        objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+        objectMapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
+        objectMapper.configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true);
 
         // 注册自定义模块到ObjectMapper
         objectMapper.registerModule(customModule);
