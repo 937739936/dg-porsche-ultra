@@ -85,8 +85,9 @@ public class UserController {
      */
     @POST
     @Path("save")
-    public void save(@Valid UserSaveParam param) {
+    public boolean save(@Valid UserSaveParam param) {
         userService.saveUser(param);
+        return true;
     }
 
     /**

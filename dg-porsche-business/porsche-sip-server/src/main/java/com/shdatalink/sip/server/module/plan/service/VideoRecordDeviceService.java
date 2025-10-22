@@ -63,7 +63,7 @@ public class VideoRecordDeviceService extends ServiceImpl<VideoRecordDeviceMappe
         Page<VideoRecordDevice> page = baseMapper.selectPage(
                 param.toPage(),
                 new LambdaQueryWrapper<VideoRecordDevice>()
-                        .exists("select 1 from t_device_channel where channel_id = t_video_record_device.channel_id")
+                        .exists("select 1 from t_device_channel where channel_id = t_video_record_device.channel_id and t_device_channel.register_time is not null")
                         .orderByDesc(VideoRecordDevice::getId)
                         .groupBy(VideoRecordDevice::getChannelId)
         );
