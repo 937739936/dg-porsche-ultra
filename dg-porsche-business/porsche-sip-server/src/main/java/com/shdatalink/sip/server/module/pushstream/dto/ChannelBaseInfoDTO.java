@@ -1,8 +1,10 @@
 package com.shdatalink.sip.server.module.pushstream.dto;
 
 import com.shdatalink.sip.server.module.device.enums.ProtocolTypeEnum;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
+@RegisterForReflection
 @Data
 public class ChannelBaseInfoDTO {
     /**
