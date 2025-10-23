@@ -111,7 +111,7 @@ public class AlarmRecordService extends ServiceImpl<AlarmRecordMapper, AlarmReco
 
             Path snapPath = deviceSnapService.getSnapPath(item.getDeviceId(), item.getChannelId());
             Path fileName = snapPath.getParent().resolve(item.getSn()).resolve(snapPath.getFileName());
-            DevicePreviewSnapshot snapshot = deviceSnapService.querySnapshot(fileName);
+            DevicePreviewSnapshot snapshot = deviceSnapService.querySnapshot(deviceSnapService.getPreviewPathFromOrigin(fileName));
             page.setBase64(snapshot.getBase64());
             return page;
         });

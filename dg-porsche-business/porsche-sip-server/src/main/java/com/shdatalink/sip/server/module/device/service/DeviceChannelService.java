@@ -29,6 +29,7 @@ import com.shdatalink.sip.server.module.device.mapper.DeviceMapper;
 import com.shdatalink.sip.server.module.device.vo.DeviceChannelPage;
 import com.shdatalink.sip.server.module.device.vo.DeviceChannelPageParam;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewInfoVO;
+import com.shdatalink.sip.server.module.device.vo.DevicePreviewSnapshot;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -62,6 +63,8 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
     DeviceChannelConvert deviceChannelConvert;
     @Inject
     MediaService mediaService;
+    @Inject
+    DeviceSnapService deviceSnapService;
 
     public Optional<DeviceChannel> findByDeviceIdAndChannelId(String deviceId, String channelId) {
         return baseMapper.selectOptByDeviceIdAndChannelId(deviceId, channelId);
@@ -119,6 +122,9 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
                     if(device != null){
                         deviceChannelPage.setProtocolType(device.getProtocolType());
                     }
+                    DevicePreviewSnapshot snapshot = deviceSnapService.queryPreview(item.getDeviceId(), item.getChannelId());
+                    deviceChannelPage.setBase64(snapshot.getBase64());
+                    deviceChannelPage.setSnapTime(snapshot.getCreateTime());
                     return deviceChannelPage;
                 });
     }

@@ -9,7 +9,6 @@ import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.framework.json.utils.JsonUtil;
 import com.shdatalink.framework.redis.utils.RedisUtil;
 import com.shdatalink.sip.server.common.constants.RedisKeyConstants;
-import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.InviteTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
@@ -25,6 +24,7 @@ import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.enums.ProtocolTypeEnum;
 import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
 import com.shdatalink.sip.server.module.device.mapper.DeviceMapper;
+import com.shdatalink.sip.server.module.device.service.DeviceSnapService;
 import com.shdatalink.sip.server.module.pushstream.dto.ChannelBaseInfoDTO;
 import com.shdatalink.sip.server.module.pushstream.dto.MediaViewerDTO;
 import com.shdatalink.sip.server.module.pushstream.enums.CodecTypeEnum;
@@ -38,10 +38,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -63,11 +59,11 @@ public class PushStreamService {
     @Inject
     MediaService mediaService;
     @Inject
-    SipConfigProperties sipConfigProperties;
-    @Inject
     RedisUtil redisUtil;
     @Inject
     DeviceMapper deviceMapper;
+    @Inject
+    DeviceSnapService deviceSnapService;
 
     public IPage<PushStreamPageResp> page(Integer page, Integer pageSize) {
         List<MediaListResult> mediaListResults = mediaService.listMedia();
@@ -97,16 +93,7 @@ public class PushStreamService {
             resp.setDeviceId(onlinePushStream.getDeviceId());
             resp.setChannelId(onlinePushStream.getChannelId());
             resp.setStreamId(streamId);
-            String snapPath = sipConfigProperties.media().snapPath();
-            Path path = Paths.get(snapPath, onlinePushStream.getDeviceId() + "_" + onlinePushStream.getChannelId() + ".jpg");
-            if (Files.exists(path)) {
-                try {
-                    byte[] bytes = Files.readAllBytes(path);
-                    resp.setBase64(Base64.getEncoder().encodeToString(bytes));
-                } catch (IOException e) {
-                    log.error("读取快照文件异常", e);
-                }
-            }
+            resp.setBase64(deviceSnapService.queryPreview(onlinePushStream.getDeviceId(), onlinePushStream.getChannelId()).getBase64());
             if (onlinePushStream.getProtocolType() == ProtocolTypeEnum.RTMP) {
                 resp.setStreamUrl(mediaService.rtmpUrl(streamId));
             } else if (onlinePushStream.getProtocolType() == ProtocolTypeEnum.PULL) {

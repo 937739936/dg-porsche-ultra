@@ -406,7 +406,7 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    deviceSnapService.updateDeviceSnap(device, channel);
+                    deviceSnapService.snapshot(device, channel);
                 }
             });
         }

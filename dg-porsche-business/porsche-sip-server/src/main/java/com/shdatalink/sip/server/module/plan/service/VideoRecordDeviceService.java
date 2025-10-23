@@ -12,6 +12,8 @@ import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
 import com.shdatalink.sip.server.module.device.mapper.DeviceMapper;
+import com.shdatalink.sip.server.module.device.service.DeviceSnapService;
+import com.shdatalink.sip.server.module.device.vo.DevicePreviewSnapshot;
 import com.shdatalink.sip.server.module.plan.convert.VideoRecordConvert;
 import com.shdatalink.sip.server.module.plan.entity.VideoRecordDevice;
 import com.shdatalink.sip.server.module.plan.event.PlanModifyEvent;
@@ -43,6 +45,8 @@ public class VideoRecordDeviceService extends ServiceImpl<VideoRecordDeviceMappe
     VideoRecordConvert videoRecordConvert;
     @Inject
     EventPublisher publisher;
+    @Inject
+    DeviceSnapService deviceSnapService;
 
     @Transactional
     public void add(VideoRecordDeviceParam param) {
@@ -84,6 +88,9 @@ public class VideoRecordDeviceService extends ServiceImpl<VideoRecordDeviceMappe
                         videoRecordDevice.setOnline(channel.getOnline());
                         videoRecordDevice.setRecording(channel.getRecording());
                     }
+                    DevicePreviewSnapshot snapshot = deviceSnapService.queryPreview(item.getDeviceId(), item.getChannelId());
+                    videoRecordDevice.setBase64(snapshot.getBase64());
+                    videoRecordDevice.setSnapTime(snapshot.getCreateTime());
                     return videoRecordDevice;
                 });
     }

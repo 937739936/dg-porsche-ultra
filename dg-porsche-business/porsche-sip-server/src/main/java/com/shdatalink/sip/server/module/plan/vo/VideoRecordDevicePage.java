@@ -2,6 +2,8 @@ package com.shdatalink.sip.server.module.plan.vo;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class VideoRecordDevicePage {
     /**
@@ -32,4 +34,12 @@ public class VideoRecordDevicePage {
      * 录像状态
      */
     private Boolean recording;
+    /**
+     * 快照
+     */
+    private String base64;
+    /**
+     * 快照时间
+     */
+    private LocalDateTime snapTime;
 }

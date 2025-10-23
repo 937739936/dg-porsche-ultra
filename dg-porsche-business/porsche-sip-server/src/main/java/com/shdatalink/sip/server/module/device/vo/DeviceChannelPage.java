@@ -75,6 +75,14 @@ public class DeviceChannelPage {
      * 协议类型
      */
     private ProtocolTypeEnum protocolType;
+    /**
+     * 快照
+     */
+    private String base64;
+    /**
+     * 快照时间
+     */
+    private LocalDateTime snapTime;
 
     public static DeviceChannelPage fromDeviceChannel(DeviceChannel deviceChannel) {
         DeviceChannelPage deviceChannelPage = new DeviceChannelPage();
