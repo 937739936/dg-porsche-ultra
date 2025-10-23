@@ -89,7 +89,6 @@ public class SipServerConfiguration {
             SipStackImpl sipStack = (SipStackImpl) sipFactory.createSipStack(sipProperties);
             sipStack.setMessageParserFactory(new GbStringMsgParserFactory());
             sipStack.setStackName("gb_starter");
-            log.info("sipStack bean created.");
             return sipStack;
         } catch (Exception e) {
             log.error("创建 SipStackImpl 失败", e);
