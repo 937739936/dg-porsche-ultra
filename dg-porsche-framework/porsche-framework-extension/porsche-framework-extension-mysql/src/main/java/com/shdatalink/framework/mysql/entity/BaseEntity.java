@@ -1,9 +1,7 @@
 package com.shdatalink.framework.mysql.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.io.Serial;
@@ -19,14 +17,11 @@ public class BaseEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @TableId(type = IdType.AUTO)
-    private Integer id;
-
     /**
      * 创建者
      */
     @TableField(fill = FieldFill.INSERT)
-    private Integer createdBy;
+    private Long createdBy;
 
     /**
      * 创建时间
@@ -38,7 +33,7 @@ public class BaseEntity implements Serializable {
      * 更新者
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Integer lastModifiedBy;
+    private Long lastModifiedBy;
 
     /**
      * 更新时间

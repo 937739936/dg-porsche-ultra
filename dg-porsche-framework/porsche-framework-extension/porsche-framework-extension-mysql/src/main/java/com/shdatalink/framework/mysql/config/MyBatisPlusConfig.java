@@ -27,8 +27,6 @@ public class MyBatisPlusConfig {
         mybatisPlusInterceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         // 分页插件(如果配置多个插件, 切记分页最后添加)
         PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor();
-        // 可选：限制单页最大条数（防止恶意请求）
-        paginationInterceptor.setMaxLimit(5L);
         mybatisPlusInterceptor.addInnerInterceptor(paginationInterceptor);
         return mybatisPlusInterceptor;
     }
