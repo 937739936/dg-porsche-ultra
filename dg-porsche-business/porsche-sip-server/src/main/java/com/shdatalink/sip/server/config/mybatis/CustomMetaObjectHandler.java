@@ -1,7 +1,7 @@
 package com.shdatalink.sip.server.config.mybatis;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import com.shdatalink.framework.mysql.entity.BaseEntity;
+import com.shdatalink.sip.server.module.common.entity.BaseEntity;
 import com.shdatalink.sip.server.module.user.vo.UserInfo;
 import com.shdatalink.sip.server.utils.UserInfoUtil;
 import jakarta.enterprise.context.ApplicationScoped;

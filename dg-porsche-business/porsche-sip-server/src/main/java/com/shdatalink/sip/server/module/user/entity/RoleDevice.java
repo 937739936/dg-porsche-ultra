@@ -1,7 +1,7 @@
 package com.shdatalink.sip.server.module.user.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.shdatalink.framework.mysql.entity.BaseEntity;
+import com.shdatalink.sip.server.module.common.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
