@@ -1,4 +1,27 @@
-# code-with-quarkus
+# 基于quarkus搭建的脚手架
+
+
+- 目录结构
+```
+dg-porsche-ultra/
+├── dg-porsche-business/                                             // 业务模块
+│   ├── demo/                                                        // demo模块
+├── dg-porsche-framework/                                            // 框架
+│   ├── porsche-framework-common/                                    // 通用模块
+│   ├── porsche-framework-dependencies/                              // 依赖包管理
+│   ├── porsche-framework-extension/                                 // 相关扩展
+│   │   ├── porsche-framework-extension-web/                         // web模块
+│   │   ├── porsche-framework-extension-json/                        // 序列化模块
+│   │   ├── porsche-framework-extension-excel/                       // excel模块
+│   │   ├── porsche-framework-extension-mail/                        // 邮件模块
+│   │   ├── porsche-framework-extension-mysql/                       // 数据库模块
+│   │   ├── porsche-framework-extension-redis/                       // 缓存服务模块
+│   │   ├── porsche-framework-extension-httpclient/                  // httpClient模块
+│   │   ├── porsche-framework-extension-job/                         // 定时任务模块
+├── README.md                                                        // 框架说明文件
+└── pom.xml                                                         
+
+```
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
@@ -40,7 +63,7 @@ The application, packaged as an _über-jar_, is now runnable using `java -jar ta
 You can create a native executable using:
 
 ```shell script
-./mvnw package -Dnative
+./mvnw clean package -Dnative
 ```
 
 Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
@@ -53,15 +76,3 @@ You can then execute your native executable with: `./target/code-with-quarkus-1.
 
 If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
 
-## Related Guides
-
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- MyBatis Plus ([guide](https://quarkiverse.github.io/quarkiverse-docs/quarkus-mybatis/dev/)): A powerful enhanced toolkit of MyBatis to simplify development
-
-## Provided Code
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
