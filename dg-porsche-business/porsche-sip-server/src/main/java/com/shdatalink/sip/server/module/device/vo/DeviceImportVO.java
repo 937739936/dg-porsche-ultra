@@ -1,6 +1,6 @@
 package com.shdatalink.sip.server.module.device.vo;
 
-import com.shdatalink.framework.excel.annotation.ExcelProperty;
+import com.shdatalink.framework.poi.annotation.ExcelProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
