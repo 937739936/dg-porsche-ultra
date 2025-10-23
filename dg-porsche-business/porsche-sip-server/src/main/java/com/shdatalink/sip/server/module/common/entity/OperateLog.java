@@ -1,7 +1,7 @@
 package com.shdatalink.sip.server.module.common.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.shdatalink.sip.server.module.common.entity.BaseEntity;
+import com.shdatalink.sip.server.config.mybatis.BaseEntity;
 import com.shdatalink.sip.server.module.common.enums.OperateLogTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

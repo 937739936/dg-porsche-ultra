@@ -1,7 +1,7 @@
 package com.shdatalink.sip.server.module.device.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.shdatalink.sip.server.module.common.entity.BaseEntity;
+import com.shdatalink.sip.server.config.mybatis.BaseEntity;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.DeviceTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.MediaStreamModeEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.GbDevice;

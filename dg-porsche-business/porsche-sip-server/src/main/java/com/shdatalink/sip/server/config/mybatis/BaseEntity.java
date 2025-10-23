@@ -1,4 +1,4 @@
-package com.shdatalink.sip.server.module.common.entity;
+package com.shdatalink.sip.server.config.mybatis;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
