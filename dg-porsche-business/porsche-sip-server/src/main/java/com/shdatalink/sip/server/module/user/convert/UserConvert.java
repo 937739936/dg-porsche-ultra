@@ -7,6 +7,8 @@ import com.shdatalink.sip.server.module.user.vo.UserInfo;
 import com.shdatalink.sip.server.module.user.vo.UserPage;
 import org.mapstruct.Mapper;
 
+import java.util.List;
+
 
 @Mapper(config = QuarkusMappingConfig.class)
 public interface UserConvert {
@@ -15,5 +17,5 @@ public interface UserConvert {
 
     UserPage toUserPage(User item);
 
-    UserDetailVO toUserDetailVO(User user);
+    UserDetailVO toUserDetailVO(User user, List<Integer> roleId, List<String> roleNames);
 }

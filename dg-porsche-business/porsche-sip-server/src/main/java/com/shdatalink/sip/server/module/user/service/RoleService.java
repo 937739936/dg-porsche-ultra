@@ -11,10 +11,10 @@ import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -36,49 +36,46 @@ public class RoleService extends ServiceImpl<RoleMapper, Role> {
     @Inject
     UserRoleMapper userRoleMapper;
 
-    public List<Permission> getPermissions(List<Integer> roleId) {
-        if (roleId == null || roleId.isEmpty()) {
-            return new ArrayList<>();
+    public List<Permission> getPermissions(List<Integer> roleIds) {
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return Collections.emptyList();
         }
         List<RolePermission> rolePermissions = rolePermissionMapper.selectList(new LambdaQueryWrapper<RolePermission>()
-                .in(RolePermission::getRoleId, roleId));
+                .in(RolePermission::getRoleId, roleIds));
         if (CollectionUtils.isEmpty(rolePermissions)) {
             return Collections.emptyList();
         }
         return permissionMapper.selectByIds(rolePermissions.stream().map(RolePermission::getPermissionId).collect(Collectors.toSet()));
     }
 
-    public List<String> getPermissionDevice(List<Integer> roleId) {
-        if (roleId == null || roleId.isEmpty()) {
-            return new ArrayList<>();
+    public List<String> getPermissionDevice(List<Integer> roleIds) {
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return Collections.emptyList();
         }
-        return roleDeviceMapper.selectList(new LambdaQueryWrapper<RoleDevice>()
-                        .in(RoleDevice::getRoleId, roleId))
-                .stream().map(RoleDevice::getDeviceId).collect(Collectors.toList());
+        return roleDeviceMapper.selectList(new LambdaQueryWrapper<RoleDevice>().in(RoleDevice::getRoleId, roleIds))
+                .stream()
+                .map(RoleDevice::getDeviceId)
+                .collect(Collectors.toList());
     }
 
+    @Transactional(rollbackOn = Exception.class)
     public boolean save(RoleSaveParam param) {
-        Role role;
-        if (param.getId() == null) {
-            role = new Role();
-        } else {
-            role = getOptById(param.getId()).orElseThrow(() -> new BizException("角色不存在"));
-        }
+        // 1、校验角色名称是否唯一
         if (checkRoleNameUnique(param)) {
             throw new BizException("角色名称已存在");
         }
 
+        // 2、保存角色信息
+        Role role = param.getId() == null ? new Role() : getOptById(param.getId()).orElseThrow(() -> new BizException("角色不存在"));
         role.setName(param.getName());
-        saveOrUpdate(role);
-        return true;
+        return saveOrUpdate(role);
     }
 
     public List<Role> getRoleByUserId(Integer id) {
         List<UserRole> userRoles = userRoleMapper.selectByUserId(id);
-        if (userRoles == null || userRoles.isEmpty()) {
-            return new ArrayList<>();
+        if (CollectionUtils.isEmpty(userRoles)) {
+            return Collections.emptyList();
         }
-
         return baseMapper.selectByIds(userRoles.stream().map(UserRole::getRoleId).collect(Collectors.toSet()));
     }
 

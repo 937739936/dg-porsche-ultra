@@ -37,8 +37,6 @@ public class UserController {
 
     /**
      * 用户列表
-     * @param param
-     * @return
      */
     @GET
     @Path("page")
@@ -58,6 +56,7 @@ public class UserController {
 
     /**
      * 修改用户密码
+     *
      * @param req 请求参数
      */
     @POST
@@ -81,7 +80,6 @@ public class UserController {
 
     /**
      * 创建/修改用户
-     * @param param
      */
     @POST
     @Path("save")
@@ -92,6 +90,7 @@ public class UserController {
 
     /**
      * 用户详情
+     *
      * @param id
      * @return
      */
@@ -103,6 +102,7 @@ public class UserController {
 
     /**
      * 删除用户
+     *
      * @param id
      * @return
      */
@@ -134,6 +134,7 @@ public class UserController {
         }
         return userAccessKeyService.removeById(id);
     }
+
     /**
      * access key 列表
      */

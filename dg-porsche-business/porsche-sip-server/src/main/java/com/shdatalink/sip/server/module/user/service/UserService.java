@@ -22,6 +22,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -40,9 +41,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     @Inject
     RoleService roleService;
     @Inject
-    RedisUtil redisUtil;
-    @Inject
     LoginService loginService;
+    @Inject
+    RedisUtil redisUtil;
     @Inject
     UserConvert convert;
 
@@ -55,27 +56,19 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         return JsonUtil.parseObject(userInfoStr, UserInfo.class);
     }
 
-    public UserInfo getUserInfoByUserName(String username) {
-        Optional<User> userOptional = getUserByUserName(username);
-        return userOptional.map(user -> convert.toUserInfo(user)).orElse(null);
-    }
-
     public Optional<User> getUserByUserName(String username) {
         return this.getOneOpt(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
     }
 
     @Transactional(rollbackOn = Exception.class)
     public void saveUser(UserSaveParam param) {
-        User user;
-        if (param.getId() == null) {
-            user = new User();
-        } else {
-            user = getOptById(param.getId()).orElseThrow(() -> new BizException("用户不存在"));
-        }
+        // 1、参数校验
         if (param.getId() == null && StringUtils.isBlank(param.getPassword())) {
             throw new BizException("密码不能为空");
         }
 
+        // 2、保存用户信息
+        User user = param.getId() == null ? new User() : getOptById(param.getId()).orElseThrow(() -> new BizException("用户不存在"));
         user.setUsername(param.getUsername());
         user.setSalt(RandomStringUtils.secure().next(8, true, true));
         if (StringUtils.isNotBlank(param.getPassword())) {
@@ -86,40 +79,88 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         user.setPhone(param.getPhone());
         user.setEmail(param.getEmail());
         user.setRemark(param.getRemark());
-
         this.saveOrUpdate(user);
-        userRoleMapper.deleteByUserId(user.getId());
-        if (param.getRoles() != null) {
-            for (Integer role : param.getRoles()) {
-                UserRole userRole = new UserRole();
-                userRole.setRoleId(role);
-                userRole.setUserId(user.getId());
-                userRoleMapper.insert(userRole);
-            }
-        }
-//        loginService.refreshUserInfo(user.getId());
+
+        // 3、保存用户角色信息
+        saveUserRole(user.getId(), param.getRoles());
+
+        // 4、刷新用户信息
+        loginService.refreshUserInfo(user.getId());
     }
+
 
     public IPage<UserPage> getPage(UserPageParam param) {
         return baseMapper.selectPage(param.toPage(), new LambdaQueryWrapper<User>()
-                .like(StringUtils.isNotBlank(param.getFullName()), User::getFullName, param.getFullName())
-                .orderByDesc(User::getId))
+                        .like(StringUtils.isNotBlank(param.getFullName()), User::getFullName, param.getFullName())
+                        .orderByDesc(User::getId))
                 .convert(item -> convert.toUserPage(item));
     }
 
+    /**
+     * 获取用户详情
+     *
+     * @param id 用户ID
+     */
     public UserDetailVO detail(Integer id) {
+        // 通过用户ID获取用户信息，如果不存在则抛出异常
         User user = getOptById(id).orElseThrow(() -> new BizException("用户不存在"));
-        UserDetailVO userDetailVO = convert.toUserDetailVO(user);
+        // 通过用户ID获取用户角色列表
         List<Role> roles = roleService.getRoleByUserId(id);
-        userDetailVO.setRoleId(roles.stream().map(Role::getId).toList());
-        userDetailVO.setRoleNames(roles.stream().map(Role::getName).toList());
-        return userDetailVO;
+        // 获取角色ID列表
+        List<Integer> roleIds = roles.stream().map(Role::getId).toList();
+        // 获取角色名称列表
+        List<String> roleNames = roles.stream().map(Role::getName).toList();
+        // 将用户信息和角色信息封装到VO对象中
+        return convert.toUserDetailVO(user, roleIds, roleNames);
     }
 
+
+    /**
+     * 删除用户及其角色信息
+     *
+     * @param id 用户ID
+     */
     @Transactional(rollbackOn = Exception.class)
     public void delete(Integer id) {
+        // 1、删除用户信息
         removeById(id);
-        userRoleMapper.deleteByUserId(id);
-//        loginService.removeUserInfo(id);
+        // 2、删除用户角色信息
+        deleteUserRole(id);
+        // 3、删除用户缓存
+        loginService.removeUserInfo(id);
+
+    }
+
+    /**
+     * 保存用户角色信息
+     *
+     * @param userId  用户ID
+     * @param roleIds 角色ID
+     */
+    private void saveUserRole(Integer userId, List<Integer> roleIds) {
+        // 删除用户已存在的角色信息
+        deleteUserRole(userId);
+
+        // 保存用户角色信息
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return;
+        }
+        List<UserRole> userRoleList = roleIds.stream().map(roleId -> {
+            UserRole userRole = new UserRole();
+            userRole.setRoleId(roleId);
+            userRole.setUserId(userId);
+            return userRole;
+        }).toList();
+        userRoleMapper.insert(userRoleList);
+    }
+
+
+    /**
+     * 删除指定用户的角色信息
+     *
+     * @param userId 用户ID
+     */
+    private void deleteUserRole(Integer userId) {
+        userRoleMapper.delete(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, userId));
     }
 }

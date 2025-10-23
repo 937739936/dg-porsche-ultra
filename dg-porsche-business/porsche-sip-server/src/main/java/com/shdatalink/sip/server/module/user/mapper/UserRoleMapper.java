@@ -11,9 +11,6 @@ import java.util.List;
 @Mapper
 public interface UserRoleMapper extends BaseMapper<UserRole> {
 
-    @Delete("delete from t_user_role where user_id = #{id} ")
-    void deleteByUserId(Integer id);
-
     @Select("select * from t_user_role where user_id = #{id}")
     List<UserRole> selectByUserId(Integer id);
 }

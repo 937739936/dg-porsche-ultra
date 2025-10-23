@@ -21,6 +21,7 @@ import java.util.List;
 @Slf4j
 @ApplicationScoped
 public class UserAccessKeyService extends ServiceImpl<UserAccessKeyMapper, UserAccessKey> {
+
     public UserAccessKey generateAccessKey() {
         Integer userId = UserInfoUtil.getUserId();
         String key = RandomStringUtils.secure().nextAlphanumeric(10);

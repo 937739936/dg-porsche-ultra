@@ -10,6 +10,9 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.List;
 
 @RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.user.service.RoleDeviceService",
         targets = {SerializedLambda.class, SFunction.class},
@@ -21,14 +24,17 @@ public class RoleDeviceService extends ServiceImpl<RoleDeviceMapper, RoleDevice>
     @Transactional(rollbackOn = Exception.class)
     public boolean save(RoleDeviceSaveParam param) {
         baseMapper.deleteByRoleId(param.getRoleId());
-        if (param.getDeviceIds() != null) {
-            for (String deviceId : param.getDeviceIds()) {
-                RoleDevice rd = new RoleDevice();
-                rd.setRoleId(param.getRoleId());
-                rd.setDeviceId(deviceId);
-                save(rd);
-            }
+        if (CollectionUtils.isEmpty(param.getDeviceIds())) {
+            return false;
         }
-        return true;
+        List<RoleDevice> list = param.getDeviceIds()
+                .stream()
+                .map(deviceId -> {
+                    RoleDevice rd = new RoleDevice();
+                    rd.setRoleId(param.getRoleId());
+                    rd.setDeviceId(deviceId);
+                    return rd;
+                }).toList();
+        return saveBatch(list);
     }
 }
