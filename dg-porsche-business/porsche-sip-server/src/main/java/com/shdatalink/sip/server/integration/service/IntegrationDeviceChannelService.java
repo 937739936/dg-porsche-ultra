@@ -13,7 +13,9 @@ import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
+import com.shdatalink.sip.server.module.device.service.DeviceSnapService;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
+import com.shdatalink.sip.server.module.device.vo.DevicePreviewSnapshot;
 import com.shdatalink.sip.server.module.device.vo.PtzControlParam;
 import com.shdatalink.sip.server.module.device.vo.PtzControlStopParam;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService;
@@ -49,6 +51,8 @@ public class IntegrationDeviceChannelService extends ServiceImpl<DeviceChannelMa
     VideoRecordRemoteService videoRecordRemoteService;
     @Inject
     IntegrationDeviceConvert integrationDeviceConvert;
+    @Inject
+    DeviceSnapService deviceSnapService;
 
     public IPage<IntegrationDeviceChannelList> getPage(IntegrationChannelPageParam param) {
         return baseMapper.selectPage(
@@ -75,27 +79,9 @@ public class IntegrationDeviceChannelService extends ServiceImpl<DeviceChannelMa
         return channelId.stream()
                 .map(c -> {
                     IntegrationDevicePreviewSnapshot snapshot = new IntegrationDevicePreviewSnapshot();
-                    DeviceChannel channel = baseMapper.selectByChannelId(c);
-                    if (channel == null) {
-                        throw new BizException("通道["+c+"]不存在");
-                    }
-                    String stream = channel.getDeviceId()+"_"+channel.getChannelId();
-                    String snapPath = sipConfigProperties.media().snapPath();
-                    Path path = Paths.get(snapPath, stream + ".jpg");
-                    if (Files.exists(path)) {
-                        byte[] bytes = null;
-                        BasicFileAttributes basicFileAttributes = null;
-                        try {
-                            bytes = Files.readAllBytes(path);
-                            basicFileAttributes = Files.readAttributes(path, BasicFileAttributes.class);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        snapshot.setBase64(Base64.getEncoder().encodeToString(bytes));
-                        if (basicFileAttributes != null && basicFileAttributes.isRegularFile()) {
-                            snapshot.setCreateTime(basicFileAttributes.lastModifiedTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-                        }
-                    }
+                    DevicePreviewSnapshot devicePreviewSnapshot = deviceSnapService.realTimeSnap(c);
+                    snapshot.setCreateTime(devicePreviewSnapshot.getCreateTime());
+                    snapshot.setBase64(devicePreviewSnapshot.getBase64());
                     snapshot.setChannelId(c);
                     return snapshot;
                 }).toList();
