@@ -40,7 +40,7 @@
         </dependency>
         <dependency>
             <groupId>com.shdatalink</groupId>
-            <artifactId>porsche-framework-extension-excel</artifactId>
+            <artifactId>porsche-framework-extension-poi</artifactId>
         </dependency>
         <dependency>
             <groupId>com.shdatalink</groupId>
