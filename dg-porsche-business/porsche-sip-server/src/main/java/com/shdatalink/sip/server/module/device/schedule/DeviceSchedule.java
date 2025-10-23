@@ -1,14 +1,11 @@
 package com.shdatalink.sip.server.module.device.schedule;
 
 import com.shdatalink.framework.common.service.EventPublisher;
-import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.SipMessageTemplate;
 import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.response.DeviceStatus;
-import com.shdatalink.sip.server.media.MediaHttpClient;
 import com.shdatalink.sip.server.media.MediaService;
 import com.shdatalink.sip.server.media.bean.entity.resp.MediaListResult;
-import com.shdatalink.sip.server.media.bean.entity.req.SnapshotReq;
 import com.shdatalink.sip.server.module.alarmplan.entity.Subscribe;
 import com.shdatalink.sip.server.module.alarmplan.service.SubscribeService;
 import com.shdatalink.sip.server.module.device.entity.Device;
@@ -20,16 +17,14 @@ import com.shdatalink.sip.server.module.device.mapper.DeviceMapper;
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
 import com.shdatalink.framework.web.utils.IpUtil;
+import com.shdatalink.sip.server.module.device.service.DeviceSnapService;
 import io.quarkus.runtime.Startup;
 import io.quarkus.scheduler.Scheduled;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -49,18 +44,15 @@ public class DeviceSchedule {
     @Inject
     DeviceChannelService deviceChannelService;
     @Inject
-    @RestClient
-    MediaHttpClient mediaHttpClient;
-    @Inject
     MediaService mediaService;
-    @Inject
-    SipConfigProperties sipConfigProperties;
     @Inject
     SubscribeService subscribeService;
     @Inject
     DeviceMapper deviceMapper;
     @Inject
     DeviceChannelMapper deviceChannelMapper;
+    @Inject
+    DeviceSnapService deviceSnapService;
 
     /**
      * 设备在线状态查询任务
@@ -135,22 +127,7 @@ public class DeviceSchedule {
                         return;
                     }
                     Device device = deviceMap.get(channel.getDeviceId());
-                    String rtspUrl = mediaService.getSnapshotUrl(device, channel.getId());
-                    try {
-                        SnapshotReq req = new SnapshotReq();
-                        req.setUrl(rtspUrl);
-                        req.setTimeoutSec(30);
-                        req.setExpireSec(60);
-                        byte[] snap = mediaHttpClient.getSnap(req);
-                        String snapPath = sipConfigProperties.media().snapPath();
-                        ;
-                        if (!Files.exists(Paths.get(snapPath))) {
-                            Files.createDirectories(Paths.get(snapPath));
-                        }
-                        Files.write(Paths.get(snapPath, channel.getDeviceId() + "_" + channel.getChannelId() + ".jpg"), snap);
-                    } catch (Exception e) {
-                        log.error("截图失败，{}", e.getMessage());
-                    }
+                    deviceSnapService.snapshot(device, channel);
                 });
     }
 

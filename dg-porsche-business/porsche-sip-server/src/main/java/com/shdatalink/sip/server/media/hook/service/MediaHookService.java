@@ -28,6 +28,7 @@ import com.shdatalink.sip.server.module.device.event.DeviceOnlineEvent;
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceLogService;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
+import com.shdatalink.sip.server.module.device.service.DeviceSnapService;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordService;
@@ -95,7 +96,8 @@ public class MediaHookService {
     MediaSignService mediaSignService;
     @Inject
     PushStreamConvert pushStreamConvert;
-
+    @Inject
+    DeviceSnapService deviceSnapService;
 
     public HookResp flowReport(FlowReportReq flowReportReq) {
         log.info("流上报事件" + flowReportReq);
@@ -146,25 +148,7 @@ public class MediaHookService {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                SnapshotReq req = new SnapshotReq();
-                DevicePreviewPlayVO playUrl = mediaService.getPlayUrl(ProtocolTypeEnum.RTMP, channel.getDeviceId(), channel.getChannelId(), channel.getId());
-                req.setUrl(playUrl.getRtspUrl());
-                req.setTimeoutSec(30);
-                req.setExpireSec(60);
-                byte[] snap = mediaHttpClient.getSnap(req);
-                String snapPath = sipConfigProperties.media().snapPath();
-                if (!Files.exists(Paths.get(snapPath))) {
-                    try {
-                        Files.createDirectories(Paths.get(snapPath));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                try {
-                    Files.write(Paths.get(snapPath, channel.getDeviceId() + "_" + channel.getChannelId() + ".jpg"), snap);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                deviceSnapService.snapshot(device, channel);
             });
         }
         PublishResp publishResp = new PublishResp();

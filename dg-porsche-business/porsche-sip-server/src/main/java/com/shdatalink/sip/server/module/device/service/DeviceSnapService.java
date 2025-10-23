@@ -75,60 +75,127 @@ public class DeviceSnapService {
         }
     }
 
-
-    public DevicePreviewSnapshot realTimeSnap(String deviceId, String channelId) throws IOException {
+    public void snapshot(String deviceId, String channelId) {
         Device device = deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备不存在"));
         DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
+        snapshot(device, channel);
+    }
+
+    public void snapshot(String deviceId, String channelId, Path snapPath) {
+        Device device = deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备不存在"));
+        DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
+        snapshot(device, channel, snapPath);
+    }
+
+    public void snapshot(Device device, DeviceChannel channel) {
+        String rtspUrl = mediaService.getSnapshotUrl(device, channel.getId());
+        SnapshotReq req = new SnapshotReq();
+        req.setUrl(rtspUrl);
+        req.setTimeoutSec(30);
+        req.setExpireSec(60);
+        snapshot(req, channel.getDeviceId(), channel.getChannelId());
+    }
+
+    public void snapshot(Device device, DeviceChannel channel, Path snapshotPath) {
+        String rtspUrl = mediaService.getSnapshotUrl(device, channel.getId());
+        SnapshotReq req = new SnapshotReq();
+        req.setUrl(rtspUrl);
+        req.setTimeoutSec(30);
+        req.setExpireSec(60);
+        snapshot(req, snapshotPath, channel.getDeviceId(), channel.getChannelId());
+    }
+
+    public Path getSnapPath(String deviceId, String channelId) {
+        String snapPath = sipConfigProperties.media().snapPath();
+        return Paths.get(snapPath, deviceId + "_" + channelId + ".jpg");
+    }
+
+    public byte[] snapshot(SnapshotReq req, String deviceId, String channelId) {
+        return snapshot(req, getSnapPath(deviceId, channelId), deviceId, channelId);
+    }
+
+    public byte[] snapshot(SnapshotReq req, Path snapSavePath, String deviceId, String channelId) {
+        Object obj = LOCK_MAP.computeIfAbsent(req.getUrl(), k -> new Object());
+        synchronized (obj) {
+            long startTime = System.currentTimeMillis();
+//
+            try {
+                byte[] snap = mediaHttpClient.getSnap(req);
+                if (snap[0] == '{') {
+                    // 返回的json
+                    throw new RuntimeException("截图失败, media server 返回" + new String(snap));
+                }
+                long endTime = System.currentTimeMillis();
+                log.info("截图成功，耗时：{}ms，deviceId: {}, channelId: {}, rtspUrl: {}", (endTime - startTime), deviceId, channelId, req.getUrl());
+                Path dir = Paths.get(snapSavePath.getParent().toString());
+                if (!Files.exists(dir)) {
+                    Files.createDirectories(dir);
+                }
+                Files.write(snapSavePath, snap);
+                return snap;
+            } catch (Exception e) {
+                log.error("截图失败，{}", e.getMessage());
+            }
+        }
+        return null;
+    }
+
+
+    public DevicePreviewSnapshot realTimeSnap(String channelId) {
+        DeviceChannel channel = deviceChannelService.getBaseMapper().selectByChannelId(channelId);
+        if (channel == null) {
+            throw new BizException("通道不存在");
+        }
+        Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
+        return realTimeSnap(device, channel);
+    }
+
+    public DevicePreviewSnapshot realTimeSnap(String deviceId, String channelId) {
+        Device device = deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备不存在"));
+        DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
+        return realTimeSnap(device, channel);
+    }
+    public DevicePreviewSnapshot realTimeSnap(Device device, DeviceChannel channel) {
         String rtspUrl = mediaService.getSnapshotUrl(device, channel.getId());
         if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
             String stream = StreamFactory.streamId(InviteTypeEnum.Play, channel.getId().toString());
             if (!mediaService.mediaExists(stream)) {
-                return querySnapshot(deviceId, channelId);
+                return querySnapshot(device.getDeviceId(), channel.getChannelId());
             }
         }
-        Object obj = LOCK_MAP.computeIfAbsent(rtspUrl, k -> new Object());
-        String snapPath = sipConfigProperties.media().snapPath();
-        Path path = Paths.get(snapPath, channel.getDeviceId() + "_" + channel.getChannelId() + ".jpg");
-        try {
-            synchronized (obj) {
-                SnapshotReq req = new SnapshotReq();
-                req.setUrl(rtspUrl);
-                req.setTimeoutSec(7);
-                req.setExpireSec(10);
-                long startTime = System.currentTimeMillis();
-                byte[] snap = mediaHttpClient.getSnap(req);
-                long endTime = System.currentTimeMillis();
-                log.info("截图成功，耗时：{}ms，deviceId: {}, channelId: {}, rtspUrl: {}", (endTime - startTime), deviceId, channelId, rtspUrl);
-                if (!Files.exists(Paths.get(snapPath))) {
-                    Files.createDirectories(Paths.get(snapPath));
-                }
-                Files.write(path, snap);
-            }
-            DevicePreviewSnapshot devicePreviewSnapshot = new DevicePreviewSnapshot();
-            if (Files.exists(path)) {
-                devicePreviewSnapshot.setBase64(Base64.getEncoder().encodeToString(Files.readAllBytes(path)));
-            }
-            devicePreviewSnapshot.setCreateTime(LocalDateTime.now());
-            return devicePreviewSnapshot;
-        } catch (Exception e) {
-            log.error("截图失败，{}", e);
+        SnapshotReq req = new SnapshotReq();
+        req.setUrl(rtspUrl);
+        req.setTimeoutSec(7);
+        req.setExpireSec(10);
+        byte[] snapshot = snapshot(req, device.getDeviceId(), channel.getChannelId());
+        if (snapshot == null) {
+            return querySnapshot(device.getDeviceId(), channel.getChannelId());
         }
-        return querySnapshot(deviceId, channelId);
+
+        DevicePreviewSnapshot devicePreviewSnapshot = new DevicePreviewSnapshot();
+        devicePreviewSnapshot.setBase64(Base64.getEncoder().encodeToString(snapshot));
+        devicePreviewSnapshot.setCreateTime(LocalDateTime.now());
+        return devicePreviewSnapshot;
     }
 
 
-    public DevicePreviewSnapshot querySnapshot(String deviceId, String channelId) throws IOException {
+    public DevicePreviewSnapshot querySnapshot(String deviceId, String channelId) {
+        Path path = getSnapPath(deviceId, channelId);
+        return querySnapshot(path);
+    }
+    public DevicePreviewSnapshot querySnapshot(Path path) {
         DevicePreviewSnapshot snapshot = new DevicePreviewSnapshot();
-        String stream = deviceId+"_"+channelId;
-        String snapPath = sipConfigProperties.media().snapPath();
-        Path path = Paths.get(snapPath, stream + ".jpg");
-        if (Files.exists(path)) {
-            byte[] bytes = Files.readAllBytes(path);
-            snapshot.setBase64(Base64.getEncoder().encodeToString(bytes));
-            BasicFileAttributes basicFileAttributes = Files.readAttributes(path, BasicFileAttributes.class);
-            if (basicFileAttributes != null && basicFileAttributes.isRegularFile()) {
-                snapshot.setCreateTime(basicFileAttributes.lastModifiedTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+        try {
+            if (Files.exists(path)) {
+                byte[] bytes = Files.readAllBytes(path);
+                snapshot.setBase64(Base64.getEncoder().encodeToString(bytes));
+                BasicFileAttributes basicFileAttributes = Files.readAttributes(path, BasicFileAttributes.class);
+                if (basicFileAttributes != null && basicFileAttributes.isRegularFile()) {
+                    snapshot.setCreateTime(basicFileAttributes.lastModifiedTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+                }
             }
+        } catch (IOException e) {
+            log.error("截图读取失败", e);
         }
         return snapshot;
     }

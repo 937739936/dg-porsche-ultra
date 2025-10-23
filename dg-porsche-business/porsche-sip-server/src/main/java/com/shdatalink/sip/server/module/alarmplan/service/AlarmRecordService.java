@@ -8,11 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shdatalink.framework.json.utils.JsonUtil;
 import com.shdatalink.framework.redis.utils.RedisUtil;
 import com.shdatalink.sip.server.common.constants.RedisKeyConstants;
-import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.response.DeviceAlarm;
-import com.shdatalink.sip.server.media.MediaHttpClient;
-import com.shdatalink.sip.server.media.MediaService;
-import com.shdatalink.sip.server.media.bean.entity.req.SnapshotReq;
 import com.shdatalink.sip.server.module.alarmplan.entity.AlarmRecord;
 import com.shdatalink.sip.server.module.alarmplan.enums.AlarmMethodEnum;
 import com.shdatalink.sip.server.module.alarmplan.enums.AlarmPriorityEnum;
@@ -22,24 +18,19 @@ import com.shdatalink.sip.server.module.alarmplan.mapper.AlarmRecordMapper;
 import com.shdatalink.sip.server.module.alarmplan.vo.AlarmRecordPageReq;
 import com.shdatalink.sip.server.module.alarmplan.vo.AlarmRecordPageResp;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
-import com.shdatalink.sip.server.module.device.enums.ProtocolTypeEnum;
 import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
+import com.shdatalink.sip.server.module.device.service.DeviceSnapService;
+import com.shdatalink.sip.server.module.device.vo.DevicePreviewSnapshot;
 import io.quarkiverse.mybatis.plus.extension.service.impl.ServiceImpl;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.List;
 
 @RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.alarmplan.service.AlarmRecordService",
@@ -52,14 +43,9 @@ public class AlarmRecordService extends ServiceImpl<AlarmRecordMapper, AlarmReco
     @Inject
     DeviceChannelMapper deviceChannelMapper;
     @Inject
-    @RestClient
-    MediaHttpClient mediaHttpClient;
-    @Inject
-    SipConfigProperties sipConfigProperties;
-    @Inject
     RedisUtil redisUtil;
     @Inject
-    MediaService mediaService;
+    DeviceSnapService deviceSnapService;
 
     public void handle(DeviceAlarm deviceAlarm) {
         String deviceAlarmCache = redisUtil.get(RedisKeyConstants.ALARM_NOTIFY + deviceAlarm.getSn());
@@ -91,37 +77,15 @@ public class AlarmRecordService extends ServiceImpl<AlarmRecordMapper, AlarmReco
             alarmRecord.setAlarmType(AlarmTypeEnum.fromVal(deviceAlarm.getAlarmType(), alarmRecord.getAlarmMethod()));
         }
 
-        //生成快照
-        alarmRecord.setFilePath(generateSnapshot(deviceAlarm.getSn(), deviceChannel));
-        save(alarmRecord);
-    }
+        if (deviceChannel != null) {
+            Path snapPath = deviceSnapService.getSnapPath(deviceChannel.getDeviceId(), deviceChannel.getChannelId());
+            Path fileName = snapPath.getParent().resolve(deviceAlarm.getSn()).resolve(snapPath.getFileName());
+            deviceSnapService.snapshot(deviceChannel.getDeviceId(), deviceChannel.getChannelId(), fileName);
+            alarmRecord.setFilePath(fileName.toString());
+        }
 
-    public String generateSnapshot(String sn, DeviceChannel deviceChannel) {
-        if (deviceChannel == null) {
-            return null;
-        }
-        try {
-            String rtspUrl = mediaService.getSnapshotUrl(ProtocolTypeEnum.GB28181, deviceChannel.getId());
-            SnapshotReq req = new SnapshotReq();
-            req.setUrl(rtspUrl);
-            req.setTimeoutSec(5);
-            req.setExpireSec(5);
-            long startTime = System.currentTimeMillis();
-            byte[] snap = mediaHttpClient.getSnap(req);
-            long endTime = System.currentTimeMillis();
-            log.info("截图成功，耗时：{}ms，deviceId: {}, channelId: {}, rtspUrl: {}", (endTime - startTime), deviceChannel.getDeviceId(), deviceChannel.getChannelId(), rtspUrl);
-            String snapPath = sipConfigProperties.media().snapPath();
-            String folderPath = snapPath + File.separator + deviceChannel.getDeviceId() + "_" + deviceChannel.getChannelId() + File.separator + sn;
-            if (!Files.exists(Paths.get(folderPath))) {
-                Files.createDirectories(Paths.get(folderPath));
-            }
-            String filePath = folderPath + File.separator + deviceChannel.getDeviceId() + "_" + deviceChannel.getChannelId() + ".jpg";
-            Files.write(Paths.get(filePath), snap);
-            return filePath;
-        } catch (Exception e) {
-            log.error("截图失败，", e);
-        }
-        return null;
+        //生成快照
+        save(alarmRecord);
     }
 
     public IPage<AlarmRecordPageResp> getPage(AlarmRecordPageReq pageReq) {
@@ -144,18 +108,11 @@ public class AlarmRecordService extends ServiceImpl<AlarmRecordMapper, AlarmReco
             page.setAlarmTime(item.getAlarmTime());
             page.setAlarmType(item.getAlarmType().getText());
             page.setEventType(item.getEventType() == null ? "" : item.getEventType().getText());
-            String snapPath = sipConfigProperties.media().snapPath();;
-            String folderPath = snapPath + File.separator + item.getDeviceId() + "_" + item.getChannelId() + File.separator + item.getSn();
 
-            Path path = Paths.get(folderPath, item.getDeviceId() + "_" + item.getChannelId() + ".jpg");
-            if (Files.exists(path)) {
-                try {
-                    byte[] bytes = Files.readAllBytes(path);
-                    page.setBase64(Base64.getEncoder().encodeToString(bytes));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            Path snapPath = deviceSnapService.getSnapPath(item.getDeviceId(), item.getChannelId());
+            Path fileName = snapPath.getParent().resolve(item.getSn()).resolve(snapPath.getFileName());
+            DevicePreviewSnapshot snapshot = deviceSnapService.querySnapshot(fileName);
+            page.setBase64(snapshot.getBase64());
             return page;
         });
     }
