@@ -538,6 +538,7 @@ public class VideoRecordService extends ServiceImpl<VideoRecordMapper, VideoReco
         String fileName = String.format("%s-%s_%s.mp4", channelId, startDate.format(DateTimeFormatter.ISO_DATE_TIME), endDate.format(DateTimeFormatter.ISO_DATE_TIME));
         response.putHeader("Content-Type", "video/mp4");
         response.putHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        response.setChunked(true);
         Path result = Files.createTempFile("concat", ".mp4");
         String[] cmd;
         if (Objects.equals(records.getFirst().getVideoCodec(), "hevc")) {
@@ -566,10 +567,11 @@ public class VideoRecordService extends ServiceImpl<VideoRecordMapper, VideoReco
         try {
             FFmpegUtil.pipe(600,
                     (bytes) -> {
-                        response.send(Buffer.buffer(bytes));
+                        response.write(Buffer.buffer(bytes));
                     },
                     cmd
             );
+            response.end();
         } catch (RuntimeException e) {
             e.printStackTrace();
             throw new BizException("视频下载失败");
