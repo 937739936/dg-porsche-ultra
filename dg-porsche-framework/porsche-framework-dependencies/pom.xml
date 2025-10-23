@@ -203,6 +203,12 @@
 
             <dependency>
                 <groupId>com.shdatalink</groupId>
+                <artifactId>porsche-framework-extension-poi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.shdatalink</groupId>
                 <artifactId>porsche-framework-extension-excel</artifactId>
                 <version>${project.version}</version>
             </dependency>
