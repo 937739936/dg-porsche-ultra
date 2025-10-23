@@ -148,7 +148,7 @@ public class PushStreamService {
             }
             pushStreamList.add(resp);
         }
-        Page<PushStreamPageResp> respPage = new Page<>(page, pageSize);
+        Page<PushStreamPageResp> respPage = new Page<>(page, pageSize, values.size());
         respPage.setRecords(pushStreamList);
         return respPage;
     }

@@ -271,7 +271,7 @@ public class MediaHookService {
         } else if (action == InviteTypeEnum.Playback) {
             GBRequest.bye(device.toGbDevice(channel.getChannelId())).withStreamId(streamNoneReaderReq.getStream()).execute();
             resp.setClose(true);
-        } else if (action == InviteTypeEnum.Download) {
+        } else if (action == InviteTypeEnum.Download || action == InviteTypeEnum.Rtmp) {
         } else {
             resp.setClose(true);
         }
