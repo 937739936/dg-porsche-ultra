@@ -34,6 +34,7 @@ import com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService;
 import com.shdatalink.sip.server.module.plan.service.VideoRecordService;
 import com.shdatalink.sip.server.module.pushstream.convert.PushStreamConvert;
 import com.shdatalink.sip.server.module.pushstream.dto.MediaViewerDTO;
+import com.shdatalink.sip.server.utils.QueryParamParser;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -295,19 +296,10 @@ public class MediaHookService {
             return hookResp;
         }
 
-        String[] split1 = streamNotFoundReq.getParams().split("&");
-        Optional<String> startOpt = Arrays.stream(split1).filter(item -> item.startsWith("start=")).findFirst();
-        Optional<String> endOpt = Arrays.stream(split1).filter(item -> item.startsWith("end=")).findFirst();
-        LocalDateTime startTime = null;
-        LocalDateTime endTime = null;
-        if (startOpt.isPresent()) {
-            startTime = LocalDateTime.parse(URLDecoder.decode(startOpt.get().replace("start=", ""), StandardCharsets.UTF_8), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
-
-        if (endOpt.isPresent()) {
-            endTime = LocalDateTime.parse(URLDecoder.decode(endOpt.get().replace("end=", ""), StandardCharsets.UTF_8), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        Map<String, String> map = QueryParamParser.parseToMap(streamNotFoundReq.getParams());
+        LocalDateTime startTime = map.containsKey("start") ? LocalDateTime.parse(map.get("start"), formatter) : null;
+        LocalDateTime endTime = map.containsKey("end") ? LocalDateTime.parse(map.get("start"), formatter) : null;
         switch (action) {
             case Play -> deviceChannelService.play(stream);
             case Playback -> {
@@ -360,15 +352,18 @@ public class MediaHookService {
         log.info("media hook on play: {}", JsonUtil.toJsonString(playReq));
         String params = playReq.getParams();
         HookResp hookResp = new HookResp();
-        Optional<String> first = Stream.of(params.split("&")).filter(item -> item.startsWith("token="))
-                .findFirst();
-        if (first.isEmpty()) {
+        Map<String, String> map = QueryParamParser.parseToMap(params);
+        if (!map.containsKey("token")) {
             hookResp.setCode(401);
             return hookResp;
         }
-        String token = first.get().replace("token=", "");
+        String token = map.get("token");
         if (!SNAPSHOT_TOKEN.equals(token)) {
-            boolean verify = mediaSignService.verify(playReq.getStream(), token);
+            if (!map.containsKey("expire")) {
+                hookResp.setCode(401);
+                return hookResp;
+            }
+            boolean verify = mediaSignService.verify(playReq.getStream(), token, Integer.parseInt(map.get("expire")));
             if (!verify) {
                 hookResp.setCode(401);
                 return hookResp;

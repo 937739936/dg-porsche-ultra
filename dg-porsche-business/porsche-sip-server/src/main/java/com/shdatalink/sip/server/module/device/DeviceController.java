@@ -5,6 +5,7 @@ import com.shdatalink.framework.common.annotation.Anonymous;
 import com.shdatalink.framework.common.annotation.CheckPermission;
 import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.framework.common.exception.BizException;
+import com.shdatalink.sip.server.common.constants.CommonConstants;
 import com.shdatalink.sip.server.media.MediaService;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
@@ -143,10 +144,13 @@ public class DeviceController {
      */
     @GET
     @Path("playUrl")
-    public DevicePreviewPlayVO playUrl(@QueryParam("deviceId") @NotBlank String deviceId, @QueryParam("channelId") @NotBlank String channelId) {
+    public DevicePreviewPlayVO playUrl(@QueryParam("deviceId") @NotBlank String deviceId,
+                                       @QueryParam("channelId") @NotBlank String channelId,
+                                       @QueryParam("expire") @DefaultValue(CommonConstants.PLAY_DEFAULT_EXPIRE_STR) Integer expire
+    ) {
         Device device = deviceService.getByDeviceId(deviceId).orElseThrow(() -> new BizException("设备'" + deviceId + "'不存在"));
         DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
-        return mediaService.getPlayUrl(device, channel);
+        return mediaService.getPlayUrl(device, channel, expire);
     }
 
     /**

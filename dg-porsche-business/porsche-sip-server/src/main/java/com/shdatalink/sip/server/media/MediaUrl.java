@@ -11,7 +11,7 @@ public interface MediaUrl {
     /**
      * 获取直播url
      */
-    DevicePreviewPlayVO play(Integer channelPrimaryId);
+    DevicePreviewPlayVO play(Integer channelPrimaryId, int expire);
 
     /**
      * 获取回放url

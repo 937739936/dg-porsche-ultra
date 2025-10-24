@@ -2,7 +2,6 @@ package com.shdatalink.sip.server.media;
 
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.sip.server.config.SipConfigProperties;
-import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.TransportTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.GbDevice;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
@@ -11,8 +10,6 @@ import com.shdatalink.sip.server.media.bean.entity.resp.*;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.enums.ProtocolTypeEnum;
-import com.shdatalink.sip.server.module.device.mapper.DeviceChannelMapper;
-import com.shdatalink.sip.server.module.device.mapper.DeviceMapper;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -23,6 +20,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.time.LocalDateTime;
 import java.util.*;
+
+import static com.shdatalink.sip.server.common.constants.CommonConstants.PLAY_DEFAULT_EXPIRE;
 
 @ApplicationScoped
 @Slf4j
@@ -150,9 +149,15 @@ public class MediaService {
     public DevicePreviewPlayVO getPlayUrl(Device device, DeviceChannel channel) {
         return getPlayUrl(device.getProtocolType(), channel.getDeviceId(), channel.getChannelId(), channel.getId());
     }
+    public DevicePreviewPlayVO getPlayUrl(Device device, DeviceChannel channel, int expire) {
+        return getPlayUrl(device.getProtocolType(), channel.getDeviceId(), channel.getChannelId(), channel.getId(), expire);
+    }
 
     public DevicePreviewPlayVO getPlayUrl(ProtocolTypeEnum type, String deviceId, String channelId, Integer channelPrimaryId) {
-        DevicePreviewPlayVO play = mediaUrls.get(type).play(channelPrimaryId);
+        return getPlayUrl(type, deviceId, channelId, channelPrimaryId, PLAY_DEFAULT_EXPIRE);
+    }
+    public DevicePreviewPlayVO getPlayUrl(ProtocolTypeEnum type, String deviceId, String channelId, Integer channelPrimaryId, int expire) {
+        DevicePreviewPlayVO play = mediaUrls.get(type).play(channelPrimaryId, expire);
         play.setDeviceId(deviceId);
         play.setChannelId(channelId);
         return play;

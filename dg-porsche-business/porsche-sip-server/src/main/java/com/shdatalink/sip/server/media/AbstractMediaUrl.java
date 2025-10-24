@@ -25,7 +25,7 @@ public abstract class AbstractMediaUrl implements MediaUrl {
     }
 
     @Override
-    public DevicePreviewPlayVO play(Integer channelPrimaryId) {
+    public DevicePreviewPlayVO play(Integer channelPrimaryId, int expire) {
         throw new RuntimeException("not supported");
     }
 

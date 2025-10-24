@@ -24,9 +24,9 @@ public class GBMediaUrl extends AbstractMediaUrl {
     }
 
     @Override
-    public DevicePreviewPlayVO play(Integer channelPrimaryId) {
+    public DevicePreviewPlayVO play(Integer channelPrimaryId, int expire) {
         String stream = StreamFactory.streamId(InviteTypeEnum.Play, channelPrimaryId.toString());
-        String sign = mediaSignService.sign(stream);
+        String sign = mediaSignService.sign(stream, expire);
         return build(stream, sign, "");
     }
 

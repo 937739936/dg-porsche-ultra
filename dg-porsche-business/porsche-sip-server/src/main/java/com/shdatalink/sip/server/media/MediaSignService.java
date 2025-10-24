@@ -8,8 +8,11 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import com.shdatalink.sip.server.config.SipConfigProperties;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.Date;
+
+import static com.shdatalink.sip.server.common.constants.CommonConstants.PLAY_DEFAULT_EXPIRE;
 
 @ApplicationScoped
 public class MediaSignService {
@@ -17,29 +20,18 @@ public class MediaSignService {
     SipConfigProperties sipConfigProperties;
 
     public String sign(String stream) {
-        String secret = sipConfigProperties.media().secret();
-
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-        return JWT.create()
-                .withIssuer(sipConfigProperties.server().id())
-                .withSubject(stream)
-                .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 86400)) // 5分钟有效期
-                .sign(algorithm);
+        return sign(stream, PLAY_DEFAULT_EXPIRE);
     }
 
-    public boolean verify(String streamId, String token) {
-        String secret = sipConfigProperties.media().secret();
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-        JWTVerifier build = JWT.require(algorithm)
-                .withIssuer(sipConfigProperties.server().id())
-                .withSubject(streamId)
-                .build();
-        try {
-            DecodedJWT decodedJWT = build.verify(token);
-            return true;
-        } catch (JWTVerificationException e) {
+    public String sign(String stream, int expire) {
+        long expireAt = System.currentTimeMillis() / 1000 + expire;
+        return DigestUtils.md2Hex(String.format("%s:%d:%s", stream, expireAt, sipConfigProperties.media().secret())) + "&expire=" + expireAt;
+    }
+
+    public boolean verify(String streamId, String token, Integer expire) {
+        if (token == null) {
             return false;
         }
+        return token.equals(sign(streamId, expire));
     }
 }

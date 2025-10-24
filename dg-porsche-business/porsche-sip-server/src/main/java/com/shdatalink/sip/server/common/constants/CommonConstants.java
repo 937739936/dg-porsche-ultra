@@ -11,4 +11,7 @@ public class CommonConstants {
      */
     public static final String DEFAULT_LARGE_LOGO_PATH =  "static/logo_large.png";
 
+    public static final Integer PLAY_DEFAULT_EXPIRE = 300;
+    public static final String PLAY_DEFAULT_EXPIRE_STR = "300";
+
 }
