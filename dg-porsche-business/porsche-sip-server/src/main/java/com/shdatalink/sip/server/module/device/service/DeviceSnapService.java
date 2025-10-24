@@ -137,7 +137,7 @@ public class DeviceSnapService {
                     10,
                     "-i", snap.toAbsolutePath().toString(),
                     "-vf", "scale="+width+":-1",
-                    path.toAbsolutePath().toString()
+                    "-y", path.toAbsolutePath().toString()
             );
             log.info("缩略图已生成：{}", path);
         } catch (IOException | InterruptedException e) {
