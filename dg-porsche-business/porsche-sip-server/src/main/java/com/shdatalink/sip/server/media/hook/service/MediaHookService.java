@@ -322,6 +322,7 @@ public class MediaHookService {
                 Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
                 mediaService.addPullStream(device.getStreamUrl(), stream, TransportTypeEnum.TCP, device.getEnableAudio());
             }
+            case Rtmp -> {}
             default -> {
                 hookResp.setCode(404);
                 return hookResp;
