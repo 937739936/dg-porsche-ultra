@@ -25,6 +25,7 @@ public class MediaSignService {
         if (token == null) {
             return false;
         }
-        return token.equals(sign(streamId, expire));
+        String sign = DigestUtils.md5Hex(String.format("%s:%d:%s", streamId, expire, sipConfigProperties.media().secret())).substring(8, 24);
+        return token.equals(sign);
     }
 }
