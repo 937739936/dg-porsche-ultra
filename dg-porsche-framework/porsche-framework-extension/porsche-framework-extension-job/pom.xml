@@ -12,8 +12,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>porsche-framework-extension-job</artifactId>
-    <description>定时任务扩展：https://cn.quarkus.io/guides/scheduler</description>
-
+    <description>定时任务扩展</description>
+    <url>https://cn.quarkus.io/guides/scheduler</url>
 
     <dependencies>
         <dependency>

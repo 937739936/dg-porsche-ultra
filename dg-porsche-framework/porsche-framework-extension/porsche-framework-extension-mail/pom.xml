@@ -12,7 +12,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>porsche-framework-extension-mail</artifactId>
-    <description>邮件程序扩展：https://cn.quarkus.io/guides/mailer-reference</description>
+    <description>邮件程序扩展</description>
+    <url>https://cn.quarkus.io/guides/mailer-reference</url>
 
 
     <dependencies>
