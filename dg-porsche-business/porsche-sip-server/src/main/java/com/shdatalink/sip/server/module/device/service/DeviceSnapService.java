@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 
 import com.shdatalink.framework.common.exception.BizException;
-import com.shdatalink.framework.redis.utils.RedisUtil;
 import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.InviteTypeEnum;
@@ -15,16 +14,13 @@ import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.enums.ProtocolTypeEnum;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewSnapshot;
+import com.shdatalink.sip.server.utils.FFmpegUtil;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -122,7 +118,7 @@ public class DeviceSnapService {
                     Files.createDirectories(dir);
                 }
                 Files.write(snapSavePath, snap);
-                generatePreview(snap, 80, getPreviewPathFromOrigin(snapSavePath));
+                generatePreview(snapSavePath, 80, getPreviewPathFromOrigin(snapSavePath));
                 return snap;
             } catch (Exception e) {
                 log.error("截图失败，{}", e.getMessage());
@@ -131,23 +127,20 @@ public class DeviceSnapService {
         return null;
     }
 
-    private void generatePreview(byte[] snap, int width, Path path) {
+    private void generatePreview(Path snap, int width, Path path) {
         try {
             if (!path.getParent().toFile().exists()) {
                 path.getParent().toFile().mkdirs();
             }
-            BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(snap));
-            float originWidth = originalImage.getWidth();
-            float originHeight = originalImage.getHeight();
-            int height = (int) (width / originWidth * originHeight);
-            BufferedImage scaledImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = scaledImage.createGraphics();
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g2d.drawImage(originalImage, 0, 0, width, height, null);
-            g2d.dispose();
-            ImageIO.write(scaledImage, "jpg", path.toFile());
+            // java.jwt不会添加到可执行文件，所以用ffmpeg
+            FFmpegUtil.run(
+                    10,
+                    "-i", snap.toAbsolutePath().toString(),
+                    "-vf", "scale="+width+":-1",
+                    path.toAbsolutePath().toString()
+            );
             log.info("缩略图已生成：{}", path);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             log.error("缩略图生成失败", e);
         }
     }
@@ -168,6 +161,10 @@ public class DeviceSnapService {
         return realTimeSnap(device, channel);
     }
     public DevicePreviewSnapshot realTimeSnap(Device device, DeviceChannel channel) {
+        if (!channel.getOnline()) {
+            return querySnapshot(device.getDeviceId(), channel.getChannelId());
+        }
+
         String rtspUrl = mediaService.getSnapshotUrl(device, channel.getId());
         if(device.getProtocolType() == ProtocolTypeEnum.GB28181){
             String stream = StreamFactory.streamId(InviteTypeEnum.Play, channel.getId().toString());
@@ -184,7 +181,7 @@ public class DeviceSnapService {
             return querySnapshot(device.getDeviceId(), channel.getChannelId());
         }
 
-        generatePreview(snapshot, 120, getPreviewPath(channel.getDeviceId(), channel.getChannelId()));
+        generatePreview(getSnapPath(channel.getDeviceId(), channel.getChannelId()), 120, getPreviewPath(channel.getDeviceId(), channel.getChannelId()));
         DevicePreviewSnapshot devicePreviewSnapshot = new DevicePreviewSnapshot();
         devicePreviewSnapshot.setBase64(Base64.getEncoder().encodeToString(snapshot));
         devicePreviewSnapshot.setCreateTime(LocalDateTime.now());
