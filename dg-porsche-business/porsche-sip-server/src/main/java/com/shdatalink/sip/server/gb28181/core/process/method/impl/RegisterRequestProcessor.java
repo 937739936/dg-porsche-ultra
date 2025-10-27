@@ -85,7 +85,6 @@ public class RegisterRequestProcessor extends AbstractSipRequestProcessor {
                         } else {
                             boolean f = DigestAuthenticationUtil.doAuthenticatePlainTextPassword(request.getMethod(), clientAuthorization, deviceConfig.getRegisterPassword());
                             if (f) {
-                                publisher.fireAsync(new DeviceRegisterEvent(deviceId, isRegistration, DeviceRegisterEvent.Status.Success));
                                 if (isRegistration) {
                                     // 1.  发送注册成功响应消息
                                     ResponseBuilder.of(requestEvent).buildRegisterOfResponse().execute();
@@ -103,10 +102,14 @@ public class RegisterRequestProcessor extends AbstractSipRequestProcessor {
                                         // ignore  exception
                                     }
 
-                                    publisher.fireAsync(new DeviceOnlineEvent(deviceId, true));
+                                    if (!deviceConfig.getOnline()) {
+                                        publisher.fireAsync(new DeviceRegisterEvent(deviceId, true, DeviceRegisterEvent.Status.Success));
+                                        publisher.fireAsync(new DeviceOnlineEvent(deviceId, true));
+                                    }
                                     publisher.fireAsync(new DeviceInfoUpdateEvent(deviceConfig));
                                 } else {
                                     logger.info("{} 设备注销.", deviceId);
+                                    publisher.fireAsync(new DeviceRegisterEvent(deviceId, false, DeviceRegisterEvent.Status.Success));
                                     publisher.fireAsync(new DeviceOnlineEvent(deviceId, false));
                                     deviceService.updateOnline(deviceId, false);
                                     deviceChannelService.setDeviceOffline(deviceId);

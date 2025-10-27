@@ -17,6 +17,7 @@ import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
 import com.shdatalink.sip.server.module.plan.vo.VideoRecordTimeLineVO;
+import com.shdatalink.sip.server.utils.FFmpegUtil;
 import com.shdatalink.sip.server.utils.SipUtil;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.vertx.core.buffer.Buffer;
@@ -105,9 +106,10 @@ public class VideoRecordRemoteService {
                 .download(startTime, endTime)
                 .execute();
 
+        long timeout = DateUtil.betweenSeconds(startTime, endTime) + 60;
         CompletableFuture<String> future = new CompletableFuture<>();
         downloadFutureMap.put(streamId, future);
-        String filePath = future.get(DateUtil.betweenSeconds(startTime, endTime)+60, TimeUnit.SECONDS);
+        String filePath = future.get(timeout, TimeUnit.SECONDS);
         try (FileInputStream inputStream = new FileInputStream(filePath)) {
             context.response().putHeader("Content-Disposition", "attachment; filename=record.mp4");
             context.response().putHeader("Content-Type", "video/mp4");

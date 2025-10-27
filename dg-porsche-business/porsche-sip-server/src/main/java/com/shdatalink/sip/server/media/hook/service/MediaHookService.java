@@ -111,8 +111,7 @@ public class MediaHookService {
     public PublishResp publish(PublishReq publishReq) {
         log.info("发布流事件");
         String stream = publishReq.getStream();
-        String prefix = stream.substring(0, 2);
-        if(Objects.equals(prefix,InviteTypeEnum.Rtmp.getPrefix())){
+        if(StreamFactory.extractType(stream) == InviteTypeEnum.Rtmp){
             DeviceChannel channel = deviceChannelService.getById(StreamFactory.extractChannel(stream));
             if(channel == null) {
                 PublishResp publishResp = new PublishResp();
@@ -157,7 +156,7 @@ public class MediaHookService {
 
     public HookResp recordMp4(RecordMp4Req recordMp4Req) {
         log.info("录制mp4事件" + recordMp4Req);
-        InviteTypeEnum action = InviteTypeEnum.getByPrefix(recordMp4Req.getStream().substring(0, 2));
+        InviteTypeEnum action = StreamFactory.extractType(recordMp4Req.getStream());
         if (action == InviteTypeEnum.Play || action == InviteTypeEnum.PullStream || action == InviteTypeEnum.Rtmp) {
             try {
                 videoRecordService.save(recordMp4Req);
@@ -195,17 +194,9 @@ public class MediaHookService {
         return new HookResp();
     }
 
-    private static final Map<String, Long> streamChangeCache = new ConcurrentHashMap<>();
     public HookResp streamChanged(StreamChangedReq streamChangedReq) {
         log.info("streamChanged: {}", JsonUtil.toJsonString(streamChangedReq));
-        if (streamChangeCache.containsKey(streamChangedReq.getStream()) && System.currentTimeMillis() - streamChangeCache.get(streamChangedReq.getStream()) < 100) {
-            HookResp hookResp = new HookResp();
-            hookResp.setCode(0);
-            return hookResp;
-        }
-        streamChangeCache.put(streamChangedReq.getStream(), System.currentTimeMillis());
-
-        InviteTypeEnum action = InviteTypeEnum.getByPrefix(streamChangedReq.getStream().substring(0, 2));
+        InviteTypeEnum action = StreamFactory.extractType(streamChangedReq.getStream());
         if (streamChangedReq.getRegist()) {
             if (action == InviteTypeEnum.Download) {
                 Path path = null;
@@ -269,7 +260,7 @@ public class MediaHookService {
             return resp;
         }
         Device device = deviceOptional.get();
-        InviteTypeEnum action = InviteTypeEnum.getByPrefix(streamNoneReaderReq.getStream().substring(0, 2));
+        InviteTypeEnum action = StreamFactory.extractType(streamNoneReaderReq.getStream());
         if (action == InviteTypeEnum.Play) {
             if (!channel.getRecording()) {
                 GBRequest.bye(device.toGbDevice(channel.getChannelId())).withStreamId(streamNoneReaderReq.getStream()).execute();
@@ -296,7 +287,7 @@ public class MediaHookService {
             return hookResp;
         }
 
-        InviteTypeEnum action = InviteTypeEnum.getByPrefix(stream.substring(0,2));
+        InviteTypeEnum action = StreamFactory.extractType(streamNotFoundReq.getStream());
         if (action == null) {
             hookResp.setCode(404);
             return hookResp;
@@ -376,7 +367,7 @@ public class MediaHookService {
             }
         }
 
-        InviteTypeEnum action = InviteTypeEnum.getByPrefix(playReq.getStream().substring(0,2));
+        InviteTypeEnum action = StreamFactory.extractType(playReq.getStream());
         if (action == null) {
             hookResp.setCode(401);
             return hookResp;

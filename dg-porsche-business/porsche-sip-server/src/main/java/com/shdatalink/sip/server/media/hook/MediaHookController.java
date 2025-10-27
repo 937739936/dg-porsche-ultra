@@ -10,6 +10,9 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Slf4j
 @Anonymous
 @Path("/media/hook")
@@ -102,6 +105,8 @@ public class MediaHookController {
         return mediaHookService.shellLogin(shellLoginReq);
     }
 
+    private static final Map<String, Long> streamChangeCache = new ConcurrentHashMap<>();
+
     /**
      * rtsp/rtmp流注册或注销时触发此事件；此事件对回复不敏感。
      */
@@ -109,7 +114,17 @@ public class MediaHookController {
     @POST
     @IgnoredResultWrapper
     public HookResp streamChanged(StreamChangedReq streamChangedReq) {
-        return mediaHookService.streamChanged(streamChangedReq);
+        streamChangeCache.compute(streamChangedReq.getStream(), (k, lastTime) -> {
+            long now = System.currentTimeMillis();
+            if (lastTime != null && now - lastTime < 100) {
+                return lastTime;
+            }
+            mediaHookService.streamChanged(streamChangedReq);
+            return now;
+        });
+        HookResp hookResp = new HookResp();
+        hookResp.setCode(0);
+        return hookResp;
     }
 
     /**
