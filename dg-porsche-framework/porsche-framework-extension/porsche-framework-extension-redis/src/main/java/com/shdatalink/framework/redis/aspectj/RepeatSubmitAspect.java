@@ -92,12 +92,9 @@ public class RepeatSubmitAspect {
 
             // 执行方法
             result = context.proceed();
-
-            // 处理完请求后执行
-            this.doAfterReturning();
-        } catch (Exception e) {
-            doAfterThrowing();
-            throw e;
+        } finally {
+            // 清理缓存
+            this.clear();
         }
         return result;
     }
@@ -105,19 +102,10 @@ public class RepeatSubmitAspect {
     /**
      * 处理完请求后执行
      */
-    private void doAfterReturning() {
+    private void clear() {
         redisUtil.del(KEY_CACHE.get());
         KEY_CACHE.remove();
     }
-
-    /**
-     * 发生异常操后作
-     */
-    private void doAfterThrowing() {
-        redisUtil.del(KEY_CACHE.get());
-        KEY_CACHE.remove();
-    }
-
 
     /**
      * 参数拼装
