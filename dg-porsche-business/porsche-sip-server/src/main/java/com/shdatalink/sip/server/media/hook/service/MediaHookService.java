@@ -52,6 +52,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
@@ -82,10 +83,6 @@ public class MediaHookService {
 
     @Inject
     Executor executor;
-
-    @Inject
-    SipConfigProperties sipConfigProperties;
-
     @Inject
     RedisUtil redisUtil;
 
@@ -99,6 +96,7 @@ public class MediaHookService {
     PushStreamConvert pushStreamConvert;
     @Inject
     DeviceSnapService deviceSnapService;
+
 
     public HookResp flowReport(FlowReportReq flowReportReq) {
         log.info("流上报事件" + flowReportReq);
@@ -197,8 +195,16 @@ public class MediaHookService {
         return new HookResp();
     }
 
+    private static final Map<String, Long> streamChangeCache = new ConcurrentHashMap<>();
     public HookResp streamChanged(StreamChangedReq streamChangedReq) {
         log.info("streamChanged: {}", JsonUtil.toJsonString(streamChangedReq));
+        if (streamChangeCache.containsKey(streamChangedReq.getStream()) && System.currentTimeMillis() - streamChangeCache.get(streamChangedReq.getStream()) < 100) {
+            HookResp hookResp = new HookResp();
+            hookResp.setCode(0);
+            return hookResp;
+        }
+        streamChangeCache.put(streamChangedReq.getStream(), System.currentTimeMillis());
+
         InviteTypeEnum action = InviteTypeEnum.getByPrefix(streamChangedReq.getStream().substring(0, 2));
         if (streamChangedReq.getRegist()) {
             if (action == InviteTypeEnum.Download) {
