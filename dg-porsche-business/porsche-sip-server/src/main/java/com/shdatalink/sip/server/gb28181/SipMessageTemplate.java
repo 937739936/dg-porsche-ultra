@@ -22,7 +22,7 @@ public class SipMessageTemplate {
 
     @SneakyThrows
     private <T> T execute(GbDevice device, QueryMessage query) {
-        return GBRequest.message(device).newSession().execute(query).get();
+        return GBRequest.message(device).execute(query).get();
     }
 
     public DeviceInfo getDeviceInfo(GbDevice device) {

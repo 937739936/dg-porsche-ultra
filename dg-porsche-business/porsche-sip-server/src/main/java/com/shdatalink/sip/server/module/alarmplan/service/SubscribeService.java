@@ -69,7 +69,6 @@ public class SubscribeService extends ServiceImpl<SubscribeMapper, Subscribe> {
 
     public void alarmSubscribe(Device device, boolean alarm) {
         GBRequest.subscribe(device.toGbDevice())
-                .newSession()
                 .execute(AlarmSubscribe.builder()
                         .sn(SipUtil.generateSn())
                         .deviceId(device.getDeviceId())
@@ -82,7 +81,6 @@ public class SubscribeService extends ServiceImpl<SubscribeMapper, Subscribe> {
 
     public void catalogSubscribe(Device device, boolean isCatalog) {
         GBRequest.subscribe(device.toGbDevice())
-                .newSession()
                 .execute(CatalogSubscribe.builder()
                         .sn(SipUtil.generateSn())
                         .deviceId(device.getDeviceId())
@@ -92,7 +90,6 @@ public class SubscribeService extends ServiceImpl<SubscribeMapper, Subscribe> {
 
     public void positionSubscribe(Device device, boolean isPosition) {
         GBRequest.subscribe(device.toGbDevice())
-                .newSession()
                 .execute(MobilePositionSubscribe.builder()
                         .sn(SipUtil.generateSn())
                         .deviceId(device.getDeviceId())

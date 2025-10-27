@@ -11,10 +11,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sip.SipException;
-import javax.sip.message.Request;
 
 @Slf4j
-public class MessageRequest extends AbstractRequest implements GBRequest {
+public class MessageRequest extends GBRequest {
 
     @Setter
     private Object content;
@@ -24,15 +23,15 @@ public class MessageRequest extends AbstractRequest implements GBRequest {
         super(toDevice, SIPRequest.MESSAGE);
     }
 
-    @Override
     public MessageRequest execute(Object content) {
         this.content = content;
         byte[] xmlData = XmlUtil.toByteXml(content, SipConstant.CHARSET);
-        request(Request.MESSAGE, SipConstant.XML, xmlData);
+        createRequest()
+                .setContent(SipConstant.XML, content)
+                .send(false);
         return this;
     }
 
-    @Override
     public <T> T get() throws SipException {
         if (!(content instanceof QueryMessage queryMessage)) {
             return null;
@@ -44,7 +43,7 @@ public class MessageRequest extends AbstractRequest implements GBRequest {
         if (futureEvent.get().getCode() == Message.EnumState.OK) {
             return futureEvent.get().getData();
         } else {
-            throw new SipException("message请求出错: cmdType="+queryMessage.getCmdType().name()+"; code = " + futureEvent.get().getCode());
+            throw new SipException("message请求出错: cmdType=" + queryMessage.getCmdType().name() + "; code = " + futureEvent.get().getCode());
         }
     }
 

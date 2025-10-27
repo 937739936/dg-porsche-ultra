@@ -109,7 +109,7 @@ public class MediaHookService {
     }
 
     public PublishResp publish(PublishReq publishReq) {
-        log.info("发布流事件");
+        log.info("发布流事件:{}", JsonUtil.toJsonString(publishReq));
         String stream = publishReq.getStream();
         if(StreamFactory.extractType(stream) == InviteTypeEnum.Rtmp){
             DeviceChannel channel = deviceChannelService.getById(StreamFactory.extractChannel(stream));
@@ -120,7 +120,7 @@ public class MediaHookService {
                 return publishResp;
             }
             Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElse(null);
-            if(device == null) {
+            if(device == null || !device.getEnable()) {
                 PublishResp publishResp = new PublishResp();
                 publishResp.setCode(404);
                 publishResp.setMsg("设备不在线");
@@ -163,9 +163,9 @@ public class MediaHookService {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (action == InviteTypeEnum.Download) {
-            String url = String.format("%s%s/%s", recordMp4Req.getFolder(), LocalDate.now().format(DateTimeFormatter.ISO_DATE), recordMp4Req.getFileName());
-            videoRecordRemoteService.downloadDone(recordMp4Req.getStream(), url);
+//        } else if (action == InviteTypeEnum.Download) {
+//            String url = String.format("%s%s/%s", recordMp4Req.getFolder(), LocalDate.now().format(DateTimeFormatter.ISO_DATE), recordMp4Req.getFileName());
+//            videoRecordRemoteService.downloadDone(recordMp4Req.getStream(), url);
         } else {
             // 删除掉录制的视频来清理硬盘
             Path path = Paths.get("%s/%s/%s", recordMp4Req.getFolder(), LocalDate.now().format(DateTimeFormatter.ISO_DATE), recordMp4Req.getFileName());
@@ -198,23 +198,7 @@ public class MediaHookService {
         log.info("streamChanged: {}", JsonUtil.toJsonString(streamChangedReq));
         InviteTypeEnum action = StreamFactory.extractType(streamChangedReq.getStream());
         if (streamChangedReq.getRegist()) {
-            if (action == InviteTypeEnum.Download) {
-                Path path = null;
-                try {
-                    path = Files.createTempDirectory("record_download");
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                // 开始录制
-                StartRecordReq startRecord = new StartRecordReq();
-                startRecord.setType(1);
-                startRecord.setStream(streamChangedReq.getStream());
-                startRecord.setCustomizedPath(path.toAbsolutePath().toString());
-                startRecord.setMaxSecond(Integer.MAX_VALUE);
-                mediaHttpClient.startRecord(startRecord);
-
-                System.out.println(path.toAbsolutePath());
-            } else if (action == InviteTypeEnum.Play) {
+            if (action == InviteTypeEnum.Play) {
                 DeviceChannel channel = deviceChannelService.getOptById(StreamFactory.extractChannel(streamChangedReq.getStream())).orElseThrow(() -> new BizException("通道不存在"));
                 deviceLogService.addLog(channel.getDeviceId(), channel.getChannelId(), channel.getOnline(), MessageTypeEnum.Stream, "开始推流");
             }
@@ -264,6 +248,7 @@ public class MediaHookService {
         if (action == InviteTypeEnum.Play) {
             if (!channel.getRecording()) {
                 GBRequest.bye(device.toGbDevice(channel.getChannelId())).withStreamId(streamNoneReaderReq.getStream()).execute();
+                deviceLogService.addLog(channel.getDeviceId(), channel.getChannelId(), channel.getOnline(), MessageTypeEnum.Stream, "流关闭（无人观看）");
                 resp.setClose(true);
             }
         } else if (action == InviteTypeEnum.Playback) {
@@ -278,39 +263,45 @@ public class MediaHookService {
         return resp;
     }
 
-    public HookResp streamNotFound(StreamNotFoundReq streamNotFoundReq) {
-        log.info("流不存在事件" + streamNotFoundReq);
+    public HookResp streamNotFound(StreamNotFoundReq req) {
+        log.info("流不存在事件" + req);
         HookResp hookResp = new HookResp();
-        String stream = streamNotFoundReq.getStream();
+        String stream = req.getStream();
         if (mediaService.mediaExists(stream)) {
             hookResp.setCode(0);
             return hookResp;
         }
 
-        InviteTypeEnum action = StreamFactory.extractType(streamNotFoundReq.getStream());
+        InviteTypeEnum action = StreamFactory.extractType(req.getStream());
         if (action == null) {
             hookResp.setCode(404);
             return hookResp;
         }
 
+        DeviceChannel channel = deviceChannelService.getById(StreamFactory.extractChannel(stream));
+        Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        Map<String, String> map = QueryParamParser.parseToMap(streamNotFoundReq.getParams());
+        Map<String, String> map = QueryParamParser.parseToMap(req.getParams());
         LocalDateTime startTime = map.containsKey("start") ? LocalDateTime.parse(map.get("start"), formatter) : null;
-        LocalDateTime endTime = map.containsKey("end") ? LocalDateTime.parse(map.get("start"), formatter) : null;
+        LocalDateTime endTime = map.containsKey("end") ? LocalDateTime.parse(map.get("end"), formatter) : null;
         switch (action) {
-            case Play -> deviceChannelService.play(stream);
+            case Play -> mediaService.play(device.toGbDevice(channel.getChannelId()), req.getStream());
             case Playback -> {
                 if (endTime == null || startTime == null) {
                     hookResp.setCode(404);
                     return hookResp;
                 }
-                deviceChannelService.playBack(stream, startTime, endTime);
+                mediaService.playback(device.toGbDevice(channel.getChannelId()), req.getStream(), startTime, endTime);
             }
-            case PullStream -> {
-                DeviceChannel channel = deviceChannelService.getById(StreamFactory.extractChannel(stream));
-                Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
-                mediaService.addPullStream(device.getStreamUrl(), stream, TransportTypeEnum.TCP, device.getEnableAudio());
+            case Download -> {
+                if (endTime == null || startTime == null) {
+                    hookResp.setCode(404);
+                    return hookResp;
+                }
+                mediaService.download(device.toGbDevice(channel.getChannelId()), req.getStream(), startTime, endTime);
             }
+            case PullStream -> mediaService.addPullStream(device.getStreamUrl(), stream, TransportTypeEnum.TCP, device.getEnableAudio());
             case Rtmp -> {}
             default -> {
                 hookResp.setCode(404);

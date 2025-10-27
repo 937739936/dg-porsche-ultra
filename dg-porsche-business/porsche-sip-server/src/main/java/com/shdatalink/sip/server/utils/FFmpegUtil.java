@@ -2,8 +2,10 @@ package com.shdatalink.sip.server.utils;
 
 import com.shdatalink.framework.common.utils.QuarkusUtil;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +58,43 @@ public class FFmpegUtil {
         } finally {
             process.destroy();
         }
+    }
+
+    public static String probeCodec(String url)
+            throws IOException, InterruptedException {
+        String[] cmd = new String[]{
+                "/usr/local/bin/ffprobe",
+                "-v", "error",
+                "-select_streams", "v",
+                "-show_entries", "stream=codec_name",
+                "-of", "csv=p=0",
+                url
+        };
+
+        String processCmd = String.join(" ", cmd);
+        System.out.println("[FFmpeg CMD] " + processCmd);
+
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+
+        Process process = pb.start();
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (!line.isEmpty()) {
+                    // 输出格式通常是 codec_name，例如: "h264"
+                    return line;
+                }
+            }
+
+            process.waitFor(30, TimeUnit.SECONDS);
+        } finally {
+            process.destroy();
+        }
+        return null;
     }
 
 //    public static void stop(Long pid) {
