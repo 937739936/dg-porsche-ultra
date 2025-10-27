@@ -48,16 +48,9 @@ public class RepeatSubmitAspect {
      */
     private static final String REPEAT_SUBMIT_KEY = "repeat_submit:";
 
-    /**
-     * KEY缓存
-     */
-    private static final ThreadLocal<String> KEY_CACHE = new ThreadLocal<>();
-
 
     @AroundInvoke
     public Object execute(InvocationContext context) throws Exception {
-        log.info("invoked {}", context.getMethod().getName());
-
         // 获取目标方法上的 @RepeatSubmit 注解
         RepeatSubmit repeatSubmit = context.getInterceptorBinding(RepeatSubmit.class);
 
@@ -88,13 +81,11 @@ public class RepeatSubmitAspect {
         try {
             // 在缓存中记录本次信息
             redisUtil.setEx(cacheRepeatKey, "", Duration.ofMillis(interval));
-            KEY_CACHE.set(cacheRepeatKey);
-
             // 执行方法
             result = context.proceed();
         } finally {
             // 清理缓存
-            this.clear();
+            this.clear(cacheRepeatKey);
         }
         return result;
     }
@@ -102,9 +93,8 @@ public class RepeatSubmitAspect {
     /**
      * 处理完请求后执行
      */
-    private void clear() {
-        redisUtil.del(KEY_CACHE.get());
-        KEY_CACHE.remove();
+    private void clear(String key) {
+        redisUtil.del(key);
     }
 
     /**
