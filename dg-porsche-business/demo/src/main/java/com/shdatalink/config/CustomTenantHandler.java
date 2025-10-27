@@ -25,7 +25,7 @@ public class CustomTenantHandler implements TenantLineHandler {
     @Override
     public boolean ignoreTable(String tableName) {
         // 根据需要返回是否忽略该表
-        return false;
+        return "t_contract_extend".equals(tableName);
     }
 
 }
