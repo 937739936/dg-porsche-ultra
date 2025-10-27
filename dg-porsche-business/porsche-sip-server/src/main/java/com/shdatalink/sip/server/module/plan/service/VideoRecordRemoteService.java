@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.framework.common.utils.DateUtil;
-import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.InviteTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.RecordInfoQuery;
@@ -49,8 +48,6 @@ public class VideoRecordRemoteService {
     DeviceService deviceService;
     @Inject
     DeviceChannelService deviceChannelService;
-    @Inject
-    SipConfigProperties sipConfigProperties;
     @Inject
     MediaService mediaService;
     @Inject
@@ -146,32 +143,6 @@ public class VideoRecordRemoteService {
     public void downloadDone(@ObservesAsync MediaDownloadDoneEvent event) {
         DeviceChannel channel = deviceChannelService.getBaseMapper().selectByChannelId(event.getChannelId());
         stopDownload(channel.getDeviceId(), channel.getChannelId());
-    }
-
-    public Long downloadTime(String deviceId, String channelId, LocalDateTime start, LocalDateTime end) {
-        RecordInfoQuery query = RecordInfoQuery.builder()
-                .deviceId(channelId)
-                .sn(SipUtil.generateSn())
-                .startTime(start)
-                .endTime(end)
-                .type("all")
-                .build();
-        Device device = deviceService.getByDeviceId(deviceId)
-                .orElseThrow(() -> new BizException("设备不存在"));
-        RecordInfo recordInfo;
-        try {
-            recordInfo = GBRequest.message(device.toGbDevice())
-                    .execute(query)
-                    .get();
-        } catch (Exception e) {
-            throw new BizException("设备端没有录像");
-        }
-        Long totalSeconds = recordInfo.getRecordList()
-                .stream()
-                .map(item -> DateUtil.betweenSeconds(item.getStartTime(), item.getEndTime()))
-                .reduce(Long::sum)
-                .get();
-        return (totalSeconds/4)+30;
     }
 
     public void stopDownload(String deviceId, String channelId) {

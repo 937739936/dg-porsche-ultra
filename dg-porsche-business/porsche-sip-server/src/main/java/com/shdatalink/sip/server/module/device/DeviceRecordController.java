@@ -132,30 +132,6 @@ public class DeviceRecordController {
     }
 
     /**
-     * 获取预估下载时长
-     *
-     * @param deviceId
-     * @param channelId
-     * @param start
-     * @param end
-     * @param type
-     * @return
-     */
-    @Path("downloadTime")
-    @GET
-    public Long downloadTime(@QueryParam("deviceId") @NotBlank String deviceId,
-                             @QueryParam("channelId") @NotBlank String channelId,
-                             @QueryParam("start") @NotNull LocalDateTime start,
-                             @QueryParam("end") @NotNull LocalDateTime end,
-                             @QueryParam("type") @NotBlank String type) {
-        if (type.equals("remote")) {
-            return videoRecordRemoteService.downloadTime(deviceId, channelId, start, end);
-        } else {
-            return 0L;
-        }
-    }
-
-    /**
      * 下载mp4文件
      *
      * @param deviceId
