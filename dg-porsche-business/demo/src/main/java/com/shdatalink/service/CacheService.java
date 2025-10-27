@@ -1,10 +1,13 @@
 package com.shdatalink.service;
 
+import com.shdatalink.framework.redis.annotation.RepeatSubmit;
+import com.shdatalink.resource.RedisResource;
 import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @ApplicationScoped
@@ -34,4 +37,6 @@ public class CacheService {
                 throw new IllegalArgumentException();
         }
     }
+
+
 }

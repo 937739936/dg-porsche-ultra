@@ -1,13 +1,14 @@
 package com.shdatalink.resource;
 
 import com.shdatalink.entity.Contract;
+import com.shdatalink.framework.redis.annotation.RepeatSubmit;
 import com.shdatalink.framework.redis.utils.RedisUtil;
+import com.shdatalink.service.CacheService;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,12 +16,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Path("/redis")
 public class RedisResource {
 
     @Inject
     RedisUtil redisUtil;
+    @Inject
+    CacheService cacheService;
 
     @GET
     @Path("/set")
@@ -99,6 +103,25 @@ public class RedisResource {
     @Path("/map/get")
     public Contract mapGet(@QueryParam("key") Integer key) {
         return redisUtil.getMapValue("demoMap", key.toString(), Contract.class);
+    }
+
+
+    @RepeatSubmit(interval = 60, timeUnit = TimeUnit.SECONDS)
+    @POST
+    @Path("/repeatSubmit")
+    public boolean repeatSubmit(@QueryParam("key") Integer key, @Valid RepeatSubmitParam param) {
+        try {
+            TimeUnit.SECONDS.sleep(50);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return true;
+    }
+
+    @Data
+    public static class RepeatSubmitParam {
+        private String name;
+        private String password;
     }
 
 
