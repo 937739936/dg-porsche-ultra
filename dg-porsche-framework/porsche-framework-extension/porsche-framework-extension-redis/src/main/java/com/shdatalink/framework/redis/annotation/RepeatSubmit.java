@@ -30,13 +30,13 @@ public @interface RepeatSubmit {
      * 间隔时间(ms)，小于此时间视为重复提交
      */
     @Nonbinding
-    int interval() default 5000;
+    int interval() default 1000;
 
     /**
-     * 时间单位 默认毫秒
+     * 时间单位 默认秒
      */
     @Nonbinding
-    TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
+    TimeUnit timeUnit() default TimeUnit.SECONDS;
 
     /**
      * 提示消息
