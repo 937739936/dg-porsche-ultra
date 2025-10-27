@@ -17,34 +17,15 @@ import java.time.LocalDateTime;
 public class Contract {
 
     /**
-     * 创建者
-     */
-    @TableField(fill = FieldFill.INSERT)
-    private Integer createdBy;
-
-    /**
-     * 创建时间
-     */
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createdTime;
-
-    /**
-     * 更新者
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Integer lastModifiedBy;
-
-    /**
-     * 更新时间
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime lastModifiedTime;
-
-    /**
      * 主键
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
+
+    /**
+     * 租户ID
+     */
+    private Long tenantId;
 
     /**
      * 合同编号

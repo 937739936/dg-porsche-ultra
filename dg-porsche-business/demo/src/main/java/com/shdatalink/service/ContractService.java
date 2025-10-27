@@ -28,10 +28,11 @@ public class ContractService extends ServiceImpl<ContractMapper, Contract> {
 
 
     public IPage<Contract> pageQueryLambda() {
-        LambdaQueryWrapper<Contract> queryWrapper = new LambdaQueryWrapper<Contract>()
-                .eq(Contract::getStatus, "执行中");
-        Page<Contract> page = page(new Page<>(1, 10), queryWrapper);
-        return page;
+//        LambdaQueryWrapper<Contract> queryWrapper = new LambdaQueryWrapper<Contract>()
+//                .eq(Contract::getStatus, "执行中");
+//        Page<Contract> page = page(new Page<>(1, 10), queryWrapper);
+        return baseMapper.queryPage(new Page<>(1, 10));
+//        return page;
     }
 
     public IPage<Contract> pageQuery() {

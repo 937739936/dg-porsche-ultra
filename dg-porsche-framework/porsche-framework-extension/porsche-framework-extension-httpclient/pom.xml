@@ -12,7 +12,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>porsche-framework-extension-httpclient</artifactId>
-    <description>httpClient扩展：https://cn.quarkus.io/guides/rest-client</description>
+    <description>httpClient扩展</description>
+    <url>https://cn.quarkus.io/guides/rest-client</url>
 
 
     <dependencies>
