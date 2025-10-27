@@ -27,7 +27,7 @@ public class MessageRequest extends GBRequest {
         this.content = content;
         byte[] xmlData = XmlUtil.toByteXml(content, SipConstant.CHARSET);
         createRequest()
-                .setContent(SipConstant.XML, content)
+                .setContent(SipConstant.XML, xmlData)
                 .send(false);
         return this;
     }
