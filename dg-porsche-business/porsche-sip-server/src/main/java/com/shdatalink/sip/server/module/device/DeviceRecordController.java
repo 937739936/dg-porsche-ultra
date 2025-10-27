@@ -156,24 +156,4 @@ public class DeviceRecordController {
             videoRecordRemoteService.download(deviceId, channelId, start, end, context);
         }
     }
-
-    /**
-     * 停止下载
-     *
-     * @param deviceId
-     * @param channelId
-     * @param type
-     */
-    @Path("stopDownload")
-    @GET
-    public void stopDownload(@QueryParam("deviceId") @NotBlank String deviceId,
-                             @QueryParam("channelId") @NotBlank String channelId,
-                             @QueryParam("type") @NotBlank String type
-    ) {
-        if (type.equals("local")) {
-        } else {
-            videoRecordRemoteService.stopDownload(deviceId, channelId);
-        }
-    }
-
 }

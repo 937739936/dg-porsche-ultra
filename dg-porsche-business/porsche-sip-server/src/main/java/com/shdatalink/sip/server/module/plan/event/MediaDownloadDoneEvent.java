@@ -7,4 +7,5 @@ import lombok.Data;
 @Data
 public class MediaDownloadDoneEvent {
     private String channelId;
+    private String callId;
 }

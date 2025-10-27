@@ -169,12 +169,11 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
                 .isNotNull(DeviceChannel::getRegisterTime));
     }
 
-    public void stop(InviteTypeEnum type, String deviceId, String channelId) {
-        DeviceChannel channel = baseMapper.selectByDeviceIdAndChannelId(deviceId, channelId);
+    public void stop(String streamId) {
+        DeviceChannel channel = baseMapper.selectById(StreamFactory.extractChannel(streamId));
         if (channel == null) {
             return;
         }
-        String streamId = StreamFactory.streamId(type, channel.getId().toString());
         Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
         GBRequest.bye(device.toGbDevice(channel.getChannelId())).withStreamId(streamId).execute();
         mediaService.closeStreams(streamId, 1);

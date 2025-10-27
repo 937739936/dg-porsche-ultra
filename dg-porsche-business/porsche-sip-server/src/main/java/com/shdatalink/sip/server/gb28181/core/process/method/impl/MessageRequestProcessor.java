@@ -128,7 +128,7 @@ public class MessageRequestProcessor extends AbstractSipRequestProcessor {
             log.info("deviceMobilePosition, {}", JsonUtil.toJsonString(deviceMobilePosition));
         } else if (deviceBase.getCmdType().equals(SipEnum.Cmd.MediaStatus.name())) {
             MediaStatus mediaStatus = XmlUtil.parse(content, MediaStatus.class);
-            eventPublisher.fireAsync(new MediaDownloadDoneEvent(mediaStatus.getDeviceId()));
+            eventPublisher.fireAsync(new MediaDownloadDoneEvent(mediaStatus.getDeviceId(), request.getCallId().getCallId()));
             log.info("mediaStatus, {}", JsonUtil.toJsonString(mediaStatus));
         } else {
             log.info("收到其他类型消息,无法处理.{}", deviceBase.getCmdType());

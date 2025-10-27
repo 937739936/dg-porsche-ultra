@@ -8,6 +8,7 @@ import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.InviteTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.RecordInfoQuery;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.response.RecordInfo;
+import com.shdatalink.sip.server.gb28181.core.builder.DialogHolder;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.media.GBMediaUrl;
 import com.shdatalink.sip.server.media.MediaService;
@@ -89,12 +90,13 @@ public class VideoRecordRemoteService {
 
     public void download(String deviceId, String channelId, LocalDateTime startTime, LocalDateTime endTime, RoutingContext context) throws ExecutionException, InterruptedException, TimeoutException, IOException {
         DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
-        String streamId = StreamFactory.streamId(InviteTypeEnum.Download, channel.getId().toString());
-        if (mediaService.rtpServerExists(streamId)) {
-            throw new BizException("该设备有其他下载任务，请稍后再试");
-        }
+//        String streamId = StreamFactory.streamId(InviteTypeEnum.Download, channel.getId().toString());
+//        if (mediaService.rtpServerExists(streamId)) {
+//            throw new BizException("该设备有其他下载任务，请稍后再试");
+//        }
 
-        String downloadUrl = gbMediaUrl.download(channel.getId(), startTime, endTime);
+        DevicePreviewPlayVO vo = gbMediaUrl.download(channel.getId(), startTime, endTime);
+        String downloadUrl = vo.getRtspUrl();
         String codec = FFmpegUtil.probeCodec(downloadUrl);
         if (StringUtils.isBlank(codec)) {
             log.error("未能获取到视频格式, 下载失败, {}", downloadUrl);
@@ -135,17 +137,16 @@ public class VideoRecordRemoteService {
                     cmd
             );
         } catch (Exception e) {
-            stopDownload(deviceId, channelId);
+            stopDownload(vo.getSsrc());
         }
 
     }
 
     public void downloadDone(@ObservesAsync MediaDownloadDoneEvent event) {
-        DeviceChannel channel = deviceChannelService.getBaseMapper().selectByChannelId(event.getChannelId());
-        stopDownload(channel.getDeviceId(), channel.getChannelId());
+        stopDownload(DialogHolder.getSsrcByCallId(event.getCallId()));
     }
 
-    public void stopDownload(String deviceId, String channelId) {
-        deviceChannelService.stop(InviteTypeEnum.Download, deviceId, channelId);
+    public void stopDownload(String streamId) {
+        deviceChannelService.stop(streamId);
     }
 }
