@@ -11,6 +11,10 @@ import jakarta.ws.rs.QueryParam;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Path("/redis")
 public class RedisResource {
@@ -59,6 +63,42 @@ public class RedisResource {
     public Boolean delete(@QueryParam("key") String key) {
         redisUtil.del(key);
         return true;
+    }
+
+    @GET
+    @Path("/list/set")
+    public Boolean listSet() {
+        List<Contract> list = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Contract contract = new Contract();
+            list.add(contract);
+        }
+        redisUtil.setList("demoList", list);
+        return true;
+    }
+
+    @GET
+    @Path("/list/get")
+    public List<Contract> listGet() {
+        return redisUtil.getList("demoList", Contract.class);
+    }
+
+    @GET
+    @Path("/map/set")
+    public Boolean mapSet() {
+        Map<String,Contract> map = new HashMap<>();
+        for (int i = 0; i < 10; i++) {
+            Contract contract = new Contract();
+            map.put(String.valueOf(i),contract);
+        }
+        redisUtil.setMap("demoMap", map);
+        return true;
+    }
+
+    @GET
+    @Path("/map/get")
+    public Contract mapGet(@QueryParam("key") Integer key) {
+        return redisUtil.getMapValue("demoMap", key.toString(), Contract.class);
     }
 
 
