@@ -2,13 +2,20 @@ package com.shdatalink.framework.redis.utils;
 
 import com.shdatalink.framework.json.utils.JsonUtil;
 import io.quarkus.redis.datasource.RedisDataSource;
+import io.quarkus.redis.datasource.hash.HashCommands;
 import io.quarkus.redis.datasource.keys.KeyCommands;
+import io.quarkus.redis.datasource.list.ListCommands;
+import io.quarkus.redis.datasource.set.SetCommands;
 import io.quarkus.redis.datasource.value.ValueCommands;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.Duration;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Redis 工具类，
@@ -18,8 +25,10 @@ import java.util.Optional;
 @ApplicationScoped
 public class RedisUtil {
 
-    private final ValueCommands<String, String> valueCommands;
     private final KeyCommands<String> keyCommands;
+    private final ValueCommands<String, String> valueCommands;
+    private final ListCommands<String, String> listCommands;
+    private final HashCommands<String, String, String> hashCommands;
 
     /**
      * 注入 RedisDataSource 并获取 ValueCommands 实例
@@ -28,8 +37,10 @@ public class RedisUtil {
      */
     @Inject
     public RedisUtil(RedisDataSource ds) {
-        this.valueCommands = ds.value(String.class, String.class);
         this.keyCommands = ds.key(String.class);
+        this.valueCommands = ds.value(String.class, String.class);
+        this.listCommands = ds.list(String.class, String.class);
+        this.hashCommands = ds.hash(String.class, String.class, String.class);
     }
 
     /**
@@ -139,8 +150,111 @@ public class RedisUtil {
         return keyCommands.expire(key, duration);
     }
 
-    public int delete(String key) {
-        return keyCommands.del(key);
+
+    /**
+     * 删除指定键的值
+     */
+    public boolean delete(String key) {
+        return keyCommands.del(key) == 1;
+    }
+
+
+    /**
+     * 缓存List数据
+     *
+     * @param key      缓存的键值
+     * @param dataList 待缓存的List数据
+     */
+    public <T> void setList(final String key, final List<T> dataList) {
+        if (CollectionUtils.isEmpty(dataList)) {
+            return;
+        }
+        dataList.forEach(data -> {
+            String jsonValue = JsonUtil.toJsonString(data);
+            listCommands.rpush(key, jsonValue);
+        });
+    }
+
+    /**
+     * 获得缓存的list对象
+     *
+     * @param key 缓存的键值
+     * @return 缓存键值对应的数据
+     */
+    public <T> List<T> getList(final String key, Class<T> clazz) {
+        List<String> list = listCommands.lrange(key, 0, -1);
+        if (CollectionUtils.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        return list.stream()
+                .map(json -> JsonUtil.parseObject(json, clazz))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 往Hash中存入数据
+     *
+     * @param key   Redis键
+     * @param hKey  Hash键
+     * @param value 值
+     */
+    public <T> void setMapValue(final String key, final String hKey, final T value) {
+        hashCommands.hset(key, hKey, JsonUtil.toJsonString(value));
+    }
+
+    /**
+     * 缓存Map
+     *
+     * @param key     缓存的键值
+     * @param dataMap 缓存键值对应的数据
+     */
+    public <T> void setMap(final String key, final Map<String, T> dataMap) {
+        if (MapUtils.isEmpty(dataMap)) {
+            return;
+        }
+        for (Map.Entry<String, T> entry : dataMap.entrySet()) {
+            setMapValue(key, entry.getKey(), entry.getValue());
+        }
+    }
+
+
+    /**
+     * 获得缓存的Map
+     *
+     * @param key 缓存的键值
+     */
+    public <T> Map<String, T> getMap(final String key, Class<T> clazz) {
+        Map<String, String> stringMap = hashCommands.hgetall(key);
+        Map<String, T> resultMap = new HashMap<>(stringMap.size());
+        for (Map.Entry<String, String> entry : stringMap.entrySet()) {
+            resultMap.put(entry.getKey(), JsonUtil.parseObject(entry.getValue(), clazz));
+        }
+        return resultMap;
+    }
+
+    /**
+     * 获取Hash中的数据
+     *
+     * @param key  Redis键
+     * @param hKey Hash键
+     * @return Hash中的对象
+     */
+    public <T> T getMapValue(final String key, final String hKey, Class<T> clazz) {
+        String value = hashCommands.hget(key, hKey);
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return JsonUtil.parseObject(value, clazz);
+    }
+
+    /**
+     * 删除Hash中的某条数据
+     *
+     * @param key  Redis键
+     * @param hKey Hash键
+     */
+    public void deleteMapValue(final String key, final String hKey) {
+        hashCommands.hdel(key, hKey);
     }
 
 }
