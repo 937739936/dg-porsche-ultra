@@ -63,7 +63,7 @@ public class FFmpegUtil {
     public static String probeCodec(String url)
             throws IOException, InterruptedException {
         String[] cmd = new String[]{
-                "/usr/local/bin/ffprobe",
+                "ffprobe",
                 "-v", "error",
                 "-select_streams", "v",
                 "-show_entries", "stream=codec_name",
