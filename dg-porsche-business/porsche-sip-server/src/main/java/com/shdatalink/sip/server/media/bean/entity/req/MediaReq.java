@@ -1,7 +1,6 @@
 package com.shdatalink.sip.server.media.bean.entity.req;
 
 import com.shdatalink.sip.server.media.bean.constant.MediaEnum;
-import jakarta.ws.rs.QueryParam;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -14,22 +13,18 @@ public class MediaReq {
     /**
      * 筛选协议，例如 rtsp或rtmp
      */
-    @QueryParam("schema")
     protected String schema = "rtsp";
     /**
      * 筛选虚拟主机，例如__defaultVhost__
      */
-    @QueryParam("vhost")
     protected String vhost = "__defaultVhost__";
     /**
      * 筛选应用名，例如 live
      */
-    @QueryParam("app")
     protected String app = "rtp";
     /**
      * 筛选流id，例如 test
      */
-    @QueryParam("stream")
     protected String stream;
 
     public MediaReq(String stream) {
