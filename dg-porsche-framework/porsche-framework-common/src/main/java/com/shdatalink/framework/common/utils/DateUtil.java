@@ -3,6 +3,7 @@ package com.shdatalink.framework.common.utils;
 import lombok.experimental.UtilityClass;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjuster;
@@ -40,9 +41,6 @@ public class DateUtil {
 
     /**
      * 时间字符串格式：yyyy-MM-dd HH:mm:ss
-     *
-     * @param dateTime
-     * @return
      */
     public static LocalDateTime toLocalDateTime(String dateTime) {
         if (dateTime == null) {
@@ -53,9 +51,6 @@ public class DateUtil {
 
     /**
      * 时间戳转localDateTime
-     *
-     * @param timestamp
-     * @return
      */
     public static LocalDateTime toLocalDateTime(Long timestamp) {
         if (timestamp == null) {
@@ -127,7 +122,7 @@ public class DateUtil {
                 temporal -> {
                     DayOfWeek dow = DayOfWeek.of(temporal.get(ChronoField.DAY_OF_WEEK));
                     int value = -(dow.getValue() + 6);
-                    return temporal.plus(value, ChronoUnit.DAYS);
+                    return temporal.plusDays(value);
                 });
         return LocalDate.now().with(lastMonday);
     }
@@ -143,12 +138,27 @@ public class DateUtil {
     public LocalDate getLastMonthLastDay() {
         return LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
     }
+
     public LocalDate getMonthFirstDay() {
         return LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
     }
 
     public LocalDate getMonthLastDay() {
         return LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+    }
+
+    /**
+     * 生成日期路径
+     */
+    public static String getDatePath() {
+        return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+    }
+
+    /**
+     * 获取当前日期和时间的字符串表示，格式为"yyyyMMddHHmmssSSS"。
+     */
+    public static String getDateTimeNow() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
     }
 
 }

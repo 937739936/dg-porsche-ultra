@@ -4,6 +4,7 @@ import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.framework.json.utils.JsonUtil;
 import com.shdatalink.framework.redis.annotation.RepeatSubmit;
 import com.shdatalink.framework.redis.utils.RedisUtil;
+import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
@@ -32,6 +33,7 @@ import java.util.StringJoiner;
 @Slf4j
 @RepeatSubmit
 @Interceptor
+@Priority(Interceptor.Priority.APPLICATION + 1)
 public class RepeatSubmitAspect {
 
     @Context
