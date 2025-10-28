@@ -108,10 +108,10 @@ public class VideoRecordSchedule {
                     });
         }
     }
-    @Scheduled(cron = "*/5 * * * * ?")
-    public void test() {
-        mediaHttpClient.isRecording(new RecordReq("01000022", 1));
-    }
+//    @Scheduled(cron = "*/5 * * * * ?")
+//    public void test() {
+//        mediaHttpClient.isRecording(new RecordReq("01000022", 1));
+//    }
 
 
     /**
