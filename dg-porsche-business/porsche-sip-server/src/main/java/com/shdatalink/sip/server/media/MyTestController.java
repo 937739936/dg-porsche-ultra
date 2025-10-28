@@ -255,7 +255,7 @@ public class MyTestController {
      */
     @Path("/isRecording")
     @POST
-    public IsRecordingResult isRecording(StartRecordReq recordReq) {
+    public IsRecordingResult isRecording(RecordReq recordReq) {
         return zlmRestTemplate.isRecording(recordReq);
     }
 

@@ -6,6 +6,7 @@ import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.media.MediaHttpClient;
 import com.shdatalink.sip.server.media.MediaService;
 import com.shdatalink.sip.server.media.bean.entity.req.MediaReq;
+import com.shdatalink.sip.server.media.bean.entity.req.RecordReq;
 import com.shdatalink.sip.server.media.bean.entity.req.StartRecordReq;
 import com.shdatalink.sip.server.media.bean.entity.resp.IsRecordingResult;
 import com.shdatalink.sip.server.media.bean.entity.resp.MediaServerResponse;
@@ -107,6 +108,11 @@ public class VideoRecordSchedule {
                     });
         }
     }
+    @Scheduled(cron = "*/5 * * * * ?")
+    public void test() {
+        mediaHttpClient.isRecording(new RecordReq("01000022", 1));
+    }
+
 
     /**
      * 开始/停止录像，每小时执行一次
@@ -136,7 +142,7 @@ public class VideoRecordSchedule {
                     continue;
                 }
                 String streamId = StreamFactory.liveStreamId(device.getProtocolType(), channel.getId().toString());
-                IsRecordingResult recording = mediaHttpClient.isRecording(new MediaReq(streamId));
+                IsRecordingResult recording = mediaHttpClient.isRecording(new RecordReq(streamId, 1));
                 // 没有流的时候要打开流
                 if (recording.getCode() == -500) {
                     if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
@@ -200,9 +206,7 @@ public class VideoRecordSchedule {
             }
             Device device = deviceMapper.selectByDeviceId(channel.getDeviceId());
             String streamId = StreamFactory.liveStreamId(device.getProtocolType(), channel.getId().toString());
-            MediaReq mediaReq = new MediaReq();
-            mediaReq.setStream(streamId);
-            IsRecordingResult recording = mediaHttpClient.isRecording(mediaReq);
+            IsRecordingResult recording = mediaHttpClient.isRecording(new RecordReq(streamId, 1));
             // 流不存在，也就没有在录像
             if (recording.getCode() == -500) {
                 deviceChannelService.updateRecording(channel.getId(), false);
@@ -214,7 +218,7 @@ public class VideoRecordSchedule {
                     List<VideoRecordDevice> devices = videoRecordPlanService.getPlanByChannelOfNow(weekDay, channel.getDeviceId(), channel.getChannelId(), LocalDateTime.now().getHour());
                     if (devices.isEmpty() || !channel.getOnline()) {
                         // 如果没有，就停止
-                        mediaHttpClient.stopRecord(new MediaReq(streamId));
+                        mediaHttpClient.stopRecord(new RecordReq(streamId, 1));
                         deviceChannelService.updateRecording(channel.getId(), false);
                         if (!mediaService.streamReaderExists(streamId)) {
                             if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {

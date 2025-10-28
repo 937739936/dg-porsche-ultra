@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class StartRecordReq extends MediaReq {
+public class StartRecordReq extends RecordReq {
     /**
      * 自定义搜索路径，与startRecord方法中的customized_path一样，默认为配置文件的路径
      */
@@ -18,9 +18,4 @@ public class StartRecordReq extends MediaReq {
      */
     @JsonProperty("max_second")
     private int maxSecond;
-
-    /**
-     * 0为hls，1为mp4
-     */
-    private int type;
 }
