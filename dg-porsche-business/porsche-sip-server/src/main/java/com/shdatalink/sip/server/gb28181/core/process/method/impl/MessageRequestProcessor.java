@@ -1,10 +1,12 @@
 package com.shdatalink.sip.server.gb28181.core.process.method.impl;
 
+import com.shdatalink.framework.common.service.EventPublisher;
 import com.shdatalink.framework.json.utils.JsonUtil;
 import com.shdatalink.sip.server.gb28181.core.bean.annotations.SipEvent;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.SipEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.base.DeviceBase;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.response.DeviceMobilePosition;
+import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.notify.response.MediaStatus;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.response.*;
 import com.shdatalink.sip.server.gb28181.core.builder.ResponseBuilder;
 import com.shdatalink.sip.server.gb28181.core.builder.SipPublisher;
@@ -14,6 +16,7 @@ import com.shdatalink.sip.server.module.alarmplan.service.AlarmRecordService;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
+import com.shdatalink.sip.server.module.plan.event.MediaDownloadDoneEvent;
 import com.shdatalink.sip.server.utils.SipUtil;
 import com.shdatalink.sip.server.utils.XmlUtil;
 import gov.nist.javax.sip.message.SIPRequest;
@@ -41,6 +44,8 @@ public class MessageRequestProcessor extends AbstractSipRequestProcessor {
 
     @Inject
     AlarmRecordService alarmRecordService;
+    @Inject
+    EventPublisher eventPublisher;
 
     @SneakyThrows
     @Override
@@ -121,6 +126,10 @@ public class MessageRequestProcessor extends AbstractSipRequestProcessor {
         } else if (deviceBase.getCmdType().equals(SipEnum.Cmd.MobilePosition.name())) {
             DeviceMobilePosition deviceMobilePosition = XmlUtil.parse(content, DeviceMobilePosition.class);
             log.info("deviceMobilePosition, {}", JsonUtil.toJsonString(deviceMobilePosition));
+        } else if (deviceBase.getCmdType().equals(SipEnum.Cmd.MediaStatus.name())) {
+            MediaStatus mediaStatus = XmlUtil.parse(content, MediaStatus.class);
+            eventPublisher.fireAsync(new MediaDownloadDoneEvent(mediaStatus.getDeviceId(), request.getCallId().getCallId()));
+            log.info("mediaStatus, {}", JsonUtil.toJsonString(mediaStatus));
         } else {
             log.info("收到其他类型消息,无法处理.{}", deviceBase.getCmdType());
         }

@@ -122,6 +122,10 @@ public class MediaService {
         }
     }
 
+    public void closeStreams(String streamId, int force) {
+        mediaHttpClient.closeStreams(new CloseStreamsReq(streamId, force));
+    }
+
     public void closeStreams(String streamId) {
         mediaHttpClient.closeStreams(new CloseStreamsReq(streamId));
     }
@@ -135,6 +139,15 @@ public class MediaService {
                     .playBack(startTime, endTime)
                     .execute();
         }
+    }
+
+    public void download(GbDevice gbDevice, String stream, LocalDateTime startTime, LocalDateTime endTime) {
+        int port = openRtpServer(stream);
+        GBRequest.invite(gbDevice)
+                .withStreamId(stream)
+                .withMediaAddress(sipConfigProperties.server().wanIp(), port)
+                .download(startTime, endTime)
+                .execute();
     }
 
     public List<TcpSessionResult> getAllSessions() {

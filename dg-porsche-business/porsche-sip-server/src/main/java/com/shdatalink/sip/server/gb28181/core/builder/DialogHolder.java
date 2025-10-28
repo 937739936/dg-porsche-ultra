@@ -8,6 +8,7 @@ public class DialogHolder {
     private static final Map<String, Dialog> dialogMap = new ConcurrentHashMap<>();
     private static final Map<String, Long> seqNumberMap = new ConcurrentHashMap<>();
     private static final Map<String, String> dialogIdSsrcMap = new ConcurrentHashMap<>();
+    private static final Map<String, String> callIdSsrcMap = new ConcurrentHashMap<>();
 
     public static Dialog getDialog(String key) {
         return dialogMap.get(key);
@@ -34,5 +35,16 @@ public class DialogHolder {
             dialogIdSsrcMap.remove(dialogId);
             seqNumberMap.remove(dialogId);
         }
+    }
+
+    public static void putCallId(String callId, String ssrc) {
+        callIdSsrcMap.put(callId, ssrc);
+    }
+
+    public static String getSsrcByCallId(String callId) {
+        return callIdSsrcMap.get(callId);
+    }
+    public static void removeCallId(String callId) {
+        callIdSsrcMap.remove(callId);
     }
 }

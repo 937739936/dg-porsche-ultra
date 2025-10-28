@@ -46,4 +46,13 @@ public class GBMediaUrl extends AbstractMediaUrl {
         String stream = StreamFactory.streamId(InviteTypeEnum.Play, channelPrimaryId.toString());
         return buildInner(stream, SNAPSHOT_TOKEN, "").getRtspUrl();
     }
+
+    public DevicePreviewPlayVO download(Integer channelPrimaryId, LocalDateTime start, LocalDateTime end) {
+        String stream = StreamFactory.streamId(InviteTypeEnum.Download, RandomUtils.insecure().randomInt(0, 99), channelPrimaryId.toString());
+        String sign = mediaSignService.sign(stream);
+        String startStr = start.format(DateTimeFormatter.ofPattern(DateUtil.DATE_TIME_PATTERN));
+        String endStr = end.format(DateTimeFormatter.ofPattern(DateUtil.DATE_TIME_PATTERN));
+        String ext = "&start=" + URLEncoder.encode(startStr, StandardCharsets.UTF_8) + "&end=" + URLEncoder.encode(endStr, StandardCharsets.UTF_8);
+        return buildInner(stream, sign, ext);
+    }
 }

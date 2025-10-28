@@ -67,7 +67,6 @@ public class AlarmPlanService extends ServiceImpl<AlarmPlanMapper, AlarmPlan> {
             Device device = deviceMapper.selectByChannelId(channelId);
             AlarmSubscribe build = AlarmSubscribe.builder().sn(SipUtil.generateSn()).deviceId(channelId).startAlarmPriority("0").endAlarmPriority("0").alarmMethod("0").build();
             GBRequest.subscribe(device.toGbDevice(channelId))
-                    .newSession()
                     .execute(build);
         }
     }
@@ -84,7 +83,6 @@ public class AlarmPlanService extends ServiceImpl<AlarmPlanMapper, AlarmPlan> {
         for (String channelId : channelIds) {
             Device device = deviceMapper.selectByChannelId(channelId);
             GBRequest.subscribe(device.toGbDevice(channelId))
-                    .newSession()
                     .execute(AlarmSubscribe.builder()
                             .sn(SipUtil.generateSn())
                             .deviceId(channelId)

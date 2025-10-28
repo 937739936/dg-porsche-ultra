@@ -21,7 +21,9 @@ import jakarta.ws.rs.sse.SseEventSink;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -64,6 +66,7 @@ public class SseClient {
             log.error("createSse 失败", e);
             // 关闭连接
             sink.close();
+            DEVICE_SSE_MAP.remove(uuid);
         }
     }
 
@@ -78,31 +81,35 @@ public class SseClient {
     }
 
     private void sendDeviceMessage(DeviceSSEResponse.EventType event, Object message) {
+        List<String> closed = new ArrayList<>();
         for (Map.Entry<String, SseEventSink> entry : DEVICE_SSE_MAP.entrySet()) {
             try {
-                entry.getValue().send(
-                        sse.newEventBuilder()
-                                .mediaType(MediaType.APPLICATION_JSON_TYPE)
-                                .id(entry.getKey())
-                                .name(event.name())
-                                .data(message)
-                                .build()
-                );
+                if (!entry.getValue().isClosed()) {
+                    entry.getValue().send(
+                            sse.newEventBuilder()
+                                    .mediaType(MediaType.APPLICATION_JSON_TYPE)
+                                    .id(entry.getKey())
+                                    .name(event.name())
+                                    .data(message)
+                                    .build()
+                    );
+                } else {
+                    closed.add(entry.getKey());
+                }
             } catch (Exception e) {
                 log.error("send device message error:{}, {}", entry.getKey(), e.getMessage());
+                closed.add(entry.getKey());
+            }
+        }
+        for (String uuid : closed) {
+            if (DEVICE_SSE_MAP.get(uuid).isClosed()) {
+                DEVICE_SSE_MAP.remove(uuid);
             }
         }
     }
 
 
     public void handleDeviceOnlineEvent(@ObservesAsync DeviceOnlineEvent event) {
-        // 推送sse消息
-        DeviceSSEResponse.Online online = new DeviceSSEResponse.Online();
-        online.setDeviceId(event.getDeviceId());
-        online.setChannelId(event.getChannelId());
-        online.setOnline(event.getOnline());
-        sendDeviceMessage(DeviceSSEResponse.EventType.Online, online);
-
         String deviceType = "";
         Device device = deviceService.getByDeviceId(event.getDeviceId()).orElseThrow(() -> new RuntimeException("设备不存在"));
         if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
@@ -114,6 +121,13 @@ public class SseClient {
         }
         // 记录日志
         deviceLogService.addLog(event.getDeviceId(), event.getChannelId(), event.getOnline(), MessageTypeEnum.Online, event.getOnline() ? deviceType + "上线" : deviceType + "离线");
+
+        // 推送sse消息
+        DeviceSSEResponse.Online online = new DeviceSSEResponse.Online();
+        online.setDeviceId(event.getDeviceId());
+        online.setChannelId(event.getChannelId());
+        online.setOnline(event.getOnline());
+        sendDeviceMessage(DeviceSSEResponse.EventType.Online, online);
     }
 
     public void handleDeviceInfoUpdateEvent(@ObservesAsync DeviceInfoUpdateEvent event) {

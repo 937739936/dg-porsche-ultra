@@ -18,7 +18,7 @@ import javax.sip.SipException;
 import javax.sip.message.Request;
 
 @Slf4j
-public class SubscribeRequest extends AbstractRequest implements GBRequest {
+public class SubscribeRequest extends GBRequest {
 
     @Setter
     private Object content;
@@ -28,7 +28,6 @@ public class SubscribeRequest extends AbstractRequest implements GBRequest {
         super(toDevice, SIPRequest.SUBSCRIBE);
     }
 
-    @Override
     public SubscribeRequest execute(Object content) {
         this.content = content;
         byte[] xmlData = XmlUtil.toByteXml(content, SipConstant.CHARSET);
@@ -51,11 +50,15 @@ public class SubscribeRequest extends AbstractRequest implements GBRequest {
         }else {
             throw new BizException("未知的订阅类型");
         }
-        subscribeRequest(Request.SUBSCRIBE, SipConstant.XML, xmlData, eventType, expires);
+        createRequest()
+                .setContent(SipConstant.XML, xmlData)
+                .setEventTypeHeader(eventType)
+                .setExpiresTimeHeader(expires)
+                .send(false)
+        ;
         return this;
     }
 
-    @Override
     public <T> T get() throws SipException {
         log.info("SubscribeRequest:>>>>123");
         if (!(content instanceof SubscribeMessage subscribeMessage)) {

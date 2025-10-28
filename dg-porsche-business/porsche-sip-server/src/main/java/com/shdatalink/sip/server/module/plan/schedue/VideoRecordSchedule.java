@@ -140,7 +140,7 @@ public class VideoRecordSchedule {
                 // 没有流的时候要打开流
                 if (recording.getCode() == -500) {
                     if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
-                        deviceChannelService.play(streamId);
+                        mediaService.play(device.toGbDevice(channel.getChannelId()), streamId);
                     } else if (device.getProtocolType() == ProtocolTypeEnum.PULL) {
                         Boolean online = mediaService.addPullStream(device.getStreamUrl(), streamId, TransportTypeEnum.parse(device.getTransport()), true);
                         if (online == null || !online) {

@@ -83,5 +83,6 @@ public class SipListenerImpl implements SipListener {
             log.info("收到摄像机DialogTerminated回调");
         }
         DialogHolder.removeDialogId(dialogTerminatedEvent.getDialog().getDialogId());
+        DialogHolder.removeCallId(dialogTerminatedEvent.getDialog().getCallId().getCallId());
     }
 }

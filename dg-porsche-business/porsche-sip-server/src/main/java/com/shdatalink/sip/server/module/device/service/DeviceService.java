@@ -252,7 +252,6 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
                     .sn(SipUtil.generateSn())
                     .build();
             GBRequest.message(device.toGbDevice())
-                    .newSession()
                     .execute(cmd);
             try {
                 Thread.sleep(1000);
@@ -265,7 +264,6 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
                     .sn(SipUtil.generateSn())
                     .build();
             GBRequest.message(device.toGbDevice())
-                    .newSession()
                     .execute(stop);
             redisUtil.del(redisKey);
         });
@@ -302,7 +300,6 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
                     .sn(SipUtil.generateSn())
                     .build();
             GBRequest.message(device.toGbDevice())
-                    .newSession()
                     .execute(cmd);
         });
         return true;
@@ -324,7 +321,6 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
                     .sn(SipUtil.generateSn())
                     .build();
             GBRequest.message(device.toGbDevice())
-                    .newSession()
                     .execute(cmd);
             redisUtil.del(RedisKeyConstants.ptzControl(param.getDeviceId(), param.getChannelId()));
             redisUtil.del(redisOptKey);

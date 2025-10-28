@@ -11,12 +11,14 @@ import javax.sip.Dialog;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InfoRequest extends AbstractRequest implements GBRequest {
+public class InfoRequest extends GBRequest {
     private float speed;
     private String streamId;
+    private final GbDevice toDevice;
+
     public InfoRequest(GbDevice toDevice) {
         super(toDevice, SIPRequest.INFO);
-        newSession();
+        this.toDevice = toDevice;
     }
 
     public InfoRequest withStreamId(String streamId) {
@@ -29,7 +31,6 @@ public class InfoRequest extends AbstractRequest implements GBRequest {
         return this;
     }
 
-    @Override
     @SneakyThrows
     public GBRequest execute() {
         List<String> msg = new ArrayList<>();
@@ -37,17 +38,15 @@ public class InfoRequest extends AbstractRequest implements GBRequest {
         msg.add("CSeq: 1.0");
         msg.add(String.format("Scale: %.2f", speed));
 
-        subject = String.format("%s:0,%s:0", toDevice.getChannelId(), sipConf.id());
-
         Dialog dialog = DialogHolder.getDialog(streamId);
         if (dialog == null) {
             throw new BizException("会话不存在,不能调整倍速");
         }
-        request = dialog.createRequest(SIPRequest.INFO);
-        request.setContent(String.join("\r\n", msg)+"\r\n", SipConstant.RTSP);
-        request.addHeader(SipUtil.getHeaderFactory().createSubjectHeader(subject));
-        request.setHeader(SipUtil.createCSeqHeader(DialogHolder.generateSeqNumber(streamId), SIPRequest.INFO));
-        doRequest(request);
+        setRequest(dialog.createRequest(SIPRequest.INFO))
+                .setSubject(String.format("%s:0,%s:0", toDevice.getChannelId(), sipConf.id()))
+                .setContent(SipConstant.RTSP, String.join("\r\n", msg) + "\r\n")
+                .setCSeqHeader(SipUtil.createCSeqHeader(DialogHolder.generateSeqNumber(streamId), SIPRequest.INFO))
+                .send(false);
         return this;
     }
 }

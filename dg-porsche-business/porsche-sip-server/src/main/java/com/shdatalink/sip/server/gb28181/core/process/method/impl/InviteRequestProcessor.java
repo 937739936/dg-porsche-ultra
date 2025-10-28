@@ -42,6 +42,7 @@ public class InviteRequestProcessor extends AbstractSipRequestProcessor {
                 Request ack = dialog.createAck(response.getCSeq().getSeqNumber());
                 dialog.sendAck(ack);
                 DialogHolder.putDialog(ssrc, dialog.getDialogId(), dialog);
+                DialogHolder.putCallId(request.getCallId().getCallId(), ssrc);
             }
         } catch (Exception e) {
             log.error("「点播回复ACK」异常：", e);

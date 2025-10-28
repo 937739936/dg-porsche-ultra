@@ -169,38 +169,14 @@ public class DeviceChannelService extends ServiceImpl<DeviceChannelMapper, Devic
                 .isNotNull(DeviceChannel::getRegisterTime));
     }
 
-    public String getStream(String deviceId, String channelId) {
-        return deviceId+"_"+channelId;
-    }
-
-    public void play(String streamId) {
+    public void stop(String streamId) {
         DeviceChannel channel = baseMapper.selectById(StreamFactory.extractChannel(streamId));
-        if (channel == null) {
-            throw new BizException("通道不存在");
-        }
-        Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
-        mediaService.play(device.toGbDevice(channel.getChannelId()), streamId);
-
-    }
-
-    public void stop(InviteTypeEnum type, String deviceId, String channelId) {
-        DeviceChannel channel = baseMapper.selectByDeviceIdAndChannelId(deviceId, channelId);
         if (channel == null) {
             return;
         }
-        String streamId = StreamFactory.streamId(type, channel.getId().toString());
         Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
         GBRequest.bye(device.toGbDevice(channel.getChannelId())).withStreamId(streamId).execute();
-        mediaService.closeStreams(streamId);
-    }
-
-    public void playBack(String streamId, LocalDateTime startTime, LocalDateTime endTime) {
-        DeviceChannel channel = baseMapper.selectById(StreamFactory.extractChannel(streamId));
-        if (channel == null) {
-            throw new BizException("通道不存在");
-        }
-        Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
-        mediaService.playback(device.toGbDevice(channel.getChannelId()), streamId, startTime, endTime);
+        mediaService.closeStreams(streamId, 1);
     }
 
     public void setDeviceOffline(String deviceId) {

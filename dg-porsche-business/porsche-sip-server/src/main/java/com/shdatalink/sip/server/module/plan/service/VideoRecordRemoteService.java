@@ -4,56 +4,55 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.shdatalink.framework.common.exception.BizException;
 import com.shdatalink.framework.common.utils.DateUtil;
-import com.shdatalink.sip.server.config.SipConfigProperties;
 import com.shdatalink.sip.server.gb28181.StreamFactory;
 import com.shdatalink.sip.server.gb28181.core.bean.constants.InviteTypeEnum;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.RecordInfoQuery;
 import com.shdatalink.sip.server.gb28181.core.bean.model.device.message.query.response.RecordInfo;
+import com.shdatalink.sip.server.gb28181.core.builder.DialogHolder;
 import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
+import com.shdatalink.sip.server.media.GBMediaUrl;
 import com.shdatalink.sip.server.media.MediaService;
 import com.shdatalink.sip.server.module.device.entity.Device;
 import com.shdatalink.sip.server.module.device.entity.DeviceChannel;
 import com.shdatalink.sip.server.module.device.service.DeviceChannelService;
 import com.shdatalink.sip.server.module.device.service.DeviceService;
 import com.shdatalink.sip.server.module.device.vo.DevicePreviewPlayVO;
+import com.shdatalink.sip.server.module.plan.event.MediaDownloadDoneEvent;
 import com.shdatalink.sip.server.module.plan.vo.VideoRecordTimeLineVO;
 import com.shdatalink.sip.server.utils.FFmpegUtil;
 import com.shdatalink.sip.server.utils.SipUtil;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
 
 @RegisterForReflection(lambdaCapturingTypes = "com.shdatalink.sip.server.module.plan.service.VideoRecordRemoteService",
         targets = {SerializedLambda.class, SFunction.class},
         serialization = true)
 @ApplicationScoped
+@Slf4j
 public class VideoRecordRemoteService {
     @Inject
     DeviceService deviceService;
     @Inject
     DeviceChannelService deviceChannelService;
     @Inject
-    SipConfigProperties sipConfigProperties;
-    @Inject
     MediaService mediaService;
-
-    private static final Map<String, CompletableFuture<String>> downloadFutureMap = new ConcurrentHashMap<>();
+    @Inject
+    GBMediaUrl gbMediaUrl;
 
     public List<VideoRecordTimeLineVO> timeline(String deviceId, String channelId, LocalDate date) {
         RecordInfoQuery query = RecordInfoQuery.builder()
@@ -68,7 +67,6 @@ public class VideoRecordRemoteService {
         RecordInfo recordInfo;
         try {
             recordInfo = GBRequest.message(device.toGbDevice())
-                    .newSession()
                     .execute(query)
                     .get();
         } catch (Exception e) {
@@ -92,75 +90,63 @@ public class VideoRecordRemoteService {
 
     public void download(String deviceId, String channelId, LocalDateTime startTime, LocalDateTime endTime, RoutingContext context) throws ExecutionException, InterruptedException, TimeoutException, IOException {
         DeviceChannel channel = deviceChannelService.findByDeviceIdAndChannelId(deviceId, channelId).orElseThrow(() -> new BizException("通道不存在"));
-        String streamId = StreamFactory.streamId(InviteTypeEnum.Download, channel.getId().toString());
-        Device device = deviceService.getByDeviceId(channel.getDeviceId()).orElseThrow(() -> new BizException("设备不存在"));
-        if (mediaService.rtpServerExists(streamId)) {
-            throw new BizException("该设备有其他下载任务，请稍后再试");
-        }
+//        String streamId = StreamFactory.streamId(InviteTypeEnum.Download, channel.getId().toString());
+//        if (mediaService.rtpServerExists(streamId)) {
+//            throw new BizException("该设备有其他下载任务，请稍后再试");
+//        }
 
-        int port = mediaService.openRtpServer(streamId);
-
-        GBRequest.invite(device.toGbDevice(channel.getChannelId()))
-                .withStreamId(streamId)
-                .withMediaAddress(sipConfigProperties.server().wanIp(), port)
-                .download(startTime, endTime)
-                .execute();
-
-        long timeout = DateUtil.betweenSeconds(startTime, endTime) + 60;
-        CompletableFuture<String> future = new CompletableFuture<>();
-        downloadFutureMap.put(streamId, future);
-        String filePath = future.get(timeout, TimeUnit.SECONDS);
-        try (FileInputStream inputStream = new FileInputStream(filePath)) {
-            context.response().putHeader("Content-Disposition", "attachment; filename=record.mp4");
-            context.response().putHeader("Content-Type", "video/mp4");
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                context.response().write(Buffer.buffer(Arrays.copyOfRange(buffer, 0, bytesRead)));
-            }
-        } catch (FileNotFoundException e) {
-            throw new BizException("下载失败，文件未找到");
-        } catch (IOException e) {
+        DevicePreviewPlayVO vo = gbMediaUrl.download(channel.getId(), startTime, endTime);
+        String downloadUrl = vo.getRtspUrl();
+        String codec = FFmpegUtil.probeCodec(downloadUrl);
+        if (StringUtils.isBlank(codec)) {
+            log.error("未能获取到视频格式, 下载失败, {}", downloadUrl);
             throw new BizException("下载失败");
         }
-        Files.deleteIfExists(Paths.get(filePath));
-    }
 
-    public void downloadDone(String streamId, String filePath) {
-        CompletableFuture<String> completableFuture = downloadFutureMap.get(streamId);
-        if (completableFuture != null) {
-            completableFuture.complete(filePath);
+        String[] cmd;
+        if (codec.equals("hevc")) {
+            cmd  = new String[]{
+                    "-i", downloadUrl,
+                    "-c:v", "copy",
+                    "-c:a", "aac",
+                    "-tag:v", "hvc1",
+                    "-movflags", "frag_keyframe+empty_moov",
+                    "-f", "mp4"
+            };
+        } else {
+            cmd  = new String[]{
+                    "-i", downloadUrl,
+                    "-c:v", "copy",
+                    "-c:a", "aac",
+                    "-movflags", "frag_keyframe+empty_moov",
+                    "-f", "mp4"
+            };
         }
-    }
 
-    public Long downloadTime(String deviceId, String channelId, LocalDateTime start, LocalDateTime end) {
-        RecordInfoQuery query = RecordInfoQuery.builder()
-                .deviceId(channelId)
-                .sn(SipUtil.generateSn())
-                .startTime(start)
-                .endTime(end)
-                .type("all")
-                .build();
-        Device device = deviceService.getByDeviceId(deviceId)
-                .orElseThrow(() -> new BizException("设备不存在"));
-        RecordInfo recordInfo;
+        HttpServerResponse response = context.response();
+        response.putHeader("Content-Disposition", "attachment; filename=record.mp4");
+        response.putHeader("Content-Type", "video/mp4");
+        response.setChunked(true);
+        long timeout = DateUtil.betweenSeconds(startTime, endTime) + 60;
         try {
-            recordInfo = GBRequest.message(device.toGbDevice())
-                    .newSession()
-                    .execute(query)
-                    .get();
+            FFmpegUtil.pipe(
+                    (int) timeout,
+                    (bytes) -> {
+                        response.write(Buffer.buffer(bytes));
+                    },
+                    cmd
+            );
         } catch (Exception e) {
-            throw new BizException("设备端没有录像");
+            stopDownload(vo.getSsrc());
         }
-        Long totalSeconds = recordInfo.getRecordList()
-                .stream()
-                .map(item -> DateUtil.betweenSeconds(item.getStartTime(), item.getEndTime()))
-                .reduce(Long::sum)
-                .get();
-        return (totalSeconds/4)+30;
+
     }
 
-    public void stopDownload(String deviceId, String channelId) {
-        deviceChannelService.stop(InviteTypeEnum.Download, deviceId, channelId);
+    public void downloadDone(@ObservesAsync MediaDownloadDoneEvent event) {
+        stopDownload(DialogHolder.getSsrcByCallId(event.getCallId()));
+    }
+
+    public void stopDownload(String streamId) {
+        deviceChannelService.stop(streamId);
     }
 }
