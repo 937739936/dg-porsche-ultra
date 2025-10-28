@@ -108,10 +108,11 @@ public class VideoRecordSchedule {
                     });
         }
     }
-//    @Scheduled(cron = "*/5 * * * * ?")
-//    public void test() {
-//        mediaHttpClient.isRecording(new RecordReq("01000022", 1));
-//    }
+    @Scheduled(cron = "*/5 * * * * ?")
+    public void test() {
+        startRecordByChannels(deviceChannelService.selectRegisterChannel());
+        stopRecordByChannels(deviceChannelMapper.selectList(null));
+    }
 
 
     /**
@@ -161,7 +162,7 @@ public class VideoRecordSchedule {
                 executor.execute(() -> {
                     if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
                         long now = System.currentTimeMillis();
-                        while (!mediaService.rtpServerExists(streamId) && System.currentTimeMillis() - now < 30000) {
+                        do {
                             StartRecordReq startRecordReq = new StartRecordReq();
                             startRecordReq.setType(1);
                             startRecordReq.setMaxSecond(60);
@@ -176,7 +177,7 @@ public class VideoRecordSchedule {
                             } catch (InterruptedException e) {
                                 throw new RuntimeException(e);
                             }
-                        }
+                        } while (!mediaService.rtpServerExists(streamId) && System.currentTimeMillis() - now < 30000);
                     } else if (device.getProtocolType() == ProtocolTypeEnum.PULL || device.getProtocolType() == ProtocolTypeEnum.RTMP) {
                         StartRecordReq startRecordReq = new StartRecordReq();
                         startRecordReq.setType(1);
