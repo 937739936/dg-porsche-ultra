@@ -8,12 +8,14 @@ import com.shdatalink.sip.server.module.user.service.LoginService;
 import com.shdatalink.sip.server.module.user.service.UserService;
 import com.shdatalink.sip.server.module.user.vo.UserInfo;
 import com.shdatalink.sip.server.config.web.UserInfoThreadHolder;
+import io.vertx.ext.web.RoutingContext;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MultivaluedMap;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,12 +29,15 @@ import java.util.stream.Stream;
 /**
  * 授权拦截器，用于检查请求的合法性。
  */
+@Slf4j
 public class AuthorizationInterceptor implements ContainerRequestFilter {
 
 
     // 注入ResourceInfo，用于获取当前请求的资源类和方法
     @Context
     ResourceInfo resourceInfo;
+    @Context
+    RoutingContext routingContext;
     @Inject
     LoginService loginService;
     @Inject
@@ -81,6 +86,11 @@ public class AuthorizationInterceptor implements ContainerRequestFilter {
 
         // 添加当前登录信息
         UserInfoThreadHolder.addUserInfo(userInfoEntity);
+
+        // 注册请求结束钩子（在响应发送、连接关闭后执行）
+        routingContext.addEndHandler(v -> {
+            UserInfoThreadHolder.remove();
+        });
     }
 
     /**
