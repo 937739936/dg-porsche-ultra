@@ -154,7 +154,8 @@ public class VideoRecordSchedule {
 
                 executor.execute(() -> {
                     if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
-                        while (!mediaService.rtpServerExists(streamId)) {
+                        long now = System.currentTimeMillis();
+                        while (!mediaService.rtpServerExists(streamId) && System.currentTimeMillis() - now < 30000) {
                             StartRecordReq startRecordReq = new StartRecordReq();
                             startRecordReq.setType(1);
                             startRecordReq.setMaxSecond(60);
