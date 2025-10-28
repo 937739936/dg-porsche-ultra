@@ -108,11 +108,11 @@ public class VideoRecordSchedule {
                     });
         }
     }
-    @Scheduled(cron = "*/5 * * * * ?")
-    public void test() {
-        startRecordByChannels(deviceChannelService.selectRegisterChannel());
-        stopRecordByChannels(deviceChannelMapper.selectList(null));
-    }
+//    @Scheduled(cron = "*/5 * * * * ?")
+//    public void test() {
+//        startRecordByChannels(deviceChannelService.selectRegisterChannel());
+//        stopRecordByChannels(deviceChannelMapper.selectList(null));
+//    }
 
 
     /**
