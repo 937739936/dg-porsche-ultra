@@ -10,11 +10,15 @@ import lombok.SneakyThrows;
 import javax.sip.Dialog;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class InfoRequest extends GBRequest {
     private float speed;
     private String streamId;
     private final GbDevice toDevice;
+
+    private static final Map<String, Integer> cseq = new ConcurrentHashMap<>();
 
     public InfoRequest(GbDevice toDevice) {
         super(toDevice, SIPRequest.INFO);
@@ -33,9 +37,10 @@ public class InfoRequest extends GBRequest {
 
     @SneakyThrows
     public GBRequest execute() {
+        Integer cseqNumber = cseq.compute(streamId, (k, v) -> v == null ? 1 : v + 1);
         List<String> msg = new ArrayList<>();
         msg.add("PLAY RTSP/1.0");
-        msg.add("CSeq: 1.0");
+        msg.add("CSeq: " + cseqNumber);
         msg.add(String.format("Scale: %.2f", speed));
 
         Dialog dialog = DialogHolder.getDialog(streamId);
