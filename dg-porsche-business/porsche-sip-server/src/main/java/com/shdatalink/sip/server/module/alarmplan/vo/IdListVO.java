@@ -8,6 +8,5 @@ import java.util.List;
 @Data
 public class IdListVO {
 
-    @QueryParam("idList")
     private List<Integer> idList;
 }

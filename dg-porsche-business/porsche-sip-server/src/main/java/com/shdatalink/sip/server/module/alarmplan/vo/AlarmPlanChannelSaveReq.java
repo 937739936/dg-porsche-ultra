@@ -12,12 +12,10 @@ public class AlarmPlanChannelSaveReq {
      * 报警预案id
      */
     @NotNull(message = "报警预案id不能为空")
-    @QueryParam("planId")
     private Integer planId;
     /**
      * 通道id
      */
-    @QueryParam("channelIds")
     private List<String> channelIds;
 
 }
