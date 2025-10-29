@@ -136,7 +136,7 @@ public class QueryParamParser {
      * @param params 参数 Map
      * @return 查询字符串（不包含 ?）
      */
-    public static String buildQueryString(Map<String, String> params) {
+    public static String buildQueryString(Map<String, Object> params) {
         return buildQueryString(params, StandardCharsets.UTF_8);
     }
     
@@ -147,7 +147,7 @@ public class QueryParamParser {
      * @param charset 字符集
      * @return 查询字符串（不包含 ?）
      */
-    public static String buildQueryString(Map<String, String> params, java.nio.charset.Charset charset) {
+    public static String buildQueryString(Map<String, Object> params, java.nio.charset.Charset charset) {
         if (params == null || params.isEmpty()) {
             return "";
         }
@@ -155,7 +155,7 @@ public class QueryParamParser {
         return params.entrySet().stream()
                 .map(entry -> {
                     String encodedKey = urlEncode(entry.getKey(), charset);
-                    String encodedValue = urlEncode(entry.getValue(), charset);
+                    String encodedValue = urlEncode(entry.getValue().toString(), charset);
                     return encodedKey + "=" + encodedValue;
                 })
                 .collect(Collectors.joining("&"));

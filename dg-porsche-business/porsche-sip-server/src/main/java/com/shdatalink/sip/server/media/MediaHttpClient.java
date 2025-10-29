@@ -224,7 +224,7 @@ public interface MediaHttpClient {
     @POST
     @Path("/stopRecord")
     @Produces(MediaType.APPLICATION_JSON)
-    MediaServerResponse<Void> stopRecord(MediaReq recordReq);
+    MediaServerResponse<Void> stopRecord(RecordReq recordReq);
 
     /**
      * 是否正在录制
@@ -232,7 +232,7 @@ public interface MediaHttpClient {
     @POST
     @Path("/isRecording")
     @Produces(MediaType.APPLICATION_JSON)
-    IsRecordingResult isRecording(MediaReq recordReq);
+    IsRecordingResult isRecording(RecordReq recordReq);
 
     /**
      * 获取截图

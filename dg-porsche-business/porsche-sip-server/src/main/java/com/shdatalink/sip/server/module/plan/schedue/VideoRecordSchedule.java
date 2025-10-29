@@ -6,6 +6,7 @@ import com.shdatalink.sip.server.gb28181.core.builder.GBRequest;
 import com.shdatalink.sip.server.media.MediaHttpClient;
 import com.shdatalink.sip.server.media.MediaService;
 import com.shdatalink.sip.server.media.bean.entity.req.MediaReq;
+import com.shdatalink.sip.server.media.bean.entity.req.RecordReq;
 import com.shdatalink.sip.server.media.bean.entity.req.StartRecordReq;
 import com.shdatalink.sip.server.media.bean.entity.resp.IsRecordingResult;
 import com.shdatalink.sip.server.media.bean.entity.resp.MediaServerResponse;
@@ -107,6 +108,12 @@ public class VideoRecordSchedule {
                     });
         }
     }
+//    @Scheduled(cron = "*/5 * * * * ?")
+//    public void test() {
+//        startRecordByChannels(deviceChannelService.selectRegisterChannel());
+//        stopRecordByChannels(deviceChannelMapper.selectList(null));
+//    }
+
 
     /**
      * 开始/停止录像，每小时执行一次
@@ -136,7 +143,7 @@ public class VideoRecordSchedule {
                     continue;
                 }
                 String streamId = StreamFactory.liveStreamId(device.getProtocolType(), channel.getId().toString());
-                IsRecordingResult recording = mediaHttpClient.isRecording(new MediaReq(streamId));
+                IsRecordingResult recording = mediaHttpClient.isRecording(new RecordReq(streamId, 1));
                 // 没有流的时候要打开流
                 if (recording.getCode() == -500) {
                     if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
@@ -154,7 +161,8 @@ public class VideoRecordSchedule {
 
                 executor.execute(() -> {
                     if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
-                        while (!mediaService.rtpServerExists(streamId)) {
+                        long now = System.currentTimeMillis();
+                        do {
                             StartRecordReq startRecordReq = new StartRecordReq();
                             startRecordReq.setType(1);
                             startRecordReq.setMaxSecond(60);
@@ -169,7 +177,7 @@ public class VideoRecordSchedule {
                             } catch (InterruptedException e) {
                                 throw new RuntimeException(e);
                             }
-                        }
+                        } while (!mediaService.rtpServerExists(streamId) && System.currentTimeMillis() - now < 30000);
                     } else if (device.getProtocolType() == ProtocolTypeEnum.PULL || device.getProtocolType() == ProtocolTypeEnum.RTMP) {
                         StartRecordReq startRecordReq = new StartRecordReq();
                         startRecordReq.setType(1);
@@ -199,9 +207,7 @@ public class VideoRecordSchedule {
             }
             Device device = deviceMapper.selectByDeviceId(channel.getDeviceId());
             String streamId = StreamFactory.liveStreamId(device.getProtocolType(), channel.getId().toString());
-            MediaReq mediaReq = new MediaReq();
-            mediaReq.setStream(streamId);
-            IsRecordingResult recording = mediaHttpClient.isRecording(mediaReq);
+            IsRecordingResult recording = mediaHttpClient.isRecording(new RecordReq(streamId, 1));
             // 流不存在，也就没有在录像
             if (recording.getCode() == -500) {
                 deviceChannelService.updateRecording(channel.getId(), false);
@@ -213,7 +219,7 @@ public class VideoRecordSchedule {
                     List<VideoRecordDevice> devices = videoRecordPlanService.getPlanByChannelOfNow(weekDay, channel.getDeviceId(), channel.getChannelId(), LocalDateTime.now().getHour());
                     if (devices.isEmpty() || !channel.getOnline()) {
                         // 如果没有，就停止
-                        mediaHttpClient.stopRecord(new MediaReq(streamId));
+                        mediaHttpClient.stopRecord(new RecordReq(streamId, 1));
                         deviceChannelService.updateRecording(channel.getId(), false);
                         if (!mediaService.streamReaderExists(streamId)) {
                             if (device.getProtocolType() == ProtocolTypeEnum.GB28181) {
