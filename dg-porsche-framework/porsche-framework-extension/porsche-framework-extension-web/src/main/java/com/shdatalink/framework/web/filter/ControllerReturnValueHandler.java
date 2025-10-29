@@ -10,6 +10,7 @@ import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -24,7 +25,7 @@ public class ControllerReturnValueHandler implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) {
         // 1. 判断是否需要跳过包装
-        if (isSkip(response.getEntity())) {
+        if (isSkip(response)) {
             return;
         }
 
@@ -36,7 +37,7 @@ public class ControllerReturnValueHandler implements ContainerResponseFilter {
     /**
      * 判断是否需要跳过包装
      */
-    private boolean isSkip(Object entity) {
+    private boolean isSkip(ContainerResponseContext response) {
         // 获取当前请求的方法
         Method method = resourceInfo.getResourceMethod();
         // 检查方法是否标注了 @IgnoredResultWrapper
@@ -51,11 +52,11 @@ public class ControllerReturnValueHandler implements ContainerResponseFilter {
             return true;
         }
 
-        // 如果实体是 File 类型，则跳过包装
-        if (entity instanceof File) {
+        // 如果下载文件，则跳过包装
+        if (StringUtils.isNotBlank(response.getHeaderString("download-filename"))) {
             return true;
         }
         // 如果实体是 ResultWrapper 类型，则跳过包装
-        return entity instanceof ResultWrapper;
+        return response.getEntity() instanceof ResultWrapper;
     }
 }

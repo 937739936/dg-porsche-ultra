@@ -2,20 +2,23 @@ package com.shdatalink.framework.excel.utils;
 
 
 import cn.idev.excel.EasyExcel;
+import cn.idev.excel.ExcelWriter;
 import cn.idev.excel.write.builder.ExcelWriterSheetBuilder;
+import cn.idev.excel.write.metadata.WriteSheet;
 import cn.idev.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
+import com.shdatalink.framework.common.utils.file.FileUtil;
 import com.shdatalink.framework.excel.core.DefaultExcelListener;
 import com.shdatalink.framework.excel.core.ExcelListener;
 import com.shdatalink.framework.excel.core.ExcelResult;
+import com.shdatalink.framework.excel.model.SheetData;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -78,11 +81,45 @@ public class ExcelUtil {
         StreamingOutput streamingOutput = outputStream ->
                 exportExcel(list, sheetName, clazz, outputStream);
 
-        return Response.ok(streamingOutput)
-                .header("Content-Disposition", createContentDisposition(filename))
-                .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8")
-                .build();
+        // 构建并返回响应
+        Response.ResponseBuilder responseBuilder = Response.ok(streamingOutput);
+        resetResponse(filename, responseBuilder);
+
+        // 构建并返回响应
+        return responseBuilder.build();
     }
+
+    /**
+     * 导出excel(多sheet)
+     */
+    public static Response exportExcel(String fileName, List<SheetData> sheetList) {
+        if (CollectionUtils.isEmpty(sheetList)) {
+            throw new IllegalArgumentException("sheetList is empty");
+        }
+        // 对文件名进行编码
+        String filename = encodingFilename(fileName);
+
+        // 多sheet导出
+        StreamingOutput streamingOutput = outputStream -> {
+            try (ExcelWriter excelWriter = EasyExcel.write(outputStream).build()) {
+                sheetList.forEach(sheetData -> {
+                    WriteSheet writeSheet = EasyExcel.writerSheet(sheetData.getSheetNo(), sheetData.getSheetName())
+                            .head(sheetData.getClazz())
+                            .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+                            .build();
+                    excelWriter.write(sheetData.getDataList(), writeSheet);
+                });
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to write excel", e);
+            }
+        };
+
+        // 构建并返回响应
+        Response.ResponseBuilder responseBuilder = Response.ok(streamingOutput);
+        resetResponse(filename, responseBuilder);
+        return responseBuilder.build();
+    }
+
 
     /**
      * 导出excel核心方法
@@ -106,16 +143,15 @@ public class ExcelUtil {
      * 编码文件名
      */
     public static String encodingFilename(String filename) {
-        return System.currentTimeMillis() + "_" + filename + ".xlsx";
+        return filename + "_" + System.currentTimeMillis() + ".xlsx";
     }
 
     /**
-     * 创建Content-Disposition头信息
+     * 重置响应体
      */
-    private static String createContentDisposition(String filename) {
-        String encoded = URLEncoder.encode(filename, StandardCharsets.UTF_8)
-                .replaceAll("\\+", "%20");
-        return "attachment; filename*=UTF-8''" + encoded;
+    private static void resetResponse(String sheetName, Response.ResponseBuilder responseBuilder) {
+        String filename = encodingFilename(sheetName);
+        FileUtil.setAttachmentResponseHeader(filename, responseBuilder);
+        responseBuilder.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8");
     }
-
 }

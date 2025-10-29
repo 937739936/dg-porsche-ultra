@@ -23,7 +23,7 @@ public class EventPublisher {
     /**
      * 触发事件(同步)
      *
-     * @param <T> 事件类型
+     * @param <T>   事件类型
      * @param event 需要触发的事件对象
      */
     public <T> void fire(T event) {
@@ -33,13 +33,21 @@ public class EventPublisher {
     /**
      * 异步触发事件(异步)
      *
-     * @param <T> 事件类型
+     * @param <T>   事件类型
      * @param event 要触发的事件对象
      */
     public <T> void fireAsync(T event) {
         genericEvent.fireAsync(event);
     }
 
+    /**
+     * 触发事件(同步)
+     * <p>
+     * 在事务提交后
+     *
+     * @param <T>   事件类型
+     * @param event 需要触发的事件对象
+     */
     public <T> void fireAfterCommit(T event) {
         tsr.registerInterposedSynchronization(new Synchronization() {
             @Override
@@ -55,6 +63,14 @@ public class EventPublisher {
         });
     }
 
+    /**
+     * 异步触发事件(异步)
+     * <p>
+     * 在事务提交后
+     *
+     * @param <T>   事件类型
+     * @param event 要触发的事件对象
+     */
     public <T> void fireAsyncAfterCommit(T event) {
         tsr.registerInterposedSynchronization(new Synchronization() {
             @Override
