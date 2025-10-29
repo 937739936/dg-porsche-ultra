@@ -3,7 +3,6 @@ package com.shdatalink.framework.web.filter;
 
 import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.framework.common.model.ResultWrapper;
-import com.shdatalink.framework.json.utils.JsonUtil;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
@@ -23,20 +22,21 @@ public class ControllerReturnValueHandler implements ContainerResponseFilter {
     private ResourceInfo resourceInfo;
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
+    public void filter(ContainerRequestContext request, ContainerResponseContext response) {
         // 1. 判断是否需要跳过包装
-        if (isSkip(responseContext)) {
+        if (isSkip(response.getEntity())) {
             return;
         }
 
         // 2. 无注解则执行统一包装
-        responseContext.setEntity(JsonUtil.toJsonString(ResultWrapper.success(responseContext.getEntity())));
+        response.setStatus(Response.Status.OK.getStatusCode());
+        response.setEntity(ResultWrapper.success(response.getEntity()));
     }
 
     /**
      * 判断是否需要跳过包装
      */
-    private boolean isSkip(ContainerResponseContext responseContext) {
+    private boolean isSkip(Object entity) {
         // 获取当前请求的方法
         Method method = resourceInfo.getResourceMethod();
         // 检查方法是否标注了 @IgnoredResultWrapper
@@ -51,8 +51,6 @@ public class ControllerReturnValueHandler implements ContainerResponseFilter {
             return true;
         }
 
-        // 获取响应实体
-        Object entity = responseContext.getEntity();
         // 如果实体是 File 类型，则跳过包装
         if (entity instanceof File) {
             return true;
