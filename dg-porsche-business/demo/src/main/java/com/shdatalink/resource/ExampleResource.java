@@ -3,10 +3,16 @@ package com.shdatalink.resource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import com.shdatalink.entity.Contract;
 import com.shdatalink.framework.common.annotation.IgnoredResultWrapper;
 import com.shdatalink.framework.common.exception.BizException;
+import com.shdatalink.framework.common.utils.DateUtil;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -18,6 +24,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
+import org.jboss.resteasy.reactive.RestQuery;
 
 @Path("/hello")
 public class ExampleResource {
@@ -25,9 +32,23 @@ public class ExampleResource {
     @Path("/testJsonException")
     @POST
     public DemoReq testJsonException(@Valid DemoReq demoReq) {
-        return demoReq;
+        System.out.println(demoReq.getName());
+        return null;
     }
 
+    @Path("/get")
+    @GET
+    public Map<String, Object> testGet(
+//                        @QueryParam("localDateTime") LocalDateTime localDateTime,
+                        @QueryParam("localDate") LocalDate localDate
+//                        @QueryParam("localTime") LocalTime localTime
+    ) {
+        Map<String, Object> map = new HashMap<>();
+//        map.put("localDateTime", localDateTime);
+        map.put("localDate", localDate);
+//        map.put("localTime", localTime);
+        return map;
+    }
 
     @Path("/testThrowException")
     @GET
@@ -73,6 +94,8 @@ public class ExampleResource {
         @Min(0)
         @Max(100)
         private Integer age;
+
+        private LocalDateTime date;
     }
 
 }
