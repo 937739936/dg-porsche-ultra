@@ -6,7 +6,6 @@ import com.shdatalink.framework.common.utils.ArgUtil;
 import com.shdatalink.framework.common.utils.DateUtil;
 import com.shdatalink.framework.common.utils.IdUtil;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.StreamingOutput;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,12 +15,12 @@ import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -155,17 +154,6 @@ public class FileUtil {
      * @param realFileName 真实文件名
      */
     public static Response download(String filePath, String realFileName) {
-        // 对真实文件名进行编码
-        String encodedFileName = encode(realFileName);
-
-        // 构建Content-Disposition的值
-        String contentDispositionValue = "attachment; filename=" +
-                encodedFileName +
-                ";" +
-                "filename*=" +
-                "utf-8''" +
-                encodedFileName;
-
         // 创建文件对象
         File file = new File(filePath);
         // 校验文件是否存在
@@ -173,15 +161,27 @@ public class FileUtil {
             throw new BizException("文件不存在");
         }
 
-        // 构建Response对象
-        return Response.ok(file)
-                // 设置响应头，允许跨域访问Content-Disposition和download-filename
-                .header("Access-Control-Expose-Headers", "Content-Disposition,download-filename")
-                // 设置Content-Disposition头，指定附件的名称
-                .header("Content-disposition", contentDispositionValue)
-                .build();
+        // 构建Response对象并设置header
+        Response.ResponseBuilder responseBuilder = Response.ok(file);
+        setAttachmentResponseHeader(realFileName, responseBuilder);
+
+        // 构建并返回响应
+        return responseBuilder.build();
     }
 
+
+    /**
+     * 下载文件名重新编码
+     *
+     * @param realFileName 真实文件名
+     */
+    public static void setAttachmentResponseHeader(String realFileName, Response.ResponseBuilder responseBuilder) {
+        String percentEncodedFileName = encode(realFileName);
+        String contentDispositionValue = "attachment; filename=%s;filename*=utf-8''%s".formatted(percentEncodedFileName, percentEncodedFileName);
+        responseBuilder.header("Access-Control-Expose-Headers", "Content-Disposition,download-filename");
+        responseBuilder.header("Content-disposition", contentDispositionValue);
+        responseBuilder.header("download-filename", percentEncodedFileName);
+    }
 
     /**
      * 对文件名进行encode
@@ -190,5 +190,4 @@ public class FileUtil {
         String encode = URLEncoder.encode(realFileName, StandardCharsets.UTF_8);
         return encode.replaceAll("\\+", "%20");
     }
-
 }
